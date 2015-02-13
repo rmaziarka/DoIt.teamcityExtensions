@@ -96,7 +96,7 @@ function Invoke-DatabaseMetaRunner {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $TimeoutInSeconds,
+        $QueryTimeoutInSeconds,
 
         [Parameter(Mandatory=$false)]
         [string]
@@ -128,8 +128,8 @@ function Invoke-DatabaseMetaRunner {
     if ($credential) {
        $params['Credential'] = $credential
     }
-    if ($TimeoutInSeconds) {
-       $params['TimeoutInSeconds'] = $TimeoutInSeconds
+    if ($QueryTimeoutInSeconds) {
+       $params['QueryTimeoutInSeconds'] = $QueryTimeoutInSeconds
     }
 
     Remove-SqlDatabase @params

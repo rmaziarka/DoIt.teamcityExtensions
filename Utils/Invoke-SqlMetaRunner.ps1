@@ -49,7 +49,7 @@ function Invoke-SqlMetaRunner {
     .PARAMETER Password
     Password - leave empty for domain agent credentials.
 
-    .PARAMETER TimeoutInSeconds
+    .PARAMETER QueryTimeoutInSeconds
     Timeout for command execution.
 
     .EXAMPLE
@@ -61,7 +61,7 @@ function Invoke-SqlMetaRunner {
         'IntegratedSecurity' = %sqlRun.integratedSecurity%;
         'Username' = '%sqlRun.username%';
         'Password' = '%sqlRun.password%';
-        'TimeoutInSeconds' = '%sqlRun.timeout%';
+        'QueryTimeoutInSeconds' = '%sqlRun.timeout%';
       }
 
       Invoke-SqlMetaRunner @params
@@ -100,7 +100,7 @@ function Invoke-SqlMetaRunner {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $TimeoutInSeconds
+        $QueryTimeoutInSeconds
         
     ) 
     $builder = New-Object System.Data.SqlClient.SqlConnectionStringBuilder
@@ -132,8 +132,8 @@ function Invoke-SqlMetaRunner {
     if ($InputFile) {
        $params['InputFile'] = $InputFile
     }
-    if ($TimeoutInSeconds) {
-       $params['TimeoutInSeconds'] = $TimeoutInSeconds
+    if ($QueryTimeoutInSeconds) {
+       $params['QueryTimeoutInSeconds'] = $QueryTimeoutInSeconds
     }
 
     Invoke-Sql @params
