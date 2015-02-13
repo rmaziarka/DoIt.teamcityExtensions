@@ -24,7 +24,49 @@ SOFTWARE.
 
 function Deploy-Psci {
 
-    param ($NodeName, $Environment, $Tokens, $ConnectionParams) 
+    <#
+    .SYNOPSIS
+    Copies PSCI library to remote host using blue-green deployment.
+
+    .DESCRIPTION
+    This function is invoked by PSCI deployment.
+    
+    .PARAMETER NodeName
+    Destination node.
+
+    .PARAMETER Environment
+    Environment where the library is being deployed.
+
+    .PARAMETER Tokens
+    Tokens resolved for given environment / nodeName.
+
+    .PARAMETER ConnectionParams
+    ConnectionParameters object describing how to connect to the remote noed (see New-ConnectionParameters).
+
+    .EXAMPLE
+        Deploy-Psci
+
+#>
+
+    [CmdletBinding()]
+    [OutputType([void])]
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]
+        $NodeName,
+
+        [Parameter(Mandatory=$true)]
+        [string]
+        $Environment,
+
+        [Parameter(Mandatory=$true)]
+        [hashtable]
+        $Tokens,
+
+        [Parameter(Mandatory=$true)]
+        [object]
+        $ConnectionParams
+    )
 
     if ($Tokens.Psci.PsciPackage) {
         $sourcePath = $Tokens.Psci.PsciPackage
