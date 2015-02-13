@@ -46,7 +46,7 @@ function Invoke-DatabaseMetaRunner {
     .PARAMETER Password
     Password - leave empty for domain agent credentials.
 
-    .PARAMETER TimeoutInSeconds
+    .PARAMETER QueryTimeoutInSeconds
     Timeout for command execution.
 
     .PARAMETER BackupLocation
