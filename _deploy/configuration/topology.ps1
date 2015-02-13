@@ -22,27 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-$curDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-Get-ChildItem -Recurse $curDir -Include *.ps1 | Where-Object { $_ -notmatch "\.Tests.ps1|_deploy"  } | Foreach-Object {
-    . $_.FullName      
+
+Environment Default {
+    ServerRole Psci `
+        -Nodes { $Tokens.General.Nodes } `
+        -RemotingCredential { $Tokens.Credentials.PSCredential } `
+        -Configurations 'Deploy-Psci'
 }
 
-Export-ModuleMember -Function `
-    ConvertTo-EnhancedHTML, `
-    ConvertTo-EnhancedHTMLFragment, `
-    ConvertTo-EnhancedHTMLFragmentImage, `
-    Get-TeamcityArrayParameter, `
-    Get-TeamcityHashtableParameter, `
-    Get-TeamcityConnectionParameters, `
-    New-JMeterAggregateReport, `
-    New-JMeterDetailedReport, `
-    New-JMeterTeamcityTests, `
-    New-TeamcityTrendReport, `
-    Invoke-ClearDirectoryMetaRunner, `
-    Invoke-CopyFilesMetaRunner, `
-    Invoke-SqlMetaRunner, `
-    Invoke-DatabaseMetaRunner, `
-    Invoke-RemotePowershellMetaRunner, `
-    Start-JMeter, `
-    Update-ConfigFile, `
-    Wait-JMeter
+Environment BrowserTestingCrossDomainAgents {
+    ServerRole Psci -Protocol HTTPS
+}

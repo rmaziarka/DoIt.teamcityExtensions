@@ -22,27 +22,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-$curDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-Get-ChildItem -Recurse $curDir -Include *.ps1 | Where-Object { $_ -notmatch "\.Tests.ps1|_deploy"  } | Foreach-Object {
-    . $_.FullName      
-}
+Environment Default {
+    Tokens Psci @{
+        BlueGreenEnvVariableName = 'PSCI_PATH'
+        DestPathBlue = 'c:\PSCI\Blue'
+        DestPathGreen = 'c:\PSCI\Green'
+        DestPathBoot = 'c:\PSCI\Boot'
+        PsciPackage = ''
+    }
+    
+    Tokens Credentials @{
+        Domain = '<TODO>'
+        User = '<TODO>'
+        Password = '<TODO>'
 
-Export-ModuleMember -Function `
-    ConvertTo-EnhancedHTML, `
-    ConvertTo-EnhancedHTMLFragment, `
-    ConvertTo-EnhancedHTMLFragmentImage, `
-    Get-TeamcityArrayParameter, `
-    Get-TeamcityHashtableParameter, `
-    Get-TeamcityConnectionParameters, `
-    New-JMeterAggregateReport, `
-    New-JMeterDetailedReport, `
-    New-JMeterTeamcityTests, `
-    New-TeamcityTrendReport, `
-    Invoke-ClearDirectoryMetaRunner, `
-    Invoke-CopyFilesMetaRunner, `
-    Invoke-SqlMetaRunner, `
-    Invoke-DatabaseMetaRunner, `
-    Invoke-RemotePowershellMetaRunner, `
-    Start-JMeter, `
-    Update-ConfigFile, `
-    Wait-JMeter
+        PSCredential = { ConvertTo-PSCredential -User "$($Tokens.Credentials.Domain)\$($Tokens.Credentials.User)" -Password $Tokens.Credentials.Password }
+    }
+    
+    Tokens General @{
+        Nodes = @('<TODO>', '<TODO>')
+    }
+}

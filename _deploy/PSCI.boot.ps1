@@ -22,27 +22,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-$curDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-Get-ChildItem -Recurse $curDir -Include *.ps1 | Where-Object { $_ -notmatch "\.Tests.ps1|_deploy"  } | Foreach-Object {
-    . $_.FullName      
+$global:ErrorActionPreference = "Stop"
+
+$psciPath = [Environment]::GetEnvironmentVariable('PSCI_PATH', 'Machine')
+if (!$psciPath) {
+  Write-Error "No PSCI_PATH environment variable. Please ensure PSCI is installed on $(hostname)."
+  exit 1
+}
+$psciPath = Join-Path -Path $psciPath -ChildPath 'PSCI.psm1'
+if (!(Test-Path -Path $psciPath )) {
+  Write-Error "Cannot find '$psciPath '. Please ensure PSCI is installed on $(hostname)."
+  exit 1
 }
 
-Export-ModuleMember -Function `
-    ConvertTo-EnhancedHTML, `
-    ConvertTo-EnhancedHTMLFragment, `
-    ConvertTo-EnhancedHTMLFragmentImage, `
-    Get-TeamcityArrayParameter, `
-    Get-TeamcityHashtableParameter, `
-    Get-TeamcityConnectionParameters, `
-    New-JMeterAggregateReport, `
-    New-JMeterDetailedReport, `
-    New-JMeterTeamcityTests, `
-    New-TeamcityTrendReport, `
-    Invoke-ClearDirectoryMetaRunner, `
-    Invoke-CopyFilesMetaRunner, `
-    Invoke-SqlMetaRunner, `
-    Invoke-DatabaseMetaRunner, `
-    Invoke-RemotePowershellMetaRunner, `
-    Start-JMeter, `
-    Update-ConfigFile, `
-    Wait-JMeter
+Import-Module -Name $psciPath 
