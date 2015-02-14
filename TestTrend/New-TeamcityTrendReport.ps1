@@ -97,7 +97,7 @@ function New-TeamcityTrendReport {
 
     Write-Log -Info "Getting trend data from TeamCity database, BuildId: '$TeamcityBuildId', NumberOfLastBuilds: $NumberOfLastBuilds"
     $sqlResult = Invoke-Sql -ConnectionString $TeamcityDbConnectionString -Query $sql
-    if (!$sqlResult -or !$sqlResult.Tables -or $sqlResult.Tables.Length -lt 2) {
+    if (!$sqlResult -or !$sqlResult.Tables -or $sqlResult.Tables.Count -lt 2) {
         Write-Log -Warn "No trend data returned from TeamCity database. Please ensure parameters are correct. Sql: $sql"
         return
     }
