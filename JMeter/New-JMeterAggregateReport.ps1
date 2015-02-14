@@ -141,7 +141,7 @@ function New-JMeterAggregateReport {
 
     $aggregateCsvOutputPath = Join-Path -Path $OutputDir -ChildPath 'JMeter-AggregateReport.csv'
     $aggregateHtmlOutputPath = Join-Path -Path $OutputDir -ChildPath 'JMeter-AggregateReport.html'
-    New-JMeterAggregateData -JMeterDir $JMeterDir -InputFilePath $InputJtlFilePath -OutputFormat 'csv' -PluginType 'AggregateReport' -OutputFilePath $aggregateCsvOutputPath
+    New-JMeterAggregateData -JMeterDir $JMeterDir -InputFilePath $InputJtlFilePath -OutputFormat 'csv' -PluginType 'AggregateReport' -OutputFilePath $aggregateCsvOutputPath -JavaPath $JavaPath
 
     if ($ImagesToGenerate) {
         foreach ($image in $ImagesToGenerate) {
@@ -160,7 +160,7 @@ function New-JMeterAggregateReport {
             if ($inputFilePath) {
                 if (Test-Path -Path $inputFilePath) {
                     New-JMeterAggregateData -JMeterDir $JMeterDir -InputFilePath $inputFilePath -OutputFormat 'png' -PluginType $image -OutputFilePath $imageOutputPath -ImageWidth $ImagesWidth -ImageHeight $ImagesHeight `
-                        -IncludeTestNames $incTestNames -ExcludeTestNames $excTestNames
+                        -IncludeTestNames $incTestNames -ExcludeTestNames $excTestNames -JavaPath $JavaPath
                 } else {
                     Write-Log -Warn "No file '$inputFilePath' - image '${image}.png' will not be generated."
                 }
