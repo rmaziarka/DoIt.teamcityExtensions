@@ -45,6 +45,10 @@ function Get-TeamcityArrayParameter {
         $Param
     )
 
+    if (!$Param) {
+        return @()
+    }
+
     # 1) Remove all \r
     # 2) Save \,
     # 3) Convert all , to \n
