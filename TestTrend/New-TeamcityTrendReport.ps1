@@ -33,17 +33,8 @@ function New-TeamcityTrendReport {
     .PARAMETER TeamcityBuildId
     Id of currently running Teamcity build (%teamcity.build.id%).
 
-    .PARAMETER TeamcityDbServer
-    Name of Teamcity database server.
-
-    .PARAMETER TeamcityDbName
-    Name of Teamcity database.
-
-    .PARAMETER TeamcityDbUser
-    TeamCity database user name used to connect to SQL server.
-    
-    .PARAMETER TeamcityDbPassword
-    Password for TeamCity database user name.
+    .PARAMETER TeamcityDbConnectionString
+    Connection string that will be used to connect to TeamCity database.
 
     .PARAMETER TeamcityCurrentBuildNumber
     Current Teamcity build number (%build.number%) - required for reporting test results for current build.
@@ -74,19 +65,7 @@ function New-TeamcityTrendReport {
 
         [Parameter(Mandatory=$true)]
         [string]
-        $TeamcityDbServer,
-
-        [Parameter(Mandatory=$false)]
-        [string]
-        $TeamcityDbName = "TeamCity",
-
-        [Parameter(Mandatory=$true)]
-        [string]
-        $TeamcityDbUser,
-
-        [Parameter(Mandatory=$true)]
-        [string]
-        $TeamcityDbPassword,
+        $TeamcityDbConnectionString,
 
         [Parameter(Mandatory=$false)]
         [string]
@@ -116,8 +95,8 @@ function New-TeamcityTrendReport {
     $sql = Get-TeamCityTrendReportSql
     $sql = $sql -f $TeamcityBuildId, $NumberOfLastBuilds
 
-    Write-Log -Info "Getting trend data from TeamCity database ($TeamcityDbServer / $TeamcityDbName), BuildId: '$TeamcityBuildId', NumberOfLastBuilds: $NumberOfLastBuilds"
-    $sqlResult = Invoke-Sql -ServerInstance $TeamcityDbServer -Database $TeamcityDbName -Username $TeamcityDbUser -Password $TeamcityDbPassword -Query $sql
+    Write-Log -Info "Getting trend data from TeamCity database, BuildId: '$TeamcityBuildId', NumberOfLastBuilds: $NumberOfLastBuilds"
+    $sqlResult = Invoke-Sql -ConnectionString $TeamcityDbConnectionString -Query $sql
     if (!$sqlResult -or !$sqlResult.Tables -or $sqlResult.Tables.Length -lt 2) {
         Write-Log -Warn "No trend data returned from TeamCity database. Please ensure parameters are correct. Sql: $sql"
         return
