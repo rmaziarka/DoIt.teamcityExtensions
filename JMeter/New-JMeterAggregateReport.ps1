@@ -45,6 +45,9 @@ function New-JMeterAggregateReport {
     .PARAMETER InputPerfMonFilePath
     Path to the input PerfMon file (optional).
 
+    .PARAMETER JavaPath
+    Optional path to java.exe that will be used by JMeter CMDRunner.
+
     .PARAMETER ImagesToGenerate
     List of images to generate. For available list see http://jmeter-plugins.org/wiki/JMeterPluginsCMD/
     
@@ -94,6 +97,10 @@ function New-JMeterAggregateReport {
         $InputPerfMonFilePath,
 
         [Parameter(Mandatory=$false)]
+        [string]
+        $JavaPath,
+
+        [Parameter(Mandatory=$false)]
         [string[]]
         $ImagesToGenerate = @('ResponseTimesOverTime', 'BytesThroughputOverTime', 'LatenciesOverTime', 'PerfMon', 'ResponseCodesPerSecond', 'ResponseTimesDistribution', 'ResponseTimesPercentiles', 'TransactionsPerSecond'),
 
@@ -126,6 +133,10 @@ function New-JMeterAggregateReport {
     if (!(Test-Path -Path $OutputDir)) {
         Write-Log -Info "Creating directory '$OutputDir'"
         [void](New-Item -Path $OutputDir -ItemType Directory)
+    }
+
+    if (!$JavaPath) {
+        $JavaPath = 'java.exe'
     }
 
     $aggregateCsvOutputPath = Join-Path -Path $OutputDir -ChildPath 'JMeter-AggregateReport.csv'
@@ -165,7 +176,7 @@ function New-JMeterAggregateReport {
         foreach ($cmdLine in $CustomCMDRunnerCommandLines) {
             $cmdArgs = "-jar `"$cmdRunnerPath`" --tool Reporter --input-jtl `"$InputJtlFilePath`" $cmdLine"
             Write-Log -Info "Generating JMeter aggregate report using custom command line"
-            [void](Start-ExternalProcess -Command "java.exe" -ArgumentList $cmdArgs)
+            [void](Start-ExternalProcess -Command $javaPath -ArgumentList $cmdArgs)
         }
     }
 

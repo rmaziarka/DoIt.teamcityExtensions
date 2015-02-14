@@ -38,6 +38,9 @@ function New-JMeterAggregateData {
 
     .PARAMETER PluginType
     Plugin type to use. For available list see http://jmeter-plugins.org/wiki/JMeterPluginsCMD/
+    
+    .PARAMETER JavaPath
+    Path to java.exe that will be used by JMeter CMDRunner.
 
     .PARAMETER OutputFilePath
     Path to the output file. If not specified, the output file will be generated at InputFilePath.  
@@ -77,6 +80,10 @@ function New-JMeterAggregateData {
         [Parameter(Mandatory=$true)]
         [string]
         $PluginType,
+
+        [Parameter(Mandatory=$true)]
+        [string]
+        $JavaPath,
 
         [Parameter(Mandatory=$false)]
         [string]
@@ -134,5 +141,5 @@ function New-JMeterAggregateData {
 
     Write-Log -Info "Generating JMeter aggregate report '$PluginType'" -emphasize
     # ignore 'Extra fields have been ignored' lines as there can be lot of them - see https://groups.google.com/forum/#!topic/jmeter-plugins/LTwLyJIJwEA
-    [void](Start-ExternalProcess -Command "java.exe" -ArgumentList $cmdArgs -IgnoreOutputRegex 'Extra fields have been ignored')
+    [void](Start-ExternalProcess -Command $javaPath -ArgumentList $cmdArgs -IgnoreOutputRegex 'Extra fields have been ignored')
 }
