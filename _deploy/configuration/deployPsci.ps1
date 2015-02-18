@@ -78,7 +78,7 @@ function Deploy-Psci {
         Path = $sourcePath
         ConnectionParams = $ConnectionParams
         BlueGreenEnvVariableName = $Tokens.Psci.BlueGreenEnvVariableName
-        Destinations = @($Tokens.Psci.DestPathBlue, $Tokens.Psci.DestPathGreen)
+        Destination = @($Tokens.Psci.DestPathBlue, $Tokens.Psci.DestPathGreen)
         ClearDestination = $true
     }
 
