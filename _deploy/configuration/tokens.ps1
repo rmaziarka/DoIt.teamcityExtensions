@@ -38,8 +38,4 @@ Environment Default {
 
         PSCredential = { ConvertTo-PSCredential -User "$($Tokens.Credentials.Domain)\$($Tokens.Credentials.User)" -Password $Tokens.Credentials.Password }
     }
-    
-    Tokens General @{
-        Nodes = @('<TODO>', '<TODO>')
-    }
 }
