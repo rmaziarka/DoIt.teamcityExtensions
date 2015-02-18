@@ -24,12 +24,11 @@ SOFTWARE.
 
 
 Environment Default {
-    ServerRole Psci `
-        -Nodes { $Tokens.General.Nodes } `
-        -RemotingCredential { $Tokens.Credentials.PSCredential } `
-        -Configurations 'Deploy-Psci'
+    # Uncomment for simple localhost deployment
+    # ServerConnection AgentsNodes -Nodes 'localhost' -RemotingCredential { $Tokens.Credentials.PSCredential }
+    ServerRole Psci -Configurations 'Deploy-Psci' -ServerConnections AgentNodes
 }
 
 Environment BrowserTestingCrossDomainAgents {
-    ServerRole Psci -Protocol HTTPS
+    ServerConnection AgentsNodes -Protocol HTTPS
 }

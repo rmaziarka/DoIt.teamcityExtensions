@@ -34,7 +34,7 @@ Base directory of the project, relative to the directory where this script resid
   
 .PARAMETER PSCILibraryPath
 Base directory where PSCI library resides, relative to $ProjectRootPath.
-   
+
 .PARAMETER PackagesPath
 Path to the directory where packages reside, relative to $ProjectRootPath.
 
@@ -65,7 +65,6 @@ All       - deploy everything according to configuration files (= Provision + De
 Provision - deploy only DSC configurations
 Deploy    - deploy only non-DSC configurations
 Adhoc     - don't use configuration files, but deploy configurations $ConfigurationsFilter to nodes $NodesFilter
- 
 #>
 param(
 	[Parameter(Mandatory=$false)]
@@ -91,16 +90,16 @@ param(
     [Parameter(Mandatory=$false)]
 	[hashtable]
 	$TokensOverride,
-
-    [Parameter(Mandatory=$false)]
+	
+	[Parameter(Mandatory=$false)]
 	[string[]]
 	$ServerRolesToDeploy,
 
     [Parameter(Mandatory=$false)]
     [string[]]
     $NodesFilter,
-
-    [Parameter(Mandatory=$false)]
+	
+	[Parameter(Mandatory=$false)]
     [string[]]
     $ConfigurationsFilter,
 
@@ -112,32 +111,34 @@ param(
 
 $global:ErrorActionPreference = "Stop"
 
-if (![System.IO.Path]::IsPathRooted($ProjectRootPath)) {
-    $ProjectRootPath = Join-Path -Path $PSScriptRoot -ChildPath $ProjectRootPath
-}
-if (![System.IO.Path]::IsPathRooted($PSCILibraryPath)) {
-	$PSCILibraryPath = Join-Path -Path $ProjectRootPath -ChildPath $PSCILibraryPath
-}
-
-if (!(Test-Path -Path "$PSCILibraryPath\PSCI.psm1")) {
-    Write-Output -Object "Cannot find PSCI library at '$PSCILibraryPath'. Please ensure your ProjectRootPath and PSCILibraryPath parameters are correct."
-	exit 1
-}
-
-Import-Module -Name "$PSCILibraryPath\PSCI.psm1" -Force
-
-$PSCIGlobalConfiguration.LogFile = "$PSScriptRoot\deploy.log.txt"
-Remove-Item -Path $PSCIGlobalConfiguration.LogFile -Force -ErrorAction SilentlyContinue
-
-Push-Location -Path $PSScriptRoot
-
 try {
-	# This will set paths that will be used in Start-Deployment
+    ############# Initialization
+    Push-Location -Path $PSScriptRoot
+
+    if (![System.IO.Path]::IsPathRooted($PSCILibraryPath)) {
+    	$PSCILibraryPath = Join-Path -Path $ProjectRootPath -ChildPath $PSCILibraryPath
+    }
+    if (!(Test-Path "$PSCILibraryPath\PSCI.psm1")) {
+        Write-Output -InputObject "Cannot find PSCI library at '$PSCILibraryPath'. Please ensure your ProjectRootPath and PSCILibraryPath parameters are correct."
+    	exit 1
+    }
+    Import-Module "$PSCILibraryPath\PSCI.psm1" -Force
+
+    $PSCIGlobalConfiguration.LogFile = 'deploy.log.txt'
+    Remove-Item -Path $PSCIGlobalConfiguration.LogFile -ErrorAction SilentlyContinue
+
     Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -PackagesPathMustExist -PSCILibraryPath $PSCILibraryPath
 	
-	# This will start the deployment according to configuration files from $DeployConfigurationPath
-	# You can limit what you deploy by using additional parameters, e.g. -ServerRolesToDeploy, -ConfigurationsFilter or -ValidateOnly
-    Start-Deployment -Environment $Environment -TokensOverride $TokensOverride -ServerRolesToDeploy $ServerRolesToDeploy -DeployConfigurationPath $DeployConfigurationPath -DeployType $DeployType -NodesFilter $NodesFilter -ConfigurationsFilter $ConfigurationsFilter
+    ############# Deployment - no custom code here, you need to put your configuration scripts under 'configuration' directory
+
+    # This will start the deployment according to configuration files from $DeployConfigurationPath
+    Start-Deployment -Environment $Environment `
+                     -DeployConfigurationPath $DeployConfigurationPath `
+                     -ServerRolesToDeploy $ServerRolesToDeploy `
+                     -ConfigurationsFilter $ConfigurationsFilter `
+                     -NodesFilter $NodesFilter `
+                     -TokensOverride $TokensOverride `
+                     -DeployType $DeployType            
     
 } catch {
     Write-ErrorRecord -ErrorRecord $_
