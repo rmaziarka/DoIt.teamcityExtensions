@@ -52,6 +52,9 @@ function Invoke-SqlMetaRunner {
     .PARAMETER QueryTimeoutInSeconds
     Timeout for command execution.
 
+    .PARAMETER Mode
+    Determines how the sql is run - by sqlcmd.exe or .NET SqlCommand.
+
     .EXAMPLE
       $params = @{
         'DatabaseServer' = '%sqlRun.databaseServer%';
@@ -100,7 +103,12 @@ function Invoke-SqlMetaRunner {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $QueryTimeoutInSeconds
+        $QueryTimeoutInSeconds,
+
+        [Parameter(Mandatory=$false)] 
+        [string]
+        [ValidateSet($null, 'sqlcmd', '.net')]
+        $Mode = '.net'
         
     ) 
     $builder = New-Object System.Data.SqlClient.SqlConnectionStringBuilder
@@ -134,6 +142,9 @@ function Invoke-SqlMetaRunner {
     }
     if ($QueryTimeoutInSeconds) {
        $params['QueryTimeoutInSeconds'] = $QueryTimeoutInSeconds
+    }
+    if ($Mode) {
+       $params['Mode'] = $Mode
     }
 
     Invoke-Sql @params
