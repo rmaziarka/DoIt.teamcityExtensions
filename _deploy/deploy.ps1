@@ -48,7 +48,7 @@ Environment where the packages should be deployed (chooses ServerRoles / Tokens 
 A hashtable containing tokens to override during this deployment. For example, if you don't want to store Live credentials in your configuration files,
 you can pass them using this parameter. It should be a 'flat' hashtable containing only token names and their values (no categories).
 
-.PARAMETER ServerRolesToDeploy
+.PARAMETER ServerRolesFilter
 Allows to limit server roles to deploy.
 
 .PARAMETER NodesFilter
@@ -77,7 +77,7 @@ param(
 
 	[Parameter(Mandatory=$false)]
 	[string]
-	$PackagesPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
+	$PackagesPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.  Leave empty for packageless deployment.
 
     [Parameter(Mandatory=$false)]
 	[string]
@@ -93,16 +93,16 @@ param(
 	
 	[Parameter(Mandatory=$false)]
 	[string[]]
-	$ServerRolesToDeploy,
+	$ServerRolesFilter = 'Psci',
+    
+    [Parameter(Mandatory=$false)]
+    [string[]]
+    $ConfigurationsFilter,
 
     [Parameter(Mandatory=$false)]
     [string[]]
     $NodesFilter,
 	
-	[Parameter(Mandatory=$false)]
-    [string[]]
-    $ConfigurationsFilter,
-
     [Parameter(Mandatory=$false)]
     [ValidateSet('All', 'Provision', 'Deploy', 'Adhoc')]
 	[string]
@@ -127,14 +127,13 @@ try {
     $PSCIGlobalConfiguration.LogFile = 'deploy.log.txt'
     Remove-Item -Path $PSCIGlobalConfiguration.LogFile -ErrorAction SilentlyContinue
 
-    Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -PackagesPathMustExist -PSCILibraryPath $PSCILibraryPath
+    Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -DeployConfigurationPath $DeployConfigurationPath -ValidatePackagesPath
 	
     ############# Deployment - no custom code here, you need to put your configuration scripts under 'configuration' directory
 
     # This will start the deployment according to configuration files from $DeployConfigurationPath
     Start-Deployment -Environment $Environment `
-                     -DeployConfigurationPath $DeployConfigurationPath `
-                     -ServerRolesToDeploy $ServerRolesToDeploy `
+                     -ServerRolesFilter $ServerRolesFilter `
                      -ConfigurationsFilter $ConfigurationsFilter `
                      -NodesFilter $NodesFilter `
                      -TokensOverride $TokensOverride `

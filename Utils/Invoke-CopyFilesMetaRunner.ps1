@@ -36,6 +36,9 @@ function Invoke-CopyFilesMetaRunner {
 	.PARAMETER Destination
 		The path where the file will be saved to (must be directory).
 
+    .PARAMETER Include
+        The files to be included in copying.
+
     .PARAMETER Exclude
         The files to be excluded from copying.
 
@@ -69,6 +72,10 @@ function Invoke-CopyFilesMetaRunner {
 
         [Parameter(Mandatory = $false)]
         [string[]]
+        $Include,
+
+        [Parameter(Mandatory = $false)]
+        [string[]]
         $Exclude,
 
         [Parameter(Mandatory = $false)]
@@ -82,7 +89,7 @@ function Invoke-CopyFilesMetaRunner {
     )
 
     if ($ConnectionParams.Nodes) {
-        Copy-FilesToRemoteServer -Path $path -ConnectionParams $ConnectionParams -Destination $Destination -Exclude $Exclude -CheckHashMode $CheckHashMode -ClearDestination:$ClearDestination
+        Copy-FilesToRemoteServer -Path $path -ConnectionParams $ConnectionParams -Destination $Destination -Include $Include -IncludeRecurse -Exclude $Exclude -ExcludeRecurse -CheckHashMode $CheckHashMode -ClearDestination:$ClearDestination
     } else {
         if ($ClearDestination -and (Test-Path -Path $Destination)) { 
             Write-Log -Info "Deleting '$Destination'."
@@ -101,6 +108,19 @@ function Invoke-CopyFilesMetaRunner {
 
         Write-Log -Info ("Copying '{0}' to '{1}'" -f ($Path -join ', '), $Destination)
         [void](New-Item -Path $Destination -ItemType 'Directory' -Force)
-        Copy-Item -Path $newPaths -Destination $Destination -Exclude $Exclude -Force -Recurse
+        $params = @{
+            Path = $newPaths
+            Destination = $Destination
+            Force = $true
+            Recurse = $true
+        }
+        if ($Include) {
+            $params.Include = $Include
+        }
+        if ($Exclude) {
+            $params.Exclude = $Exclude
+        }
+
+        Copy-Item @params
     }
 }
