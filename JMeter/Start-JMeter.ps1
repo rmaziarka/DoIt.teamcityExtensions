@@ -160,7 +160,9 @@ function Start-JMeter {
     }
 
     if (!$RunInBackground) {
+        Write-ProgressExternal -Message 'Running JMeter'
         [void](Start-ExternalProcess -Command $jmeterPath -ArgumentList $cmdArgs)
+        Write-ProgressExternal -Message ''
     } else {
         
         $params = @{

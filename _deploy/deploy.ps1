@@ -62,8 +62,8 @@ If not set, configurations will be deployed according to the ServerRoles defined
 .PARAMETER DeployType
 Deployment type:
 All       - deploy everything according to configuration files (= Provision + Deploy)
-Provision - deploy only DSC configurations
-Deploy    - deploy only non-DSC configurations
+DSC       - deploy only DSC configurations
+Functions - deploy only non-DSC configurations
 Adhoc     - don't use configuration files, but deploy configurations $ConfigurationsFilter to nodes $NodesFilter
 #>
 param(
@@ -104,7 +104,7 @@ param(
     $NodesFilter,
 	
     [Parameter(Mandatory=$false)]
-    [ValidateSet('All', 'Provision', 'Deploy', 'Adhoc')]
+    [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
 	[string]
 	$DeployType = 'All'
 )

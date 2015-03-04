@@ -133,15 +133,18 @@ function Wait-JMeter {
         return $false
     }
 
+    Write-ProgressExternal -Message 'Waiting for JMeter'
     # todo: add JMeter real-time logging
     if (!$process.WaitForExit($TimeoutInSeconds * 1000)) {
         if ($KillAfterTimeout) {
             if ($ShutdownMode -eq "KillProcess") {
                 Stop-ProcessForcefully -Process $process
+                Write-ProgressExternal -Message ''
                 Write-Log -Critical "JMeter process has not finished after $TimeoutInSeconds s and has been killed."
             } elseif (!(Test-Path -Path $JMeterDir)) {
                 Write-Log -Warn "Cannot find JMeter directory at '$JMeterDir'. JMeter process will be stopped in 'KillProcess' mode instead of '$ShutdownMode'"
                 Stop-ProcessForcefully -Process $process
+                Write-ProgressExternal -Message ''
                 Write-Log -Critical "JMeter process has not finished after $TimeoutInSeconds s and has been killed."
             } else {
                 $javaPath = "java.exe"
@@ -165,13 +168,17 @@ function Wait-JMeter {
                 Write-Log -Info "JMeter process has been stopped."
             }
         } else {
+            Write-ProgressExternal -Message ''
             Write-Log -Info "JMeter process still running after $TimeoutInSeconds s."
             return $true
         }
     }
 
+    Write-ProgressExternal -Message ''
+
     Write-JMeterStdOutAndStdErr -StdOutFile $StdOutFile -StdErrFile $StdErrFile
     Test-JMeterSuccess -JtlOutputFile $JtlOutputFile
+
     return $false
 
 }

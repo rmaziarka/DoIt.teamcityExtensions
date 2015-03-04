@@ -46,6 +46,12 @@ function Invoke-DatabaseMetaRunner {
     .PARAMETER Password
     Password - leave empty for domain agent credentials.
 
+    .PARAMETER RemoteShareUsername
+    Remote share username to use if $Path is an UNC path. Note the file will be copied to localhost if this set.
+
+    .PARAMETER RemoteSharePassword
+    Remote share password to use if $Path is an UNC path.
+
     .PARAMETER QueryTimeoutInSeconds
     Timeout for command execution.
 
@@ -96,6 +102,14 @@ function Invoke-DatabaseMetaRunner {
 
         [Parameter(Mandatory=$false)]
         [string]
+        $RemoteShareUsername,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $RemoteSharePassword,
+
+        [Parameter(Mandatory=$false)]
+        [string]
         $QueryTimeoutInSeconds,
 
         [Parameter(Mandatory=$false)]
@@ -136,6 +150,11 @@ function Invoke-DatabaseMetaRunner {
 
     if ($Action -eq 'DropAndRestore') {
         $params['Path'] = $BackupLocation
+        if ($RemoteShareUsername) {
+            $remoteShareCred = ConvertTo-PSCredential -User $RemoteShareUsername -Password $RemoteSharePassword
+            $params['RemoteShareCredential'] = $remoteShareCred
+        }
+        Write-ProgressExternal -Message 'Restoring database'
         Restore-SqlDatabase @params
     } elseif ($Action -eq 'DropAndCreate') {
         New-SqlDatabase @params
