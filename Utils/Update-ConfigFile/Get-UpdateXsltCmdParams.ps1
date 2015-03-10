@@ -73,7 +73,7 @@ function Get-UpdateXsltCmdParams {
                 throw "File $configFileName does not exist (server $(hostname))."
             }
 
-            $configFileName = Resolve-Path -Path $configFileName
+            $configFileName = (Resolve-Path -Path $configFileName).ProviderPath
 
             $xslt = New-Object System.Xml.Xsl.XslCompiledTransform
 

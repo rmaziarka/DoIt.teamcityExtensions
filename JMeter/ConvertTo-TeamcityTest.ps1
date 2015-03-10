@@ -148,7 +148,7 @@ function ConvertTo-TeamcityTest {
             if ($ColumnTestFailure) { 
                 $failureValue = [decimal]$_.$ColumnTestFailure
                 if ($failureValue -gt $FailureThreshold) {
-                    Write-Output -InputObject ("##teamcity[testFailed name='{0}' message='{1}']" -f $testName, "Failure threshold exceeded (${failureValue}%)")
+                    Write-Output -InputObject ("##teamcity[testFailed name='{0}' message='{1}']" -f $testName, "Failure threshold exceeded (${failureValue}% > ${FailureThreshold}%)")
                     $testInfo.Succeeded = $false
                 }
             }

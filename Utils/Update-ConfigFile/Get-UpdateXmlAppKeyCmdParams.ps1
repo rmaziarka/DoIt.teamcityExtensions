@@ -72,7 +72,7 @@ function Get-UpdateXmlAppKeyCmdParams {
                 throw "File $configFileName does not exist (server $(hostname))."
             }
 
-            $configFileName = Resolve-Path -Path $configFileName
+            $configFileName = (Resolve-Path -Path $configFileName).ProviderPath
 
             [xml]$config = Get-Content -Path $configFileName -ReadCount -0
     

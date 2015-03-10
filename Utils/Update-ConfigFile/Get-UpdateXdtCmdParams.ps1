@@ -73,7 +73,7 @@ function Get-UpdateXdtCmdParams {
                 throw "File $configFileName does not exist (server $(hostname))."
             }
 
-            $configFileName = Resolve-Path -Path $configFileName
+            $configFileName = (Resolve-Path -Path $configFileName).ProviderPath
 
             # in remote run we don't have PSCI - need to use files that have been copied earlier to C:\XDTTransform
             if (!$PSCIGlobalConfiguration) {
