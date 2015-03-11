@@ -26,12 +26,12 @@ $global:ErrorActionPreference = "Stop"
 
 $psciPath = [Environment]::GetEnvironmentVariable('PSCI_PATH', 'Machine')
 if (!$psciPath) {
-  Write-Error "No PSCI_PATH environment variable. Please ensure PSCI is installed on $(hostname)."
+  Write-Error "No PSCI_PATH environment variable. Please ensure PSCI is installed on $([system.environment]::MachineName)."
   exit 1
 }
 $psciPath = Join-Path -Path $psciPath -ChildPath 'PSCI.psm1'
 if (!(Test-Path -Path $psciPath )) {
-  Write-Error "Cannot find '$psciPath '. Please ensure PSCI is installed on $(hostname)."
+  Write-Error "Cannot find '$psciPath '. Please ensure PSCI is installed on $([system.environment]::MachineName)."
   exit 1
 }
 

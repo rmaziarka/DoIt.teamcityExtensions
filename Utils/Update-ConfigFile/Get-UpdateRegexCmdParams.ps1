@@ -73,7 +73,7 @@ function Get-UpdateRegexCmdParams {
         $Global:ErrorActionPreference = 'Stop'
         foreach ($configFileName in $ConfigFiles) {
             if (!(Test-Path -Path $configFileName)) {
-                throw "File $configFileName does not exist (server $(hostname))."
+                throw "File $configFileName does not exist (server $([system.environment]::MachineName))."
             }
 
             $configFileName = (Resolve-Path -Path $configFileName).ProviderPath

@@ -121,7 +121,7 @@ function Update-ConfigFile {
     if ($ConnectionParameters.Nodes) {
         $computerNamesLog = $ConnectionParameters.Nodes
     } else {
-        $computerNamesLog = (hostname)
+        $computerNamesLog = ([system.environment]::MachineName)
     }
 
     if ($ConnectionParameters) {
