@@ -178,12 +178,7 @@ function Invoke-RunJsCoverMetaRunner {
         [void](Start-ExternalProcess -Command $PhantomJsPath -ArgumentList $phantomJsArgs -WorkingDirectory (Get-Location))
         Start-Sleep -Seconds 2
     } finally {
-        Stop-JsCoverServer
-    }
-
-    if (!$process.WaitForExit(10000)) {
-        Stop-ProcessForcefully -Process $process
-        Write-Log -Critical "JsCover process has not finished after 10s and has been killed."
+        Stop-JsCoverServer -Process $process
     }
 
     $OutputDir = (Resolve-Path -Path $OutputDir).Path
@@ -193,9 +188,41 @@ function Invoke-RunJsCoverMetaRunner {
 }
 
 function Stop-JsCoverServer {
+    <#
+    .SYNOPSIS
+    Stops JsCover local web server.
+    
+    .PARAMETER Process
+    Process of JsCover server.
+    
+    .PARAMETER Port
+    Port of JsCover server.
+    
+    .EXAMPLE
+    Stop-JsCoverServer -Process $serverProcess -Port 8080
+    #>
+
+    [CmdletBinding()]
+    [OutputType([void])]
+    param(
+        [Parameter(Mandatory=$false)]
+        [PSCustomObject]
+        $Process,
+
+        [Parameter(Mandatory=$false)]
+        [int]
+        $Port = 8080
+    )
+
+    # first try to stop it using web request
     try {
-        Invoke-WebRequest -Uri 'http://localhost:8080/stop' -Method 'GET' -UseBasicParsing
+        Invoke-WebRequest -Uri "http://localhost:$Port/stop" -Method 'GET' -UseBasicParsing
     } catch {
         #JsCover response is badly formatted so we need to swallow the exception
+    }
+    
+    if ($Process -and !$Process.WaitForExit(10000)) {
+        Stop-ProcessForcefully -Process $Process
+        Write-Log -Critical "JsCover process has not finished after 10s and has been killed."
     }
 }
