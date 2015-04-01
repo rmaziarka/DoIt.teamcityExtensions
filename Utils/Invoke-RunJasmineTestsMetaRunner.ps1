@@ -62,7 +62,7 @@ function Invoke-RunJasmineTestsMetaRunner {
         -NoInstrumentPaths @('Web/Scripts', 'Web.Tests') -NoInstrumentRegExp '.*_test.js'
 
 	#>
-	[CmdletBinding()]
+	[CmdletBinding(DefaultParametersetName='WithoutCoverage')]
 	[OutputType([void])]
     param(
         [Parameter(ParameterSetName='WithoutCoverage', Mandatory=$true)]
