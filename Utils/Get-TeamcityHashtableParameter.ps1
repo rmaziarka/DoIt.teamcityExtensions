@@ -53,7 +53,7 @@ function Get-TeamcityHashtableParameter {
         }
         $eqIndex = $line.IndexOf('=')
         if ($eqIndex -le 0) {
-            throw "Invalid format (should be key=value) - line: $line"
+            throw "Invalid format (should be key=value) - line: $line, parameter string: $Param"
         }
         $key = $line.Substring(0, $eqIndex)
         $value = $line.Substring($eqIndex+1)
