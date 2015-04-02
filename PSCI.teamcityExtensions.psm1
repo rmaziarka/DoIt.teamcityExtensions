@@ -44,5 +44,4 @@ Export-ModuleMember -Function `
     Invoke-DatabaseMetaRunner, `
     Invoke-RemotePowershellMetaRunner, `
     Start-JMeter, `
-    Update-ConfigFile, `
     Wait-JMeter
