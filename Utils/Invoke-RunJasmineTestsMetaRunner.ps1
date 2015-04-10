@@ -205,6 +205,9 @@ function Start-JsCoverServer {
 	.PARAMETER NoInstrumentRegExp
 	Regular expressions of URLs not to be instrumented by JsCover.
 
+	.PARAMETER Port
+	The port to listen on
+
 	.PARAMETER WaitForServerWarmup
 	Time to wait in seconds for JsCover server to stand up.
 
