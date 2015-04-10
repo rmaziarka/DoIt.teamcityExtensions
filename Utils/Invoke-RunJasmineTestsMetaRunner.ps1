@@ -54,6 +54,9 @@ function Invoke-RunJasmineTestsMetaRunner {
 	.PARAMETER NoInstrumentRegExp
 	Regular expressions of URLs not to be instrumented by JsCover.
 
+	.PARAMETER JsCoverServerPort
+	The port for JsCover web server to listen on
+
 	.PARAMETER WaitForJsCoverServer
 	Time to wait in seconds for JsCover server to stand up.
 
@@ -105,6 +108,10 @@ function Invoke-RunJasmineTestsMetaRunner {
 
         [Parameter(ParameterSetName='WithCoverage', Mandatory=$false)]
         [int]
+        $JsCoverServerPort = 8085,
+
+        [Parameter(ParameterSetName='WithCoverage', Mandatory=$false)]
+        [int]
         $WaitForJsCoverServer = 5
     )
         
@@ -119,7 +126,7 @@ function Invoke-RunJasmineTestsMetaRunner {
     $getCoverage = $PSCmdlet.ParameterSetName -eq 'WithCoverage'
 
     if ($getCoverage) {
-        Stop-JsCoverServer
+        Stop-JsCoverServer -Port $JsCoverServerPort
 
         if (!(Test-Path -Path $JsCoverPath)) {
             Write-Log -Critical "Cannot find JsCover jar file at '$JsCoverPath'."
@@ -151,10 +158,10 @@ function Invoke-RunJasmineTestsMetaRunner {
     
     if ($getCoverage) {
         $process = Start-JsCoverServer -JsCoverPath $JsCoverPath -DocumentRoot $DocumentRoot -OutputDir $OutputDir `
-            -NoInstrumentPaths $NoInstrumentPaths -NoInstrumentRegExp $NoInstrumentPaths -WaitForServerWarmup $WaitForJsCoverServer
+            -NoInstrumentPaths $NoInstrumentPaths -NoInstrumentRegExp $NoInstrumentPaths -Port $JsCoverServerPort -WaitForServerWarmup $WaitForJsCoverServer
 
         $testRunnerUri = $TestRunnerPagePath -replace '\\', '/'
-        $phantomJsArgs = "$RunJasminePath http://localhost:8080/$testRunnerUri"
+        $phantomJsArgs = "$RunJasminePath http://localhost:$JsCoverServerPort/$testRunnerUri"
     } else {
         $phantomJsArgs = "$RunJasminePath $TestRunnerPagePath"
     }
@@ -166,7 +173,7 @@ function Invoke-RunJasmineTestsMetaRunner {
         Start-Sleep -Seconds 2
     } finally {
         if ($getCoverage) {
-            Stop-JsCoverServer -Process $process
+            Stop-JsCoverServer -Process $process -Port $JsCoverServerPort
         }
     }
 
@@ -228,6 +235,10 @@ function Start-JsCoverServer {
         [Parameter(Mandatory=$false)]
         [string[]]
         $NoInstrumentRegExp,
+        
+        [Parameter(Mandatory=$true)]
+        [int]
+        $Port,
 
         [Parameter(Mandatory=$true)]
         [int]
@@ -239,7 +250,7 @@ function Start-JsCoverServer {
     $stdOutFile = Join-Path -Path $OutputDir -ChildPath 'out.log'
     $stdErrFile = Join-Path -Path $OutputDir -ChildPath 'err.log'
 
-    $cmdArgs = "-Dfile.encoding=UTF-8 -jar $JsCoverPath -ws --log=FINE --save-json-only --document-root=$DocumentRoot --report-dir=$OutputDir"
+    $cmdArgs = "-Dfile.encoding=UTF-8 -jar $JsCoverPath -ws --log=FINE --save-json-only --port=$Port --document-root=$DocumentRoot --report-dir=$OutputDir"
     
     foreach ($path in $NoInstrumentPaths) {
         $cmdArgs += " --no-instrument=$path"
@@ -292,9 +303,9 @@ function Stop-JsCoverServer {
         [PSCustomObject]
         $Process,
 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory=$true)]
         [int]
-        $Port = 8080
+        $Port
     )
 
     # first try to stop it using web request
