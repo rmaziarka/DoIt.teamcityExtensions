@@ -54,6 +54,9 @@ function Invoke-RunJasmineTestsMetaRunner {
 	.PARAMETER NoInstrumentRegExp
 	Regular expressions of URLs not to be instrumented by JsCover.
 
+	.PARAMETER WaitForJsCoverServer
+	Time to wait in seconds for JsCover server to stand up.
+
 	.EXAMPLE			
     Invoke-RunJasmineTestsMetaRunner -PhantomJsPath 'bin\phantomjs.exe' -RunJasminePath 'bin\run-jscover-jasmine.js' -TestRunnerPagePath 'Source\Web.Tests\SpecRunner.html' 
 
@@ -98,7 +101,11 @@ function Invoke-RunJasmineTestsMetaRunner {
 
         [Parameter(ParameterSetName='WithCoverage', Mandatory=$false)]
         [string[]]
-        $NoInstrumentRegExp
+        $NoInstrumentRegExp,
+
+        [Parameter(ParameterSetName='WithCoverage', Mandatory=$false)]
+        [int]
+        $WaitForJsCoverServer = 5
     )
         
     if (!(Test-Path -Path $PhantomJsPath)) {
@@ -112,6 +119,8 @@ function Invoke-RunJasmineTestsMetaRunner {
     $getCoverage = $PSCmdlet.ParameterSetName -eq 'WithCoverage'
 
     if ($getCoverage) {
+        Stop-JsCoverServer
+
         if (!(Test-Path -Path $JsCoverPath)) {
             Write-Log -Critical "Cannot find JsCover jar file at '$JsCoverPath'."
         }
@@ -142,7 +151,7 @@ function Invoke-RunJasmineTestsMetaRunner {
     
     if ($getCoverage) {
         $process = Start-JsCoverServer -JsCoverPath $JsCoverPath -DocumentRoot $DocumentRoot -OutputDir $OutputDir `
-            -NoInstrumentPaths $NoInstrumentPaths -NoInstrumentRegExp $NoInstrumentPaths
+            -NoInstrumentPaths $NoInstrumentPaths -NoInstrumentRegExp $NoInstrumentPaths -WaitForServerWarmup $WaitForJsCoverServer
 
         $testRunnerUri = $TestRunnerPagePath -replace '\\', '/'
         $phantomJsArgs = "$RunJasminePath http://localhost:8080/$testRunnerUri"
@@ -189,9 +198,12 @@ function Start-JsCoverServer {
 	.PARAMETER NoInstrumentRegExp
 	Regular expressions of URLs not to be instrumented by JsCover.
 
+	.PARAMETER WaitForServerWarmup
+	Time to wait in seconds for JsCover server to stand up.
+
 	.EXAMPLE			
     Start-JsCoverServer -JsCoverPath 'bin\JSCover-all.jar' -DocumentRoot 'Source' -OutputDir '.jscover' `
-        -NoInstrumentPaths @('Web/Scripts', 'Web.Tests') -NoInstrumentRegExp '.*_test.js'
+        -NoInstrumentPaths @('Web/Scripts', 'Web.Tests') -NoInstrumentRegExp '.*_test.js' -WaitForServerWarmup 4
     #>
 
     [CmdletBinding()]
@@ -215,7 +227,11 @@ function Start-JsCoverServer {
 
         [Parameter(Mandatory=$false)]
         [string[]]
-        $NoInstrumentRegExp
+        $NoInstrumentRegExp,
+
+        [Parameter(Mandatory=$true)]
+        [int]
+        $WaitForServerWarmup
     )
 
     $JsCoverPath = (Resolve-Path -Path $JsCoverPath).Path
@@ -223,7 +239,7 @@ function Start-JsCoverServer {
     $stdOutFile = Join-Path -Path $OutputDir -ChildPath 'out.log'
     $stdErrFile = Join-Path -Path $OutputDir -ChildPath 'err.log'
 
-    $cmdArgs = "-Dfile.encoding=UTF-8 -jar $JsCoverPath -ws --log=INFO --save-json-only --document-root=$DocumentRoot --report-dir=$OutputDir"
+    $cmdArgs = "-Dfile.encoding=UTF-8 -jar $JsCoverPath -ws --log=FINE --save-json-only --document-root=$DocumentRoot --report-dir=$OutputDir"
     
     foreach ($path in $NoInstrumentPaths) {
         $cmdArgs += " --no-instrument=$path"
@@ -249,7 +265,7 @@ function Start-JsCoverServer {
     Write-Log -Info "Process started, id = $($process.Id), name = $($process.Name)"
             
     # give time to server start up
-    Start-Sleep -Seconds 2
+    Start-Sleep -Seconds $WaitForServerWarmup
 
     return $process
 }
@@ -283,13 +299,18 @@ function Stop-JsCoverServer {
 
     # first try to stop it using web request
     try {
+        Write-Log -Info "Stopping JsCover server."
         Invoke-WebRequest -Uri "http://localhost:$Port/stop" -Method 'GET' -UseBasicParsing
     } catch {
         #JsCover response is badly formatted so we need to swallow the exception
     }
     
-    if ($Process -and !$Process.WaitForExit(10000)) {
-        Stop-ProcessForcefully -Process $Process
-        Write-Log -Critical "JsCover process has not finished after 10s and has been killed."
+    if ($Process) {
+        if (!$Process.WaitForExit(10000)){
+            Stop-ProcessForcefully -Process $Process
+            Write-Log -Info "JsCover process has not finished after 10s and has been killed."
+        } else{
+            Write-Log -Info "JsCover server has been stopped."
+        }
     }
 }
