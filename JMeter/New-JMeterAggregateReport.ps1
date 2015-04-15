@@ -47,25 +47,10 @@ function New-JMeterAggregateReport {
 
     .PARAMETER JavaPath
     Optional path to java.exe that will be used by JMeter CMDRunner.
-
-    .PARAMETER ImagesToGenerate
-    List of images to generate. For available list see http://jmeter-plugins.org/wiki/JMeterPluginsCMD/
     
-    .PARAMETER ImagesWidth
-    Width of each generated image.
-
-    .PARAMETER ImagesHeight
-    Height of each generated image.
-
     .PARAMETER WarningThresholds
     String containing warning thresholds for each column. For example if $WarningThresholds = 'Average=3000,Max=30000,Error %=0', 
     samples with Average > 3000, Max > 30000 or Error % > 0 will be marked red in the output html.
-
-    .PARAMETER IncludeTestNames
-    List of test names that should be included (only for generating PNG files).
-
-    .PARAMETER ExcludeTestNames
-    List of test names that should be excluded (only for generating PNG files).
 
     .PARAMETER CustomCMDRunnerCommandLines
     List of custom command line parameters - each will be passed to a separate invocation of CMDRunner.
@@ -99,34 +84,24 @@ function New-JMeterAggregateReport {
         [Parameter(Mandatory=$false)]
         [string]
         $JavaPath,
-
-        [Parameter(Mandatory=$false)]
-        [string[]]
-        $ImagesToGenerate = @('ResponseTimesOverTime', 'BytesThroughputOverTime', 'LatenciesOverTime', 'PerfMon', 'ResponseCodesPerSecond', 'ResponseTimesDistribution', 'ResponseTimesPercentiles', 'TransactionsPerSecond'),
-
-        [Parameter(Mandatory=$false)]
-        [int]
-        $ImagesWidth = 667,
-
-        [Parameter(Mandatory=$false)]
-        [int]
-        $ImagesHeight = 500,
-        
+       
         [Parameter(Mandatory=$false)]
         [string]
         $WarningThresholds = 'Average=3000,Median=3000,90% Line=3000,Max=30000,Error %=0',
 
         [Parameter(Mandatory=$false)]
         [string[]]
-        $IncludeTestNames,
-
-        [Parameter(Mandatory=$false)]
-        [string[]]
-        $ExcludeTestNames,
-
-        [Parameter(Mandatory=$false)]
-        [string[]]
-        $CustomCMDRunnerCommandLines
+        $CustomCMDRunnerCommandLines = @(
+            '--input-jtl "{jtlPath}" --generate-png "{outputDir}\ResponseTimesOverTime.png" --plugin-type ResponseTimesOverTime --width 667 --height 500',
+            '--input-jtl "{jtlPath}" --generate-png "{outputDir}\BytesThroughputOverTime.png" --plugin-type BytesThroughputOverTime --width 667 --height 500',
+            '--input-jtl "{jtlPath}" --generate-png "{outputDir}\LatenciesOverTime.png" --plugin-type LatenciesOverTime --width 667 --height 500',
+            '--input-jtl "{jtlPath}" --generate-png "{outputDir}\ResponseCodesPerSecond.png" --plugin-type ResponseCodesPerSecond --width 667 --height 500',
+            '--input-jtl "{jtlPath}" --generate-png "{outputDir}\ResponseTimesDistribution.png" --plugin-type ResponseTimesDistribution --width 667 --height 500',
+            '--input-jtl "{jtlPath}" --generate-png "{outputDir}\ResponseTimesPercentiles.png" --plugin-type ResponseTimesPercentiles --width 667 --height 500',
+            '--input-jtl "{jtlPath}" --generate-png "{outputDir}\TransactionsPerSecond.png" --plugin-type TransactionsPerSecond --width 667 --height 500',
+            '--input-jtl "{jtlPath}" --generate-png "{outputDir}\ThreadsStateOverTime.png" --plugin-type ThreadsStateOverTime --width 667 --height 500',
+            '--input-jtl "{perfMonPath}" --generate-png "{outputDir}\PerfMon.png" --plugin-type PerfMon --width 667 --height 500'
+        )
 
     )
 
@@ -143,40 +118,40 @@ function New-JMeterAggregateReport {
     $aggregateHtmlOutputPath = Join-Path -Path $OutputDir -ChildPath 'JMeter-AggregateReport.html'
     New-JMeterAggregateData -JMeterDir $JMeterDir -InputFilePath $InputJtlFilePath -OutputFormat 'csv' -PluginType 'AggregateReport' -OutputFilePath $aggregateCsvOutputPath -JavaPath $JavaPath
 
-    if ($ImagesToGenerate) {
-        foreach ($image in $ImagesToGenerate) {
-            $imageOutputPath = Join-Path -Path $OutputDir -ChildPath "${image}.png"
-
-            if ($image -eq 'PerfMon') {
-                $incTestNames = $null
-                $excTestNames = $null
-                $inputFilePath = $InputPerfMonFilePath
-            } else {
-                $incTestNames = $IncludeTestNames
-                $excTestNames = $ExcludeTestNames
-                $inputFilePath = $InputJtlFilePath
-            }
-
-            if ($inputFilePath) {
-                if (Test-Path -Path $inputFilePath) {
-                    New-JMeterAggregateData -JMeterDir $JMeterDir -InputFilePath $inputFilePath -OutputFormat 'png' -PluginType $image -OutputFilePath $imageOutputPath -ImageWidth $ImagesWidth -ImageHeight $ImagesHeight `
-                        -IncludeTestNames $incTestNames -ExcludeTestNames $excTestNames -JavaPath $JavaPath
-                } else {
-                    Write-Log -Warn "No file '$inputFilePath' - image '${image}.png' will not be generated."
-                }
-            }
-        }
-    }
-
     if ($CustomCMDRunnerCommandLines) {
         $cmdRunnerPath = Join-Path -Path $JMeterDir -ChildPath "lib\ext\CMDRunner.jar"
         if (!(Test-Path -Path $cmdRunnerPath)) {
             Write-Log -Critical "Cannot find JMeter CMDRunner plugin at '$cmdRunnerPath'."
         }
+
+        $replaceStrings = @{
+            'jtlPath' = $InputJtlFilePath
+            'outputDir' = $OutputDir
+            'perfMonPath' = $InputPerfMonFilePath
+        }
+
         foreach ($cmdLine in $CustomCMDRunnerCommandLines) {
-            $cmdArgs = "-jar `"$cmdRunnerPath`" --tool Reporter --input-jtl `"$InputJtlFilePath`" $cmdLine"
-            Write-Log -Info "Generating JMeter aggregate report using custom command line"
-            [void](Start-ExternalProcess -Command $javaPath -ArgumentList $cmdArgs)
+            $shouldRun = $true
+            foreach ($replaceString in $replaceStrings.Keys) {
+                if ($cmdLine -imatch "\{$replaceString\}") {
+                    $value = $replaceStrings[$replaceString]
+                    if (!$value) {
+                        $shouldRun = $false
+                        Write-Log -Warn "Command line '$cmdLine' will not run - {$replaceString} is specified but related parameter is not."
+                        break
+                    } elseif (!(Test-Path -Path $value)) {
+                        $shouldRun = $false
+                        Write-Log -Warn "Command line '$cmdLine' will not run - path '$value' does not exist."
+                        break
+                    } else { 
+                        $cmdLine = $cmdLine -ireplace "\{$replaceString\}", $value
+                    }
+                }
+            }
+            if ($shouldRun) { 
+                $cmdArgs = "-jar `"$cmdRunnerPath`" --tool Reporter $cmdLine"
+                [void](Start-ExternalProcess -Command $javaPath -ArgumentList $cmdArgs)
+            }
         }
     }
 
