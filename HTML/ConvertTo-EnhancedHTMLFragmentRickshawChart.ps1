@@ -282,19 +282,22 @@ var appendFilterTableOnClick = function(selector) {
 }
 
 var createTable = function() {
-	var no = 1
+	var no = 1;
 	var tableDataSet = [];
+    var i = 0;
 
-    jQuery('#legend .line').each(function (index, e) {
-        if (!e.series.disabled) {
-            var data = e.series.data;
-		    var newRow = [ no++, e.series.name ];
+    var lines = jQuery('#legend .line');
+    for (i = 0; i < lines.length; i++) { 
+        var line = lines[i];
+        if (!line.series.disabled) {
+            var data = line.series.data;
+		    var newRow = [ no++, line.series.name ];
 		    data.forEach(function (row) {
 			    newRow.push(row.y);
 		    });
 		    tableDataSet.push(newRow);
 	    }
-    });
+    };
 
 	if (tableDataSet == []) {
 		return;
@@ -303,10 +306,11 @@ var createTable = function() {
 	var columns = [ ];
 	columns.push({ "title" : "No" });
 	columns.push({ "title" : "Test name" });
-
-	chartData[0].data.forEach(function (data) {
-	  columns.push({ "title": "#" + data.xLabel });
-	});
+    
+    var dataColumns = chartData[0].data
+    for (i = 0; i < dataColumns.length; i++) {  
+	    columns.push({ "title": "#" + dataColumns[i].xLabel });
+	}
 	
     if (tableObj) {
         tableObj.fnClearTable();

@@ -77,7 +77,7 @@ function New-TeamcityTrendReport {
 
         [Parameter(Mandatory=$false)]
         [int]
-        $NumberOfLastBuilds = 1000,
+        $NumberOfLastBuilds = 30,
 
         [Parameter(Mandatory=$false)]
         [switch]
@@ -119,6 +119,7 @@ function New-TeamcityTrendReport {
         }
     }
 
+    Write-Log -Info "Generating html report"
     if ($GenerateCsvFile) {
         ConvertTo-CsvInBuildNameOrder -BuildIdMap $buildIdMap -TrendData $trendData -CsvOutputPath $csvOutputPath
     }

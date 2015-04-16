@@ -86,6 +86,8 @@ table.dataTable tfoot th { padding: 8px 10px }
 }
 #tableData_wrapper {
     display: inline-block;
+    max-width: 1300px;
+    overflow-x: scroll;
 }
 table.dataTable {
     width: auto;
