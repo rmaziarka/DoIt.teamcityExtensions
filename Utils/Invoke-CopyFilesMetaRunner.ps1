@@ -91,14 +91,14 @@ function Invoke-CopyFilesMetaRunner {
     if ($ConnectionParams.Nodes) {
         Copy-FilesToRemoteServer -Path $path -ConnectionParams $ConnectionParams -Destination $Destination -Include $Include -IncludeRecurse -Exclude $Exclude -ExcludeRecurse -CheckHashMode $CheckHashMode -ClearDestination:$ClearDestination
     } else {
-        if ($ClearDestination -and (Test-Path -Path $Destination)) { 
+        if ($ClearDestination -and (Test-Path -LiteralPath $Destination)) { 
             Write-Log -Info "Deleting '$Destination'."
-            [void](Remove-Item -Path $Destination -Force -Recurse)
+            [void](Remove-Item -LiteralPath $Destination -Force -Recurse)
         }
 
         $newPaths = New-Object System.Collections.ArrayList
         foreach ($p in $Path) {
-            if (Test-Path -Path $p -PathType Container) {
+            if (Test-Path -LiteralPath $p -PathType Container) {
                 # we need to do this or otherwise we would get a new directory in $Destination
                 [void]($newPaths.Add((Join-Path -Path $p -ChildPath '*')))
             } else {

@@ -65,7 +65,7 @@ function New-JMeterDetailedReport {
         
     )
 
-    if (!(Test-Path -Path $OutputDir)) {
+    if (!(Test-Path -LiteralPath $OutputDir)) {
         Write-Log -Info "Creating directory '$OutputDir'"
         [void](New-Item -Path $OutputDir -ItemType Directory)
     }
@@ -78,16 +78,16 @@ function New-JMeterDetailedReport {
         $xslPath = Join-Path -Path $JMeterDir -ChildPath "extras\jmeter-results-report_21.xsl"
     }
 
-    if (!(Test-Path -Path $xslPath)) {
+    if (!(Test-Path -LiteralPath $xslPath)) {
         Write-Log -Critical "Cannot find JMeter's xsl at '$xslPath'. Please ensure you have provided correct JMeterDir."
     }
 
-    if (!(Test-Path -Path $InputJtlFilePath)) {
+    if (!(Test-Path -LiteralPath $InputJtlFilePath)) {
         Write-Log -Critical "Cannot find input JTL file at '$InputJtlFilePath'."
     }
 
     Write-Log -Info "Generating JMeter detailed report for '$InputJtlFilePath' at '$OutputFilePath'"
-    Remove-Item -Path $OutputFilePath -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $OutputFilePath -Force -ErrorAction SilentlyContinue
     $xslt = New-Object System.Xml.Xsl.XslCompiledTransform
     $xslt.Load($xslPath)
     $xslt.Transform($InputJtlFilePath, $OutputFilePath) 

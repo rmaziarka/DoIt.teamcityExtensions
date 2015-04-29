@@ -85,7 +85,7 @@ function New-TeamcityTrendReport {
 
     )
 
-    if (!(Test-Path -Path $OutputDir)) {
+    if (!(Test-Path -LiteralPath $OutputDir)) {
         Write-Log -Info "Creating directory '$OutputDir'"
         [void](New-Item -Path $OutputDir -ItemType Directory)
     }

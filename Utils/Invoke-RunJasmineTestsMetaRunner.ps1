@@ -115,11 +115,11 @@ function Invoke-RunJasmineTestsMetaRunner {
         $WaitForJsCoverServer = 5
     )
         
-    if (!(Test-Path -Path $PhantomJsPath)) {
+    if (!(Test-Path -LiteralPath $PhantomJsPath)) {
         Write-Log -Critical "Cannot find PhantomJs exe file at '$PhantomJsPath'."
     }
     
-    if (!(Test-Path -Path $RunJasminePath)) {
+    if (!(Test-Path -LiteralPath $RunJasminePath)) {
         Write-Log -Critical "Cannot find Jasmine script file at '$RunJasminePath'."
     }
 
@@ -128,33 +128,33 @@ function Invoke-RunJasmineTestsMetaRunner {
     if ($getCoverage) {
         Stop-JsCoverServer -Port $JsCoverServerPort
 
-        if (!(Test-Path -Path $JsCoverPath)) {
+        if (!(Test-Path -LiteralPath $JsCoverPath)) {
             Write-Log -Critical "Cannot find JsCover jar file at '$JsCoverPath'."
         }
 
-        if (!(Test-Path -Path $DocumentRoot)) {
+        if (!(Test-Path -LiteralPath $DocumentRoot)) {
             Write-Log -Critical "Cannot find documents root directory at '$DocumentRoot'."
         }
     
         $testRunnerAbsPath = Join-Path -Path $DocumentRoot -ChildPath $TestRunnerPagePath
-        if (!(Test-Path -Path ($testRunnerAbsPath))) {
+        if (!(Test-Path -LiteralPath ($testRunnerAbsPath))) {
             Write-Log -Critical "Cannot find test runner page at '$testRunnerAbsPath'."
         }
 
-        $DocumentRoot = (Resolve-Path -Path $DocumentRoot).Path
+        $DocumentRoot = (Resolve-Path -LiteralPath $DocumentRoot).Path
 
-        if (Test-Path -Path $OutputDir) {
+        if (Test-Path -LiteralPath $OutputDir) {
             Write-Log -Info "Output directory '$OutputDir' exists - deleting."
-            Remove-Item -Path $OutputDir -Force -Recurse
+            Remove-Item -LiteralPath $OutputDir -Force -Recurse
         }
     } else{
-        if (!(Test-Path -Path ($TestRunnerPagePath))) {
+        if (!(Test-Path -LiteralPath ($TestRunnerPagePath))) {
             Write-Log -Critical "Cannot find test runner page at '$TestRunnerPagePath'."
         }
     }
     
-    $PhantomJsPath = (Resolve-Path -Path $PhantomJsPath).Path
-    $RunJasminePath = (Resolve-Path -Path $RunJasminePath).Path
+    $PhantomJsPath = (Resolve-Path -LiteralPath $PhantomJsPath).Path
+    $RunJasminePath = (Resolve-Path -LiteralPath $RunJasminePath).Path
     
     if ($getCoverage) {
         $process = Start-JsCoverServer -JsCoverPath $JsCoverPath -DocumentRoot $DocumentRoot -OutputDir $OutputDir `
@@ -178,7 +178,7 @@ function Invoke-RunJasmineTestsMetaRunner {
     }
 
     if ($getCoverage) {
-        $OutputDir = (Resolve-Path -Path $OutputDir).Path
+        $OutputDir = (Resolve-Path -LiteralPath $OutputDir).Path
         $convertArgs = "-cp $JsCoverPath jscover.report.Main --format=LCOV $OutputDir $DocumentRoot"
         Write-ProgressExternal -Message 'Converting coverage reports'
         [void](Start-ExternalProcess -Command 'java.exe' -ArgumentList $convertArgs -WorkingDirectory (Get-Location) -CheckStdErr: $false)
@@ -248,7 +248,7 @@ function Start-JsCoverServer {
         $WaitForServerWarmup
     )
 
-    $JsCoverPath = (Resolve-Path -Path $JsCoverPath).Path
+    $JsCoverPath = (Resolve-Path -LiteralPath $JsCoverPath).Path
 
     $stdOutFile = Join-Path -Path $OutputDir -ChildPath 'out.log'
     $stdErrFile = Join-Path -Path $OutputDir -ChildPath 'err.log'

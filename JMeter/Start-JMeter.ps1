@@ -114,30 +114,30 @@ function Start-JMeter {
         $NonGUI = $true
     )
 
-    if (!(Test-Path -Path $JMeterDir)) {
+    if (!(Test-Path -LiteralPath $JMeterDir)) {
         Write-Log -Critical "Cannot find JMeter directory at '$JMeterDir'."
     }
-    if (!(Test-Path -Path $JmxInputFile)) {
+    if (!(Test-Path -LiteralPath $JmxInputFile)) {
         Write-Log -Critical "Cannot find JMX input file at '$JmxInputFile'."
     }
 
-    if (Test-Path -Path $JtlOutputFile) {
+    if (Test-Path -LiteralPath $JtlOutputFile) {
         Write-Log -Info "Output file '$JtlOutputFile' exists - deleting."
-        Remove-Item -Path $JtlOutputFile -Force
+        Remove-Item -LiteralPath $JtlOutputFile -Force
     }
 
-    if (Test-Path -Path $RunInBackgroundStdOutFile) {
+    if (Test-Path -LiteralPath $RunInBackgroundStdOutFile) {
         Write-Log -Info "Stdout file '$RunInBackgroundStdOutFile' exists - deleting."
-        Remove-Item -Path $RunInBackgroundStdOutFile -Force
+        Remove-Item -LiteralPath $RunInBackgroundStdOutFile -Force
     }
 
-    if (Test-Path -Path $RunInBackgroundStdErrFile) {
+    if (Test-Path -LiteralPath $RunInBackgroundStdErrFile) {
         Write-Log -Info "Stdout file '$RunInBackgroundStdErrFile' exists - deleting."
-        Remove-Item -Path $RunInBackgroundStdErrFile -Force
+        Remove-Item -LiteralPath $RunInBackgroundStdErrFile -Force
     }
 
     $jMeterPath = Join-Path -Path $JMeterDir -ChildPath "bin\jmeter.bat"
-    if (!(Test-Path -Path $jMeterPath)) {
+    if (!(Test-Path -LiteralPath $jMeterPath)) {
        Write-Log -Critical "Cannot find '$jMeterPath'."
     }
 

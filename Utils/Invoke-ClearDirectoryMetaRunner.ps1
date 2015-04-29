@@ -97,6 +97,6 @@ function Invoke-ClearDirectoryMetaRunner {
         if ($VerboseLog) {
             Write-Log -Info "Deleting $($_.FullName)"
         }
-        Remove-Item -Path $_.FullName -Recurse -Force
+        Remove-Item -LiteralPath $_.FullName -Recurse -Force
     }
 }

@@ -87,7 +87,7 @@ function Invoke-RemotePowershellMetaRunner {
 
     if ($ScriptFile) {
         foreach ($file in $ScriptFile) {
-            if (!(Test-Path -Path $file)) {
+            if (!(Test-Path -LiteralPath $file)) {
                 Write-Log -Critical "File '$file' does not exist at $([system.environment]::MachineName)."
             }
             $scriptToRun += Get-Content -Path $file -ReadCount 0 | Out-String

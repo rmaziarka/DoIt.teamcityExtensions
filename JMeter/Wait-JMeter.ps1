@@ -118,7 +118,7 @@ function Wait-JMeter {
     }
 
     if (!$JMeterPid -and $JMeterPidFile) {
-        if (!(Test-Path -Path $JMeterPidFile)) {
+        if (!(Test-Path -LiteralPath $JMeterPidFile)) {
             Write-Log -Critical "No JMeter Pid file at '$JMeterPidFile'. Please investigate why Start-JMeter has not created it."
         }
         $JMeterPid = Get-Content -Path $JMeterPidFile -ReadCount 1
@@ -141,7 +141,7 @@ function Wait-JMeter {
                 Stop-ProcessForcefully -Process $process
                 Write-ProgressExternal -Message ''
                 Write-Log -Critical "JMeter process has not finished after $TimeoutInSeconds s and has been killed."
-            } elseif (!(Test-Path -Path $JMeterDir)) {
+            } elseif (!(Test-Path -LiteralPath $JMeterDir)) {
                 Write-Log -Warn "Cannot find JMeter directory at '$JMeterDir'. JMeter process will be stopped in 'KillProcess' mode instead of '$ShutdownMode'"
                 Stop-ProcessForcefully -Process $process
                 Write-ProgressExternal -Message ''
@@ -245,7 +245,7 @@ function Test-JMeterSuccess {
         $JtlOutputFile
     )
 
-    if (Test-Path -Path $JtlOutputFile) {
+    if (Test-Path -LiteralPath $JtlOutputFile) {
         Write-Log -Info "JMeter process finished and generated jtl file at '$JtlOutputFile'." -Emphasize
         return
     } else {

@@ -142,7 +142,7 @@ Describe -Tag "PSCI.unit" "Invoke-RemotePowershellMetaRunner" {
             }
 
         } finally {
-            Remove-Item -Path $testFilePath -Force 
+            Remove-Item -LiteralPath $testFilePath -Force 
         }
     }
 }

@@ -37,11 +37,11 @@ Describe -Tag "PSCI.unit" "Invoke-ClearDirectoryMetaRunner" {
 
                         Invoke-ClearDirectoryMetaRunner -IncludeRegex 'bin$' -ExcludeRegex 'test2'
 
-                        Test-Path -Path 'test1\bin' | Should Be $false
-                        Test-Path -Path 'test2\bin' | Should Be $true
+                        Test-Path -LiteralPath 'test1\bin' | Should Be $false
+                        Test-Path -LiteralPath 'test2\bin' | Should Be $true
                     } finally {
-                        Remove-Item -Path 'test1' -Force -Recurse
-                        Remove-Item -Path 'test2' -Force -Recurse
+                        Remove-Item -LiteralPath 'test1' -Force -Recurse
+                        Remove-Item -LiteralPath 'test2' -Force -Recurse
                         Pop-Location
                     }
                 }

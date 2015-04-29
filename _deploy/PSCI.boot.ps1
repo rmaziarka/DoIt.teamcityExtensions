@@ -30,7 +30,7 @@ if (!$psciPath) {
   exit 1
 }
 $psciPath = Join-Path -Path $psciPath -ChildPath 'PSCI.psm1'
-if (!(Test-Path -Path $psciPath )) {
+if (!(Test-Path -LiteralPath $psciPath )) {
   Write-Error "Cannot find '$psciPath '. Please ensure PSCI is installed on $([system.environment]::MachineName)."
   exit 1
 }
