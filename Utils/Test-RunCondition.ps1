@@ -56,6 +56,7 @@ function Test-RunCondition {
             $msg = "- will not run"
         }
         Write-Log -Info "RunCondition result: $result $msg"
+        return $resultTest
     }
     return $true
     
