@@ -22,28 +22,41 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-$curDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-Get-ChildItem -Recurse $curDir -Include *.ps1 | Where-Object { $_ -notmatch "\.Tests.ps1|_deploy"  } | Foreach-Object {
-    . $_.FullName      
-}
+function Test-RunCondition {
 
-Export-ModuleMember -Function `
-    ConvertTo-EnhancedHTML, `
-    ConvertTo-EnhancedHTMLFragment, `
-    ConvertTo-EnhancedHTMLFragmentImage, `
-    Get-TeamcityArrayParameter, `
-    Get-TeamcityHashtableParameter, `
-    Get-TeamcityConnectionParameters, `
-    New-JMeterAggregateReport, `
-    New-JMeterDetailedReport, `
-    New-JMeterTeamcityTests, `
-    New-TeamcityTrendReport, `
-    Invoke-ClearDirectoryMetaRunner, `
-    Invoke-CopyFilesMetaRunner, `
-    Invoke-SqlMetaRunner, `
-    Invoke-DatabaseMetaRunner, `
-    Invoke-RemotePowershellMetaRunner, `
-    Invoke-RunJasmineTestsMetaRunner, `
-    Start-JMeter, `
-    Test-RunCondition, `
-    Wait-JMeter
+    <#
+    .SYNOPSIS
+    Evaluates a string specified by user - used to decide whether to run a metarunner.
+
+    .DESCRIPTION
+    This is required because currently TeamCity does not allow to execute a build step based on a condition - https://youtrack.jetbrains.com/issue/TW-17939.
+
+    .PARAMETER RunCondition
+    An expression that will be evaluated.
+    
+    .EXAMPLE
+    Test-RunCondition -RunCondition "'1' -eq '1'"
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory=$false)]
+        [string]
+        $RunCondition
+    )
+
+    if ($RunCondition) {
+        Write-Log -Info "Evaluating RunCondition: $RunCondition"
+        $result = Invoke-Expression -Command $RunCondition
+        if ($result) {
+            $resultTest = $true
+            $msg = "- will run"
+        } else {
+            $resultTest = $false
+            $msg = "- will not run"
+        }
+        Write-Log -Info "RunCondition result: $result $msg"
+    }
+    return $true
+    
+}
