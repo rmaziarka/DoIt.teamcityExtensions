@@ -39,7 +39,8 @@ Export-ModuleMember -Function `
     New-JMeterTeamcityTests, `
     New-TeamcityTrendReport, `
     Invoke-ClearDirectoryMetaRunner, `
-    Invoke-CopyFilesMetaRunner, `
+    Invoke-CopyDownloadFilesMetaRunner, `
+    Invoke-CopyUploadFilesMetaRunner, `
     Invoke-SqlMetaRunner, `
     Invoke-DatabaseMetaRunner, `
     Invoke-RemotePowershellMetaRunner, `
