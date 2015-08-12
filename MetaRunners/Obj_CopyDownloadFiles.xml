@@ -34,7 +34,7 @@ $exclude = Get-TeamcityArrayParameter -Param @'
 '@
 
 $connectionParams = Get-TeamcityConnectionParameters `
-  -Nodes '%connection.nodes% `
+  -Nodes '%connection.nodes%' `
   -User '%connection.userName%' `
   -Password '%connection.password%' `
   -UseHttps:%connection.useHttps%
