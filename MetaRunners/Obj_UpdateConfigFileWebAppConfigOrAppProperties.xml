@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Obj: Update config file (web/app.config or app.properties)">
+  <description>Updates entries in config files (xml add key='' value='' / xml connectionStrings / ini-like key=value)</description>
+  <settings>
+    <parameters>
+      <param name="config.files" value="" spec="text description='Newline- or comma delimited paths to the files that will be modified' validationMode='not_empty' label='Path to files to update' display='normal'" />
+      <param name="config.type" value="" spec="select label_1='Web.config properties (xml - add key=|'|' value=|'|')' description='Config file type' data_1='XmlAppKey' display='normal' label='File type' data_2='XmlConnectionString' label_2='Web.config connectionString' data_3='KeyValue' label_3='Properties file (.ini-like - key=value)'" />
+      <param name="config.values" value="" spec="text description='Newline- or comma-delimited properties to set (in |'key=value|' format)' validationMode='not_empty' label='Properties values' display='normal'" />
+      <param name="connection.nodes" value="" spec="text description='Newline- or comma-delimited list of remote servers where the files will be updated.'  validationMode='any' label='Remote servers' display='normal'" />
+      <param name="connection.useHttps" value="" spec="checkbox checkedValue='$true' description='Check to use https (WinRM 5986) instead of http (WinRM 5985).' uncheckedValue='$false' label='Use HTTPS' display='normal'" />
+      <param name="connection.userName" value="" spec="text description='User name to use to connect to the remote servers. Can be empty only if HTTPS is not used.' validationMode='any' label='User name' display='normal'" />
+      <param name="connection.password" value="" spec="password description='Password to use to connect to the remote servers. Can be empty only if HTTPS is not used.' label='Password' display='normal'" />
+      <param name="run.condition" value="" spec="text description='Powershell expression that will be evaluated to decide whether to run this build step. For example, if you want to run the step only if parameter x is not empty, put |'%x% -ne &quot;&quot;|'' validationMode='any' label='Run condition' display='normal'" />
+    </parameters>
+    <build-runners>
+      <runner name="Update configuration file" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x64" />
+          <param name="jetbrains_powershell_errorToError" value="true" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\PSCI\Boot\PSCI.boot.ps1
+try {
+$runCondition = @'
+%run.condition%
+'@
+if (!(Test-RunCondition -RunCondition $runCondition)) {
+  return
+}
+
+$configFiles = Get-TeamcityArrayParameter -Param @'
+%config.files%
+'@
+
+$configValues = Get-TeamcityArrayParameter -Param @'
+%config.values%
+'@
+
+$connectionNodes = Get-TeamcityArrayParameter -Param @'
+%connection.nodes%
+'@
+
+$configType = '%config.type%'
+$connectionParams = Get-TeamcityConnectionParameters `
+  -Nodes $connectionNodes `
+  -User '%connection.userName%' `
+  -Password '%connection.password%' `
+  -UseHttps:%connection.useHttps%
+  
+Update-ConfigFile `
+  -ConfigFiles $configFiles `
+  -ConfigType $configType `
+  -ConfigValues $configValues `
+  -ConnectionParameters $connectionParams
+} catch {
+  Write-ErrorRecord
+}]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+

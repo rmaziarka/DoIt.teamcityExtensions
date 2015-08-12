@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Obj: Rename projects in solution">
+  <description>Renames projects in solution file</description>
+  <settings>
+    <parameters>
+      <param name="SolutionFile" value="" spec="text validationMode='not_empty' label='Solution file' display='normal'" />
+      <param name="ProjectMappings" value="" spec="text validationMessage='Provide mappings {project guid}=&gt;new project name' validationMode='regex' label='Projects mappings' display='normal' regexp='(\{|[\w-|]+\}\s*=&gt;\s*|[\w\.|]+\s*)*' description='Newline-delimited set of rules in the form of {Project guid}=&gt;NewName Remember to use project unique guid from solution file (not the first in the line!)'" />
+    </parameters>
+    <build-runners>
+      <runner name="Replace solution content" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x64" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_script_code"><![CDATA[function Get-Matches($Pattern) { 
+  begin { 
+    $regex = New-Object Regex($pattern, [System.Text.RegularExpressions.RegexOptions]::MultiLine) 
+    $replacements = @()
+  }
+  process { 
+    foreach ($match in ($regex.Matches($_))) { 
+       $replacement = New-Object System.Object
+       $replacement | Add-Member -type NoteProperty -name Guid -value ([Object[]]$match.Groups)[1].Value
+       $replacement | Add-Member -type NoteProperty -name Name -value ([Object[]]$match.Groups)[-1].Value
+       $replacements += $replacement
+    }
+    return $replacements   
+  }
+}
+
+$solutionFile = '%SolutionFile%'
+
+If (!(Test-Path $solutionFile)) {
+    Write-Host "##teamcity[message text='Solution file does not exist.' status='ERROR']"
+    return
+}
+
+$replacements = '%ProjectMappings%'
+
+$pattern = '({[\w-]+})\s*=>\s*([\w\.]+)'
+$array = $replacements | Get-Matches $pattern
+If ($array.Count -lt 1) {
+    Write-Host "##teamcity[message text='Empty mapping list.' status='ERROR']"
+    return
+}
+
+$array
+
+$changedCnt = 0
+
+(Get-Content $solutionFile) | Foreach-object {
+  $match = $false
+  ForEach ($replacement in $array) {
+    $pattern = 'Project\("([^"]+)"\) = "(\w+)", "([^"]+)", "' + $replacement.Guid
+    If ($_ -match $pattern) {
+      $rep = 'Project("$1") = "' + $replacement.Name + '", "$3", "' + $replacement.Guid
+      $_ -replace $pattern, $rep
+      $match = $true
+      $changedCnt++
+    } 
+  }
+  If (!$match) {
+    $_
+  }
+} | Set-Content $solutionFile
+
+If ($changedCnt -eq 0) {
+    Write-Host "##teamcity[message text='Solution file does not contain projects to be changed.' status='WARNING']"
+}
+ElseIf ($changedCnt -eq 1) {
+    Write-Host "##teamcity[message text='1 project has been changed']"
+}
+Else {
+    Write-Host "##teamcity[message text='$changedCnt projects have been changed']"
+}]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+

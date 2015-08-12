@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Obj: Update text file (using regex)">
+  <description>Replaces all occurences of regex with specified string</description>
+  <settings>
+    <parameters>
+      <param name="config.files" value="" spec="text description='Newline- or comma delimited paths to the files that will be modified' validationMode='not_empty' label='Path to files to update' display='normal'" />
+      <param name="config.regexSearch" value="" spec="text description='Regex used for searching (see http://msdn.microsoft.com/en-us/library/az24scfc%28v=vs.110%29.aspx for reference)' validationMode='not_empty' label='Search regex' display='normal'" />
+      <param name="config.replaceString" value="" spec="text description='String that will replace all matches of regex' validationMode='any' label='Replace string' display='normal'" />
+      <param name="connection.nodes" value="" spec="text description='Newline- or comma-delimited list of remote servers where the files will be updated.'  validationMode='any' label='Remote servers' display='normal'" />
+      <param name="connection.useHttps" value="" spec="checkbox checkedValue='$true' description='Check to use https (WinRM 5986) instead of http (WinRM 5985).' uncheckedValue='$false' label='Use HTTPS' display='normal'" />
+      <param name="connection.userName" value="" spec="text description='User name to use to connect to the remote servers. Can be empty only if HTTPS is not used.' orderNumber='5.0' validationMode='any' label='User name' display='normal'" />
+      <param name="connection.password" value="" spec="password description='Password to use to connect to the remote servers. Can be empty only if HTTPS is not used.' label='Password' display='normal'" />
+    </parameters>
+    <build-runners>
+      <runner name="Update files using regex" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x64" />
+          <param name="jetbrains_powershell_errorToError" value="true" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\PSCI\Boot\PSCI.boot.ps1
+try {
+$configFiles = Get-TeamcityArrayParameter -Param @'
+%config.files%
+'@
+
+$connectionNodes = Get-TeamcityArrayParameter -Param @'
+%connection.nodes%
+'@
+
+$regexSearch = @'
+%config.regexSearch%
+'@
+
+$replaceString = @'
+%config.replaceString%
+'@
+
+$connectionParams = Get-TeamcityConnectionParameters `
+  -Nodes $connectionNodes `
+  -User '%connection.userName%' `
+  -Password '%connection.password%' `
+  -UseHttps:%connection.useHttps%
+  
+Update-ConfigFile `
+  -ConfigFiles $configFiles `
+  -ConfigType 'Regex' `
+  -RegexSearch $regexSearch `
+  -ReplaceString $replaceString `
+  -ConnectionParameters $connectionParams
+} catch {
+  Write-ErrorRecord
+}]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+

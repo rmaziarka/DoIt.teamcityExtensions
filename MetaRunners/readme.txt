@@ -1,0 +1,1 @@
+Contents of this directory needs to be copied to <TeamCityDataDir>\config\projects\_Root\pluginData\metaRunners.

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Obj: JMeter start">
+  <description>Start JMeter in foreground or background</description>
+  <settings>
+    <parameters>
+      <param name="jmeter.rootPath" value="%env.TC_JMeter%" spec="text description='Path to root JMeter directory' validationMode='not_empty' label='Path to JMeter' display='normal'" />
+      <param name="jmeter.javaPath" value="%env.TC_JDK7x86%\bin\java.exe" spec="text description='Path to java.exe that will be used by JMeter (leave empty for java.exe from path).' validationMode='any' label='Path to java' display='normal'" />
+      <param name="jmeter.jmxFile" value="" spec="text description='Path to the JMeter JMX file (input)' validationMode='not_empty' label='Path to JMX file' display='normal'" />
+      <param name="jmeter.jtlFile" value="" spec="text description='Path to the JMeter JTL file (output)' validationMode='not_empty' label='Path to JTL file' display='normal'" />
+      <param name="jmeter.properties" value="" spec="text description='Comma-delimited JMeter properties (e.g. host=localhost,threads=1)' validationMode='any' label='JMeter Properties' display='normal'" />
+      <param name="jmeter.additionalParams" value="" spec="text description='Additional string that will be passed to JMeter command line' validationMode='any' label='Additional JMeter command line' display='normal'" />
+      <param name="jmeter.runInBackground" value="false" spec="checkbox checkedValue='true' description='If checked, JMeter process will run in background' uncheckedValue='false' label='Run in background' display='normal'" />
+      <param name="jmeter.timeToWait" value="10" spec="text description='Time to wait (in seconds) after starting JMeter process. After this time it will be ensured that JMeter process is still running. Ignored if not run in background.' validationMode='any' label='Time to wait' display='normal'" />
+      <param name="jmeter.enabled" value="true" spec="text description='Put false if this whole step should not run.' validationMode='any' label='Enabled' display='normal'" />
+    </parameters>
+    <build-runners>
+      <runner name="Start JMeter" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x86" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_minVersion" value="4.0" />
+          <param name="jetbrains_powershell_script_code"><![CDATA[if ('%jmeter.enabled%' -and '%jmeter.enabled%' -ine 'true') {
+  Write-Host "jmeter.enabled is set to %jmeter.enabled% - skipping."
+  exit 0
+} 
+
+. c:\PSCI\Boot\PSCI.boot.ps1
+$ErrorActionPreference = "Stop"
+try {
+
+$properties = Get-TeamCityArrayParameter -Param @'
+%jmeter.properties%
+'@
+
+Start-JMeter -JMeterDir '%jmeter.rootPath%' `
+-JmxInputFile '%jmeter.jmxFile%' `
+-JtlOutputFile '%jmeter.jtlFile%' `
+-JavaPath '%jmeter.javaPath%' `
+-JMeterProperties $properties `
+-JMeterAdditionalCommandLineParams '%jmeter.additionalParams%' `
+-RunInBackground:$%jmeter.runInBackground% `
+-RunInBackgroundStdOutFile 'jmeter-stdout.txt' `
+-RunInBackgroundStdErrFile 'jmeter-stderr.txt' `
+-JMeterPidFile 'jmeter-pid.txt'
+
+if ($%jmeter.runInBackground%) {
+  $isJmeterRunning = Wait-JMeter -JMeterPidFile 'jmeter-pid.txt' `
+  -JtlOutputFile '%jmeter.jtlFile%' `
+  -StdOutFile 'jmeter-stdout.txt' `
+  -StdErrFile 'jmeter-stderr.txt' `
+  -TimeoutInSeconds '%jmeter.timeToWait%'
+  
+  if (!$isJmeterRunning) {
+    Write-Log -Critical 'JMeter is not running after %jmeter.timeToWait% s. Please investigate.'
+  }
+}
+} catch {
+  Write-ErrorRecord
+}]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+

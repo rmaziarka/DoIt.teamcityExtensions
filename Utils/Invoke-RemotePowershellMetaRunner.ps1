@@ -112,7 +112,7 @@ function Invoke-RemotePowershellMetaRunner {
     $cmdParams += $ConnectionParams.PSSessionParams
 
     if ($ConnectionParams.Nodes) {
-        Write-Log -Info "Running $logScriptToRun on $($ConnectionParams.Nodes -join ','), failOnNonZeroExitCode:$FailOnNonZeroExitCode."
+        Write-Log -Info "Running $logScriptToRun on $($ConnectionParams.NodesAsString), $($ConnectionParams.OptionsAsString), failOnNonZeroExitCode:$FailOnNonZeroExitCode."
     } else {
         $global:LASTEXITCODE = $null
         Write-Log -Info "Running $logScriptToRun on localhost, failOnNonZeroExitCode:$FailOnNonZeroExitCode."

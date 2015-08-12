@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Obj: Deploy with PSCI">
+  <description>Deploys a package that has been created using Obj.PSCI</description>
+  <settings>
+    <parameters>
+      <param name="psci.deploy.environment" value="" spec="text description='Comma- or newline-delimited list of environments where the package will be deployed (as defined in deployConfiguration.ps1)'  validationMode='not_empty' label='Environment' display='normal'" />
+      <param name="psci.deploy.serverRolesToDeploy" value="" spec="text description='List of server roles to deploy (leave empty for all, as defined for the selected environment in deployConfiguration.ps1)'  validationMode='any' label='ServerRoles to deploy' display='normal'" />
+      <param name="psci.deploy.nodesFilter" value="" spec="text description='List of destination nodes (servers) - leave empty to use nodes defined in configuration files'  validationMode='any' label='Nodes override' display='normal'" />
+      <param name="psci.deploy.configurationsFilter" value="" spec="text description='List of configurations which will be deployed to destination nodes - leave empty to use configurations defined in configuration files'  validationMode='any' label='Configurations override' display='normal'" />
+      <param name="psci.deploy.tokensOverride" value="" spec="text description='Comma- or newline-delimited tokens to override during deployment - e.g. User=Me,Password=secret. You need to escape , with \, and \ with \\.'  validationMode='any' label='Tokens override' display='normal'" />
+      <param name="psci.deploy.deployps1" value="DeployScripts\deploy.ps1" spec="text description='Path to deploy.ps1' validationMode='not_empty' label='Path to deploy.ps1' display='normal'" />
+      <param name="psci.deploy.projectRootPath" value="" spec="text description='Base project directory (leave empty for default defined in deploy.ps1)' validationMode='any' label='Path to project root' display='normal'" />
+      <param name="psci.deploy.objPSCIPath" value="" spec="text description='Path to PSCI (leave empty for default defined in deploy.ps1, put AGENT_PSCI for PSCI available at Teamcity agent)' validationMode='any' label='Path to PSCI' display='normal'" />
+      <param name="psci.deploy.packagesPath" value="" spec="text description='Path to packages directory (leave empty for default defined in deploy.ps1)' validationMode='any' label='Path to packages' display='normal'" />
+      <param name="psci.deploy.deployConfigurationPath" value="" spec="text description='Path to configuration files (leave empty for default defined in deploy.ps1)' validationMode='any' label='Path to configuration files' display='normal'" />
+      <param name="psci.deploy.deployType" value="All" spec="select description='Deploy type' data_2='Provision' data_1='All' display='normal' label='Deploy type' data_4='Adhoc' data_3='Deploy'" />
+      <param name="psci.deploy.validateOnly" value="" spec="text description='Put true to create deployment plan but not run actual deployment' display='normal' label='Validate only'" />
+      <param name="psci.deploy.postScript" value="" spec="text description='Additional powershell code to run after the deployment (in the same Powershell session - can use variables $params or $DeploymentPlan)' display='normal' label='Custom post-script'" />
+    </parameters>
+    <build-runners>
+      <runner name="Run PSCI deployment" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x64" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_script_code"><![CDATA[$global:ErrorActionPreference = "Stop"
+$psciAgentPath = [Environment]::GetEnvironmentVariable('PSCI_PATH', 'Machine')
+if (!$psciAgentPath ) {
+  Write-Error "No PSCI_PATH environment variable. Please ensure PSCI is installed on agent."
+  exit 1
+}
+try { 
+. "$psciAgentPath\PSCI.classes.ps1"
+. "$psciAgentPath\core\utils\Write-Log.ps1"
+. "$psciAgentPath\modules\teamcityExtensions\Utils\Get-TeamcityArrayParameter.ps1"
+. "$psciAgentPath\modules\teamcityExtensions\Utils\Get-TeamcityHashtableParameter.ps1"
+
+$env = Get-TeamcityArrayParameter -Param @'
+%psci.deploy.environment%
+'@
+
+if ($env.Count -eq 1) {
+  # Make environment backward-compatible (in old version string, instead of string[])
+  $env = $env[0]
+}
+
+$tokensOverride = Get-TeamcityHashtableParameter -Param @'
+%psci.deploy.tokensOverride%
+'@
+
+$params = @{
+  Environment = $env
+  DeployType = '%psci.deploy.deployType%'
+}
+
+if ('%psci.deploy.serverRolesToDeploy%') {
+  $serverRolesFilter = Get-TeamcityArrayParameter -Param @'
+%psci.deploy.serverRolesToDeploy%
+'@
+  $content = Get-Content -Path "%psci.deploy.deployps1%" -ReadCount 0 | Out-String
+  if ($content -imatch '\$ServerRolesFilter') {
+    $params.ServerRolesFilter = $serverRolesFilter
+  } else {
+    $params.ServerRolesToDeploy = $serverRolesFilter
+  }
+}
+if ('%psci.deploy.nodesFilter%') {
+  $params.NodesFilter = Get-TeamcityArrayParameter -Param @'
+%psci.deploy.nodesFilter%
+'@
+}
+if ('%psci.deploy.configurationsFilter%') {
+  $params.ConfigurationsFilter = Get-TeamcityArrayParameter -Param @' 
+%psci.deploy.configurationsFilter%
+'@
+}
+if ('%psci.deploy.tokensOverride%') {
+  $params.TokensOverride = $tokensOverride
+}
+if ('%psci.deploy.projectRootPath%') {
+  $params.ProjectRootPath = '%psci.deploy.projectRootPath%'
+}
+if ('%psci.deploy.objPSCIPath%') {
+  if ('%psci.deploy.objPSCIPath%' -ieq 'AGENT_PSCI') {
+    $psciPath = [Environment]::GetEnvironmentVariable('PSCI_PATH', 'Machine')
+  } else {
+    $psciPath = '%psci.deploy.objPSCIPath%'
+  } 
+
+  $content = Get-Content -Path "%psci.deploy.deployps1%" -ReadCount 0 | Out-String
+  if ($content -imatch '\$PSCILibraryPath') {
+    $params.PSCILibraryPath = $psciPath
+  } else {
+    $params.ObjPSCILibraryPath = $psciPath
+  }
+}
+if ('%psci.deploy.packagesPath%') {
+  $params.PackagesPath = '%psci.deploy.packagesPath%'
+}
+if ('%psci.deploy.deployConfigurationPath%') {
+  $params.DeployConfigurationPath = '%psci.deploy.deployConfigurationPath%'
+}
+if ('%psci.deploy.validateOnly%' -ieq 'true') {
+  $params.ValidateOnly = $true
+}
+
+$paramsLog = ($params.GetEnumerator() | Foreach-Object { "-$($_.Key) $($_.Value)" }) -join ' '
+} catch {
+  Write-Host $_ -ErrorAction SilentlyContinue
+  exit 1
+}
+
+Write-Host "Running %psci.deploy.deployps1% $paramsLog"
+& "%psci.deploy.deployps1%" @params
+
+$postScript = @'
+%psci.deploy.postScript%
+'@
+if ($postScript) {
+  Write-Host "Running custom post-script"
+  Invoke-Expression $postScript
+}]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+

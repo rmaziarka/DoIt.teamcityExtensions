@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Obj: Copy / upload files">
+  <description>Copies files locally or uploads files to remote servers using WinRM</description>
+  <settings>
+    <parameters>
+      <param name="copyFiles.sourcePaths" value="" spec="text description='Newline- or comma-delimited list of paths to directories or files to copy/upload (can use wildcards)' validationMode='not_empty' label='Source paths' display='normal'" />
+      <param name="copyFiles.destinationPath" value="" spec="text description='Destination directory' validationMode='not_empty' label='Destination path' display='normal'" />
+	  <param name="copyFiles.include" value="" spec="text description='Newline- or comma-delimited list of include masks (can use wildcards)' validationMode='any' label='Include' display='normal'" />
+      <param name="copyFiles.exclude" value="" spec="text description='Newline- or comma-delimited list of exclude masks (can use wildcards)' validationMode='any' label='Exclude' display='normal'" />
+      <param name="copyFiles.clearDestination" value="$true" spec="checkbox checkedValue='$true' description='If checked, destination directory will be emptied before copying files' uncheckedValue='$false' label='Clear destination' display='normal'" />
+      <param name="copyFiles.checkHashMode" value="DontCheckHash" spec="checkbox checkedValue='UseHashFile' description='If checked, a hash from the source files will be calculated and compared to hash from the destination files. If they match, the files will not be copied.' uncheckedValue='DontCheckHash' label='Don|'t copy if files not changed' display='normal'" />
+      <param name="connection.nodes" value="" spec="text description='Newline- or comma-delimited list of remote servers where the files will be uploaded (leave empty to copy files locally on agent).'  validationMode='any' label='Remote servers' display='normal'" />
+      <param name="connection.useHttps" value="" spec="checkbox checkedValue='$true' description='Check to use https (WinRM 5986) instead of http (WinRM 5985).' uncheckedValue='$false' label='Use HTTPS' display='normal'" />
+      <param name="connection.userName" value="" spec="text description='User name to use to connect to the remote servers. Can be empty only if HTTPS is not used.' validationMode='any' label='User name' display='normal'" />
+      <param name="connection.password" value="" spec="password description='Password to use to connect to the remote servers. Can be empty only if HTTPS is not used.' label='Password' display='normal'" />
+    </parameters>
+    <build-runners>
+      <runner name="Upload files" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x64" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\PSCI\Boot\PSCI.boot.ps1
+try { 
+$connectionNodes = Get-TeamcityArrayParameter -Param @'
+%connection.nodes%
+'@
+
+$sourcePaths = Get-TeamcityArrayParameter -Param @'
+%copyFiles.sourcePaths%
+'@
+
+$include = Get-TeamcityArrayParameter -Param @'
+%copyFiles.include%
+'@
+
+$exclude = Get-TeamcityArrayParameter -Param @'
+%copyFiles.exclude%
+'@
+
+$connectionParams = Get-TeamcityConnectionParameters `
+  -Nodes $connectionNodes `
+  -User '%connection.userName%' `
+  -Password '%connection.password%' `
+  -UseHttps:%connection.useHttps%
+
+Invoke-CopyUploadFilesMetaRunner `
+  -Path $sourcePaths `
+  -ConnectionParams $connectionParams `
+  -Destination '%copyFiles.destinationPath%' `
+  -Include $include `
+  -Exclude $exclude `
+  -CheckHashMode '%copyFiles.checkHashMode%' `
+  -ClearDestination:%copyFiles.clearDestination%
+} catch {
+  Write-ErrorRecord
+}]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+

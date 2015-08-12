@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Obj: Run remote Powershell">
+  <description>Runs Powershell command on remote hosts</description>
+  <settings>
+    <parameters>
+      <param name="powershell.files" value="" spec="text description='Newline- or comma-delimited list of local .ps1 files to run on the remote server(s).' validationMode='any' label='Powershell files' display='normal'" />
+      <param name="powershell.command" value="" spec="text description='Command to run on the remote server(s)' validationMode='any' label='Powershell command' display='normal'" />
+      <param name="powershell.arguments" value="" spec="text description='Newline- or comma-delimited list of arguments that will be passed to Powershell file. Note they should be specified in right order (they should not be named).' validationMode='any' label='Powershell parameters' display='normal'" />
+      <param name="powershell.failOnNonZeroExitCode" value="$true" spec="checkbox checkedValue='$true' description='Check to automatically fail the command on non-zero exit code.' uncheckedValue='$false' label='Fail on non-zero exit code' display='normal'" />
+      <param name="remote.servers" value="" spec="text description='Newline- or comma-delimited list of remote servers where the Powershell command will run. If empty, command will be run locally.' validationMode='any' label='Remote servers' display='normal'" />
+      <param name="use.ssl" value="" spec="checkbox checkedValue='$true' description='Check to use https (WinRM 5986) instead of http (WinRM 5985).' uncheckedValue='$false' label='Use SSL' display='normal'" />
+      <param name="powershell.authentication" value="Default" spec="select description='Powershell authentication type' data_1='Default' data_2='CredSSP' label='Authentication type' display='normal'" />
+      <param name="user.name" value="" spec="text description='User name to use to connect to the remote servers. Can be empty only if HTTPS is not used.' validationMode='any' label='User name' display='normal'" />
+      <param name="user.password" value="" spec="password description='Password to use to connect to the remote servers. Can be empty only if HTTPS is not used.' label='Password' display='normal'" />
+    </parameters>
+    <build-runners>
+      <runner name="Run remote command" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x64" />
+          <param name="jetbrains_powershell_errorToError" value="true" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\PSCI\Boot\PSCI.boot.ps1
+try { 
+
+$connectionNodes = Get-TeamcityArrayParameter -Param @'
+%remote.servers%
+'@
+
+$powershellFiles = Get-TeamcityArrayParameter -Param @'
+%powershell.files%
+'@
+
+$powershellCommand = @'
+%powershell.command%
+'@
+
+$powershellArguments = Get-TeamcityArrayParameter -Param @'
+%powershell.arguments%
+'@
+
+$connectionParams = Get-TeamcityConnectionParameters `
+  -Nodes $connectionNodes `
+  -User '%user.name%' `
+  -Password '%user.password%' `
+  -Authentication '%powershell.authentication%' `
+  -UseHttps:%use.ssl%
+  
+Invoke-RemotePowershellMetaRunner -ScriptFile $powershellFiles -ScriptBody $powershellCommand -ConnectionParams $connectionParams -ScriptArguments $powershellArguments -FailOnNonZeroExitCode:%powershell.failOnNonZeroExitCode%
+} catch {
+  Write-ErrorRecord
+  exit 1
+}]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+

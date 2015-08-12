@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Obj: Kill processes">
+  <description>Kills hanging processes at TeamCity agent. Uses parameter teamcity.agent.process.names.to.kill.</description>
+  <settings>
+    <parameters />
+    <build-runners>
+      <runner name="Kill processes" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x86" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_script_code"><![CDATA[Write-Host "Killing processes: %teamcity.agent.process.names.to.kill%"
+$currentPid = [System.Diagnostics.Process]::GetCurrentProcess().Id
+$parentPid = gwmi Win32_Process -filter "processid = $currentPid" | select -ExpandProperty ParentProcessId
+$pidsToKill = Get-Process -Name %teamcity.agent.process.names.to.kill% -ErrorAction SilentlyContinue | select -ExpandProperty Id | where { $_ -ne $currentPid -and $_ -ne $parentPid}
+if (!$pidsToKill) {
+  Write-Host 'No processes to kill.'
+  return
+}
+$p = Stop-Process -ErrorAction SilentlyContinue -Force -PassThru -Id $pidsToKill
+Write-Host ('Killed {0} processes.' -f ($p.length))
+exit 0]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+

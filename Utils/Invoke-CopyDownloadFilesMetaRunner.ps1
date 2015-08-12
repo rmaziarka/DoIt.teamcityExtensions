@@ -22,13 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Invoke-CopyFilesMetaRunner {
+function Invoke-CopyDownloadFilesMetaRunner {
     <#
 	.SYNOPSIS
-		A helper for TeamCity MetaRunner that copies files locally.
+		A helper for TeamCity MetaRunner that downloads files.
 
 	.PARAMETER Path
-		The file or directory path that should be copied locally or uploaded to remote server.
+		The file or directory path that should be copied locally or downloaded from remote server.
+
+    .PARAMETER ConnectionParams
+        Connection parameters created by New-ConnectionParameters function.
 
 	.PARAMETER Destination
 		The path where the file will be saved to (must be directory).
@@ -43,7 +46,7 @@ function Invoke-CopyFilesMetaRunner {
         If $true then all content from $Destination will be deleted.
 
 	.EXAMPLE			
-        Invoke-CopyFilesMetaRunner -Path c:\temp\test.exe -Destination c:\temp\
+        Invoke-CopyDownloadFilesMetaRunner -Path c:\temp\test.exe -Destination c:\temp\ -ConnectionParams (New-ConnectionParameters -Nodes 'remote-server.com')
 
 	#>
 	[CmdletBinding()]
@@ -52,7 +55,11 @@ function Invoke-CopyFilesMetaRunner {
         [Parameter(Mandatory = $true)]
         [string[]]
         $Path,
-       
+
+        [Parameter(Mandatory = $true)]
+        [object]
+        $ConnectionParams,
+        
         [Parameter(Mandatory = $true)]
         [string]
         $Destination,
@@ -70,35 +77,9 @@ function Invoke-CopyFilesMetaRunner {
         $ClearDestination = $false
     )
 
-    if ($ClearDestination -and (Test-Path -LiteralPath $Destination)) { 
-        Write-Log -Info "Deleting '$Destination'."
-        [void](Remove-Item -LiteralPath $Destination -Force -Recurse)
+    if ($ConnectionParams.Nodes) {
+        Copy-FilesFromRemoteServer -RemotePath $path -ConnectionParams $ConnectionParams -Destination $Destination -Include $Include -IncludeRecurse -Exclude $Exclude -ExcludeRecurse -ClearDestination:$ClearDestination
+    } else {
+        Invoke-CopyFilesMetaRunner -Path $path -Destination $Destination -Include $Include -Exclude $Exclude -ClearDestination:$ClearDestination
     }
-
-    $newPaths = New-Object System.Collections.ArrayList
-    foreach ($p in $Path) {
-        if (Test-Path -LiteralPath $p -PathType Container) {
-            # we need to do this or otherwise we would get a new directory in $Destination
-            [void]($newPaths.Add((Join-Path -Path $p -ChildPath '*')))
-        } else {
-            [void]($newPaths.Add($p))
-        }
-    }
-
-    Write-Log -Info ("Copying '{0}' to '{1}'" -f ($Path -join ', '), $Destination)
-    [void](New-Item -Path $Destination -ItemType 'Directory' -Force)
-    $params = @{
-        Path = $newPaths
-        Destination = $Destination
-        Force = $true
-        Recurse = $true
-    }
-    if ($Include) {
-        $params.Include = $Include
-    }
-    if ($Exclude) {
-        $params.Exclude = $Exclude
-    }
-
-    Copy-Item @params
 }

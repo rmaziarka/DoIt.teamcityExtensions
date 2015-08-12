@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Obj: Clear directory">
+  <description>Clear directory recursively using regex</description>
+  <settings>
+    <parameters>
+      <param name="clearDirectory.regex" value="(bin|obj)$" spec="text description='Include regex - matching files/directories will be deleted. Put . to delete whole directory.' validationMode='any' label='Include regex' display='normal'" />
+      <param name="clearDirectory.excludeRegex" value="" spec="text description='Exclude regex - matching files/directories will NOT be deleted (overrides include regex).' validationMode='any' label='Exclude regex' display='normal'" />
+      <param name="clearDirectory.baseDir" value="" spec="text description='Base directory which will be traversed. Leave empty for default TeamCity working directory.' validationMode='any' label='Base directory' display='normal'" />
+      <param name="clearDirectory.items" value="Directories" spec="select description='Items to match' label='Items to match' display='normal' data_1='Directories' data_2='Files' data_3='FilesAndDirectories'" />
+      <param name="clearDirectory.verboseLog" value="$true" spec="checkbox checkedValue='$true' uncheckedValue='$false' label='Verbose logging' display='normal'" />
+    </parameters>
+    <build-runners>
+      <runner name="Clear directory" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x64" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\PSCI\Boot\PSCI.boot.ps1
+try { 
+$includeRegex = @'
+%clearDirectory.regex%
+'@
+$excludeRegex = @'
+%clearDirectory.excludeRegex%
+'@
+  
+Invoke-ClearDirectoryMetaRunner `
+  -IncludeRegex $includeRegex `
+  -ExcludeRegex $excludeRegex `
+  -BaseDirectory '%clearDirectory.baseDir%' `
+  -ItemsToMatch '%clearDirectory.items%' `
+  -VerboseLog:%clearDirectory.verboseLog%
+
+} catch {
+  Write-ErrorRecord
+}]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+

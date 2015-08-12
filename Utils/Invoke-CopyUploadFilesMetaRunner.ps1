@@ -22,13 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Invoke-CopyFilesMetaRunner {
+function Invoke-CopyUploadFilesMetaRunner {
     <#
 	.SYNOPSIS
-		A helper for TeamCity MetaRunner that copies files locally.
+		A helper for TeamCity MetaRunner that uploads files.
 
 	.PARAMETER Path
 		The file or directory path that should be copied locally or uploaded to remote server.
+
+    .PARAMETER ConnectionParams
+        Connection parameters created by New-ConnectionParameters function.
 
 	.PARAMETER Destination
 		The path where the file will be saved to (must be directory).
@@ -39,11 +42,17 @@ function Invoke-CopyFilesMetaRunner {
     .PARAMETER Exclude
         The files to be excluded from copying.
 
+    .PARAMETER CheckHashMode
+        There are three modes for checking whether the destination path needs to be updated when uploading to remote server:
+        DontCheckHash - files are always uploaded to the servers
+        AlwaysCalculateHash - files are uploaded to the servers if their hashes calculated in local path and in remote path are different
+        UseHashFile - files are uploaded to the servers if there doesn't exist a syncHash_<hash> file, where hash is hash calculated in local path
+
     .PARAMETER ClearDestination
         If $true then all content from $Destination will be deleted.
 
 	.EXAMPLE			
-        Invoke-CopyFilesMetaRunner -Path c:\temp\test.exe -Destination c:\temp\
+        Invoke-CopyUploadFilesMetaRunner -Path c:\temp\test.exe -Destination c:\temp\ -ConnectionParams (New-ConnectionParameters -Nodes 'remote-server.com')
 
 	#>
 	[CmdletBinding()]
@@ -52,7 +61,11 @@ function Invoke-CopyFilesMetaRunner {
         [Parameter(Mandatory = $true)]
         [string[]]
         $Path,
-       
+
+        [Parameter(Mandatory = $true)]
+        [object]
+        $ConnectionParams,
+        
         [Parameter(Mandatory = $true)]
         [string]
         $Destination,
@@ -66,39 +79,18 @@ function Invoke-CopyFilesMetaRunner {
         $Exclude,
 
         [Parameter(Mandatory = $false)]
+        [string]
+        [ValidateSet('DontCheckHash','AlwaysCalculateHash','UseHashFile')]
+        $CheckHashMode = 'DontCheckHash',
+
+        [Parameter(Mandatory = $false)]
         [switch]
         $ClearDestination = $false
     )
 
-    if ($ClearDestination -and (Test-Path -LiteralPath $Destination)) { 
-        Write-Log -Info "Deleting '$Destination'."
-        [void](Remove-Item -LiteralPath $Destination -Force -Recurse)
+    if ($ConnectionParams.Nodes) {
+        Copy-FilesToRemoteServer -Path $path -ConnectionParams $ConnectionParams -Destination $Destination -Include $Include -IncludeRecurse -Exclude $Exclude -ExcludeRecurse -CheckHashMode $CheckHashMode -ClearDestination:$ClearDestination
+    } else {
+        Invoke-CopyFilesMetaRunner -Path $path -Destination $Destination -Include $Include -Exclude $Exclude -ClearDestination:$ClearDestination
     }
-
-    $newPaths = New-Object System.Collections.ArrayList
-    foreach ($p in $Path) {
-        if (Test-Path -LiteralPath $p -PathType Container) {
-            # we need to do this or otherwise we would get a new directory in $Destination
-            [void]($newPaths.Add((Join-Path -Path $p -ChildPath '*')))
-        } else {
-            [void]($newPaths.Add($p))
-        }
-    }
-
-    Write-Log -Info ("Copying '{0}' to '{1}'" -f ($Path -join ', '), $Destination)
-    [void](New-Item -Path $Destination -ItemType 'Directory' -Force)
-    $params = @{
-        Path = $newPaths
-        Destination = $Destination
-        Force = $true
-        Recurse = $true
-    }
-    if ($Include) {
-        $params.Include = $Include
-    }
-    if ($Exclude) {
-        $params.Exclude = $Exclude
-    }
-
-    Copy-Item @params
 }

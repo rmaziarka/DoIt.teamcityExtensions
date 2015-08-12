@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Obj: Update XML file (using XDT/XSLT)">
+  <description>Applies XDT transform or XSLT stylesheet to XML files</description>
+  <settings>
+    <parameters>
+      <param name="config.files" value="" spec="text description='Newline- or comma delimited paths to the files that will be modified' validationMode='not_empty' label='Path to files to update' display='normal'" />
+      <param name="config.transformFilename" value="" spec="text description='Path to xdt or xslt file (if empty, |'Transform body|' parameter will be used)' validationMode='any' label='Path to transform file' display='normal'" />
+      <param name="config.transformBody" spec="text description='Body of xdt or xslt transform to use (if empty, |'Path to transform file|' parameter will be used)' orderNumber='3.0' validationMode='any' label='Transform body' display='normal'" />
+      <param name="config.type" value="XDT" spec="select description='Transform type' data_2='XSLT' data_1='XDT' display='normal' label='Transform type'" />
+      <param name="connection.nodes" value="" spec="text description='Newline- or comma-delimited list of remote servers where the files will be updated.' validationMode='any' label='Remote servers' display='normal'" />
+      <param name="connection.useHttps" value="" spec="checkbox checkedValue='$true' description='Check to use https (WinRM 5986) instead of http (WinRM 5985).' uncheckedValue='$false' label='Use HTTPS' display='normal'" />
+      <param name="connection.userName" value="" spec="text description='User name to use to connect to the remote servers. Can be empty only if HTTPS is not used.' validationMode='any' label='User name' display='normal'" />
+      <param name="connection.password" value="" spec="password description='Password to use to connect to the remote servers. Can be empty only if HTTPS is not used.' label='Password' display='normal'" />
+    </parameters>
+    <build-runners>
+      <runner name="Update XML file" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x64" />
+          <param name="jetbrains_powershell_errorToError" value="true" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\PSCI\Boot\PSCI.boot.ps1
+try { 
+$configFiles = Get-TeamcityArrayParameter -Param @'
+%config.files%
+'@
+
+$connectionNodes = Get-TeamcityArrayParameter -Param @'
+%connection.nodes%
+'@
+
+$transformBody = @'
+%config.transformBody%
+'@
+
+$configType = '%config.type%'
+$connectionParams = Get-TeamcityConnectionParameters `
+  -Nodes $connectionNodes `
+  -User '%connection.userName%' `
+  -Password '%connection.password%' `
+  -UseHttps:%connection.useHttps%
+  
+Update-ConfigFile `
+  -ConfigFiles $configFiles `
+  -ConfigType $configType `
+  -TransformFilename '%config.transformFilename%' `
+  -TransformBody $transformBody `
+  -ConnectionParameters $connectionParams
+} catch {
+  Write-ErrorRecord
+}]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+
