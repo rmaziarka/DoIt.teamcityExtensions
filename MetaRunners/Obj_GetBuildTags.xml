@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Obj: Get build tags">
+  <description>Gets build tags and saves them in a parameter</description>
+  <settings>
+    <parameters>
+      <param name="gettag.parameter.name" value="" spec="text description='Name of parameter that will get the build tags' validationMode='not_empty' label='Parameter name' display='normal'" />
+      <param name="gettag.build.id" value="" spec="text description='Build id to get tags from. Leave empty for current build.' orderNumber='2.0' validationMode='' label='Build ID' display='normal'" />
+    </parameters>
+    <build-runners>
+      <runner name="Get tags and update parameter" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x64" />
+          <param name="jetbrains_powershell_errorToError" value="true" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_script_code"><![CDATA[$Global:ErrorActionPreference = 'Stop'
+
+try { 
+  $buildID = '%gettag.build.id%'
+  if (!$buildID) {
+    $buildID = '%teamcity.build.id%'
+  }
+
+  $user = '%system.teamcity.auth.userId%'
+  $pass = ConvertTo-SecureString -String '%system.teamcity.auth.password%' -AsPlainText -Force
+  $cred = New-Object System.Management.Automation.PsCredential $user, $pass
+  $uri = "%teamcity.serverUrl%/httpAuth/app/rest/builds/id:$buildID/tags/" 
+  
+  Write-Host "Getting tags from build id ${buildID}"
+  $result = Invoke-WebRequest -Uri $uri -Credential $cred -Method GET -UseBasicParsing
+  if ($result.StatusCode -ne 200) {
+      throw "Sending GET failed - status code $($result.StatusCode): $($result.Content)"
+  }
+
+  $xml = [xml]($result.Content)
+  $tags = $xml.tags.tag.name
+  Write-Host "Got following tags: $($tags -join ', ')"
+
+  $paramName = '%gettag.parameter.name%'
+  $paramValue = $tags -join ','
+  $paramValue = $paramValue -replace "\|","||" -replace "'","|'" -replace "`n","|n" -replace "`r","|r" -replace "\[","|[" -replace "\]","|]"
+  Write-Host "##teamcity[setParameter name='$paramName' value='$paramValue']"
+  
+} catch {
+  Write-Host $_
+  exit 1
+}]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+
