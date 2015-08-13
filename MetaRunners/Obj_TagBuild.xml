@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Obj: Tag build">
+  <description>Tags current or any other build</description>
+  <settings>
+    <parameters>
+      <param name="build.tag" value="" spec="text description='Comma-separated list of build tags to apply for current build' validationMode='not_empty' label='Build tags' display='normal'" />
+      <param name="build.id.to.tag" value="" spec="text description='Build id to tag. Leave empty for current build.' validationMode='' label='Build ID' display='normal'" />
+      <param name="build.tag.mode" value="POST" spec="select description='Specify whether to replace or add tags' label_1='Add tags' data_1='POST' label_2='Replace tags' data_2='PUT' label='Tag mode' display='normal'" />
+      <param name="build.tag.password" value="" spec="password display='hidden'" />
+      <param name="build.tag.userId" value="" spec="text display='hidden'"/>
+    </parameters>
+    <build-runners>
+      <runner name="Tag build" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x64" />
+          <param name="jetbrains_powershell_errorToError" value="true" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_script_code"><![CDATA[$Global:ErrorActionPreference = 'Stop'
+
+try { 
+  $buildID = '%build.id.to.tag%'
+  if (!$buildID) {
+    $buildID = '%teamcity.build.id%'
+  }
+
+  $user = '%build.tag.userId%'
+  $pass = '%build.tag.password%'
+  if (!$user -or !$pass) {
+      throw "Either build.tag.userId or build.tag.password is empty. Please modify this metarunner to include valid userId and password."
+  }
+  $pass = ConvertTo-SecureString -String $pass -AsPlainText -Force
+  $cred = New-Object System.Management.Automation.PsCredential $user, $pass
+  $uri = "%teamcity.serverUrl%/httpAuth/app/rest/builds/id:$buildID/tags/" 
+  $requestMethod = '%build.tag.mode%'
+  $tags = '%build.tag%' -split ','
+  
+  $xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><tags count="{0}">' -f $tags.Count
+  $xml += ($tags | foreach { '<tag name="{0}"/>' -f $_ }) -join ''
+  $xml += '</tags>'
+
+  Write-Host "Tagging build id ${buildID}: $tags"
+  $result = Invoke-WebRequest -Uri $uri -Credential $cred -Method $requestMethod -Body $xml -UseBasicParsing -ContentType 'application/xml'
+  if ($result.StatusCode -ne 200 -and $result.StatusCode -ne 204) {
+      throw "Sending POST failed - status code $($result.StatusCode): $($result.Content)"
+  }
+  
+} catch {
+  Write-Host $_
+  exit 1
+}]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+

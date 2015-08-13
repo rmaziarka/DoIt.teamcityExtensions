@@ -1,1 +1,2 @@
 Contents of this directory needs to be copied to <TeamCityDataDir>\config\projects\_Root\pluginData\metaRunners.
+Note metarunners Obj_GenerateTestTrendReport and Obj_TagBuild.xml need to be modified to include valid user and password in parameters.
