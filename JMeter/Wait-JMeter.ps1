@@ -138,12 +138,12 @@ function Wait-JMeter {
     if (!$process.WaitForExit($TimeoutInSeconds * 1000)) {
         if ($KillAfterTimeout) {
             if ($ShutdownMode -eq "KillProcess") {
-                Stop-ProcessForcefully -Process $process
+                Stop-ProcessForcefully -Process $process -KillTimeoutInSeconds 1
                 Write-ProgressExternal -Message ''
                 Write-Log -Critical "JMeter process has not finished after $TimeoutInSeconds s and has been killed."
             } elseif (!(Test-Path -LiteralPath $JMeterDir)) {
                 Write-Log -Warn "Cannot find JMeter directory at '$JMeterDir'. JMeter process will be stopped in 'KillProcess' mode instead of '$ShutdownMode'"
-                Stop-ProcessForcefully -Process $process
+                Stop-ProcessForcefully -Process $process -KillTimeoutInSeconds 1
                 Write-ProgressExternal -Message ''
                 Write-Log -Critical "JMeter process has not finished after $TimeoutInSeconds s and has been killed."
             } else {
@@ -163,7 +163,7 @@ function Wait-JMeter {
                 $killTimeout = 60
                 if (!$process.WaitForExit($killTimeout * 1000)) {				
                     Write-Log -Info "JMeter process is still running after $killTimeout s - killing."
-                    Stop-ProcessForcefully -Process $process
+                    Stop-ProcessForcefully -Process $process -KillTimeoutInSeconds $killTimeout
                 }
                 Write-Log -Info "JMeter process has been stopped."
             }
@@ -191,6 +191,9 @@ function Stop-ProcessForcefully {
     
     .PARAMETER Process
     Process object.
+
+    .PARAMETER KillTimeoutInSeconds
+    Time to wait for process before killing it.
     
     .EXAMPLE
     Stop-ProcessForcefully -Process $process
@@ -201,7 +204,11 @@ function Stop-ProcessForcefully {
     param(
         [Parameter(Mandatory=$true)]
         [object]
-        $Process
+        $Process,
+
+        [Parameter(Mandatory=$true)]
+        [int]
+        $KillTimeoutInSeconds
     )
 	
 	$childProcesses = Get-WmiObject -Class Win32_Process -Filter "ParentProcessID=$($Process.Id)" | Select-Object -ExpandProperty ProcessID
@@ -218,8 +225,8 @@ function Stop-ProcessForcefully {
 	} catch {
 		Write-Log -Warn "Kill method thrown exception: $_ - waiting for exit."
 	}
-	if (!$Process.WaitForExit($killTimeout * 1000)) {
-		Write-Log -Critical "Cannot kill process (pid $($Process.Id)) - still running after $($killTimeout * 1000 * 2) s"
+	if (!$Process.WaitForExit($KillTimeoutInSeconds * 1000)) {
+		Write-Log -Critical "Cannot kill process (pid $($Process.Id)) - still running after $($KillTimeoutInSeconds * 1000 * 2) s"
 	}
     Write-Log -Info "Process $($Process.Id) killed along with its children."
 }
