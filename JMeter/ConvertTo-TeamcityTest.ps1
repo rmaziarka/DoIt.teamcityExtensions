@@ -144,15 +144,17 @@ function ConvertTo-TeamcityTest {
             $testInfo = @{}
             $testInfo.TestName = "${TestSuiteName}: $testName"
             $testInfo.Succeeded = $true
-            Write-Output -InputObject ("##teamcity[testStarted name='{0}']" -f $testName)
+            # need to escape some characters - see https://confluence.jetbrains.com/display/TCD8/Build+Script+Interaction+with+TeamCity
+            $testNameEscaped = $testName -replace "\|","||" -replace "'","|'" -replace "`n","|n" -replace "`r","|r" -replace "\[","|[" -replace "\]","|]"
+            Write-Output -InputObject ("##teamcity[testStarted name='{0}']" -f $testNameEscaped)
             if ($ColumnTestFailure) { 
                 $failureValue = [decimal]$_.$ColumnTestFailure
                 if ($failureValue -gt $FailureThreshold) {
-                    Write-Output -InputObject ("##teamcity[testFailed name='{0}' message='{1}']" -f $testName, "Failure threshold exceeded (${failureValue} > ${FailureThreshold})")
+                    Write-Output -InputObject ("##teamcity[testFailed name='{0}' message='{1}']" -f $testNameEscaped, "Failure threshold exceeded (${failureValue} > ${FailureThreshold})")
                     $testInfo.Succeeded = $false
                 }
             }
-            Write-Output -InputObject ("##teamcity[testFinished name='{0}' duration='{1}']" -f $testName, [decimal]::round($_.$ColumnTestTime))
+            Write-Output -InputObject ("##teamcity[testFinished name='{0}' duration='{1}']" -f $testNameEscaped, [decimal]::round($_.$ColumnTestTime))
             $testInfo.Duration = $_.$ColumnTestTime
         }
         if ($BuildStatisticName -and $_.$ColumnTestName -eq $BuildStatisticTestName) {
