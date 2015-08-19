@@ -87,23 +87,27 @@ function Invoke-RemotePowershellMetaRunner {
 
     if ($ScriptFile) {
         $scriptToRun = { 
-            foreach ($file in $using:ScriptFile) {
+            param ($scriptFile, $scriptArgs, $failOnNonZeroExitCode)
+
+            $Global:ErrorActionPreference = 'Stop'
+
+            foreach ($file in $scriptFile) {
                 if (!(Test-Path -LiteralPath $file)) {
-                    Write-Host -object "File '$file' does not exist at $([system.environment]::MachineName)."
-                    exit 1
+                    throw "File '$file' does not exist at $([system.environment]::MachineName)."
                 }
             }
-
-            $scriptArgs = $using:ScriptArguments
-            foreach ($file in $using:ScriptFile) {
-                . $file @scriptArgs
+            foreach ($file in $scriptFile) {
+                . $file $scriptArgs
             }
 
-            if ($using:FailOnNonZeroExitCode) {
+            if ($failOnNonZeroExitCode) {
                 if ($global:LASTEXITCODE) { throw "Exit code: $($global:LASTEXITCODE)" }
             }
         }
-        $cmdParams = @{ ScriptBlock = $scriptToRun }
+        $cmdParams = @{ 
+            ScriptBlock = $scriptToRun
+            ArgumentList = @($ScriptFile, $ScriptArguments, $FailOnNonZeroExitCode)
+        }
         $logScriptToRun = "file(s) $($ScriptFile -join ', ')"
     } else {
         $scriptToRun += $ScriptBody

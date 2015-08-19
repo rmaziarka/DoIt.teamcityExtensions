@@ -33,12 +33,13 @@ Describe -Tag "PSCI.unit" "Invoke-RemotePowershellMetaRunner" {
             }
         }
         
-        $testFilePath = "Invoke-RemotePowershellMetaRunnerTests.temp.ps1"
+        $testFilePath = "c:\test\Invoke-RemotePowershellMetaRunnerTests.temp.ps1"
 
         try { 
             $testExpectedResult = 'TEST'
             $testScriptBody = "Write-Output '$testExpectedResult'"
             New-Item -Path $testFilePath -Force -Value $testScriptBody -ItemType File
+            $testFilePath = (Resolve-Path -LiteralPath $testFilePath).ProviderPath
 
             Context "when neither ScriptFile nor ScriptBody is specified" {
                 It "should throw exception" {
@@ -104,6 +105,15 @@ Describe -Tag "PSCI.unit" "Invoke-RemotePowershellMetaRunner" {
             Context "when run remotely" {
 
                 $connParams = New-ConnectionParameters -Nodes 'localhost'
+
+                It "should throw exception when ScriptFile does not exist" {
+                    try { 
+                        Invoke-RemotePowershellMetaRunner -ScriptFile "${testFilePath}.wrong" -ConnectionParams $connParams
+                    } catch {
+                        return
+                    }
+                    throw 'Expected exception'
+                }
 
                 It "should invoke script for ScriptFile" {
                    $result = Invoke-RemotePowershellMetaRunner -ScriptFile $testFilePath -ConnectionParams $connParams
