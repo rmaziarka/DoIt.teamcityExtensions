@@ -86,27 +86,36 @@ function Invoke-RemotePowershellMetaRunner {
     }
 
     if ($ScriptFile) {
-        foreach ($file in $ScriptFile) {
-            if (!(Test-Path -LiteralPath $file)) {
-                Write-Log -Critical "File '$file' does not exist at $([system.environment]::MachineName)."
+        $scriptToRun = { 
+            foreach ($file in $using:ScriptFile) {
+                if (!(Test-Path -LiteralPath $file)) {
+                    Write-Host -object "File '$file' does not exist at $([system.environment]::MachineName)."
+                    exit 1
+                }
             }
-            $scriptToRun += Get-Content -Path $file -ReadCount 0 | Out-String
-            $scriptToRun += "`n"
+
+            $scriptArgs = $using:ScriptArguments
+            foreach ($file in $using:ScriptFile) {
+                . $file @scriptArgs
+            }
+
+            if ($using:FailOnNonZeroExitCode) {
+                if ($global:LASTEXITCODE) { throw "Exit code: $($global:LASTEXITCODE)" }
+            }
         }
-        $logScriptToRun = "contents of file(s) $($ScriptFile -join ', ')"
+        $cmdParams = @{ ScriptBlock = $scriptToRun }
+        $logScriptToRun = "file(s) $($ScriptFile -join ', ')"
     } else {
         $scriptToRun += $ScriptBody
         $logScriptToRun = 'custom powershell script'
-    }
+        if ($FailOnNonZeroExitCode) {
+            $scriptToRun += "`nif (`$global:LASTEXITCODE) { throw `"Exit code: `$($global:LASTEXITCODE)`" }"
+        }
+        $cmdParams = @{ ScriptBlock = [Scriptblock]::Create($scriptToRun) }
 
-    if ($FailOnNonZeroExitCode) {
-        $scriptToRun += "`nif (`$global:LASTEXITCODE) { throw `"Exit code: `$($global:LASTEXITCODE)`" }"
-    }
-
-    $cmdParams = @{ ScriptBlock = [Scriptblock]::Create($scriptToRun) }
-
-    if ($ScriptArguments) {
-        $cmdParams.ArgumentList = $ScriptArguments
+        if ($ScriptArguments) {
+            $cmdParams.ArgumentList = $ScriptArguments
+        }
     }
 
     $cmdParams += $ConnectionParams.PSSessionParams
