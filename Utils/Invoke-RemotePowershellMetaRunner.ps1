@@ -29,13 +29,16 @@ function Invoke-RemotePowershellMetaRunner {
     A helper for TeamCity MetaRunner that invokes powershell code remotely or locally on different credentials.
     
     .PARAMETER ScriptFile
-    Path to local file(s) containing Powershell script to invoke remotely. If $null, $ScriptBody will be used.
+    Path to local / remote (depending on $ScriptFileIsRemotePath) file(s) containing Powershell script to invoke remotely. If $null, $ScriptBody will be used.
 
     .PARAMETER ScriptBody
     Body of Powershell script to invoke remotely. If $null, $ScriptFile will be used.
 
     .PARAMETER ScriptArguments
     Arguments that will be passed to the ScriptFile.
+
+    .PARAMETER ScriptFileIsRemotePath
+    If true, $ScriptFile will mean the scripts are on remote hosts.
     
     .PARAMETER ConnectionParams
     Connection parameters created by New-ConnectionParameters function.
@@ -72,6 +75,10 @@ function Invoke-RemotePowershellMetaRunner {
         [string[]]
         $ScriptArguments,
 
+        [Parameter(Mandatory=$false)]
+        [switch]
+        $ScriptFileIsRemotePath,
+
         [Parameter(Mandatory=$true)]
         [object]
         $ConnectionParams,
@@ -85,38 +92,58 @@ function Invoke-RemotePowershellMetaRunner {
         Write-Log -Critical 'You need to specify either script filename or script body.'
     }
 
+    if ($ScriptFile -and $ScriptBody) {
+        Write-Log -Critical 'You cannot specifiy both script filename and script body.'
+    }
+
     if ($ScriptFile) {
-        $scriptToRun = { 
-            param ($scriptFile, $scriptArgs, $failOnNonZeroExitCode)
+        if ($ScriptFileIsRemotePath) { 
 
-            $Global:ErrorActionPreference = 'Stop'
+            $scriptToRun = { 
+                param ($scriptFile, $scriptArgs, $failOnNonZeroExitCode)
 
-            foreach ($file in $scriptFile) {
-                if (!(Test-Path -LiteralPath $file)) {
-                    throw "File '$file' does not exist at $([system.environment]::MachineName)."
+                $Global:ErrorActionPreference = 'Stop'
+
+                foreach ($file in $scriptFile) {
+                    if (!(Test-Path -LiteralPath $file)) {
+                        throw "File '$file' does not exist at $([system.environment]::MachineName)."
+                    }
+                }
+                foreach ($file in $scriptFile) {
+                    . $file $scriptArgs
+                }
+
+                if ($failOnNonZeroExitCode) {
+                    if ($global:LASTEXITCODE) { throw "Exit code: $($global:LASTEXITCODE)" }
                 }
             }
-            foreach ($file in $scriptFile) {
-                . $file $scriptArgs
+            $cmdParams = @{ 
+                ScriptBlock = $scriptToRun
+                ArgumentList = @($ScriptFile, $ScriptArguments, $FailOnNonZeroExitCode)
             }
+            $logScriptToRun = "remote file(s) $($ScriptFile -join ', ')"
 
-            if ($failOnNonZeroExitCode) {
-                if ($global:LASTEXITCODE) { throw "Exit code: $($global:LASTEXITCODE)" }
+        } else {
+            $scriptToRun = ''
+            foreach ($file in $ScriptFile) {
+                if (!(Test-Path -LiteralPath $file)) {
+                   Write-Log -Critical "File '$file' does not exist at $([system.environment]::MachineName)."
+                }
+                $scriptToRun += Get-Content -Path $file -ReadCount 0 | Out-String
+                $scriptToRun += "`n"
             }
+            $logScriptToRun = "contents of local file(s) $($ScriptFile -join ', ')"
         }
-        $cmdParams = @{ 
-            ScriptBlock = $scriptToRun
-            ArgumentList = @($ScriptFile, $ScriptArguments, $FailOnNonZeroExitCode)
-        }
-        $logScriptToRun = "file(s) $($ScriptFile -join ', ')"
     } else {
-        $scriptToRun += $ScriptBody
+        $scriptToRun = $ScriptBody
         $logScriptToRun = 'custom powershell script'
+    }
+
+    if ($ScriptBody -or !$ScriptFileIsRemotePath) {
         if ($FailOnNonZeroExitCode) {
             $scriptToRun += "`nif (`$global:LASTEXITCODE) { throw `"Exit code: `$($global:LASTEXITCODE)`" }"
         }
         $cmdParams = @{ ScriptBlock = [Scriptblock]::Create($scriptToRun) }
-
         if ($ScriptArguments) {
             $cmdParams.ArgumentList = $ScriptArguments
         }

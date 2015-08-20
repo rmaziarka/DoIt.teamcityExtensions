@@ -33,13 +33,14 @@ Describe -Tag "PSCI.unit" "Invoke-RemotePowershellMetaRunner" {
             }
         }
         
-        $testFilePath = "c:\test\Invoke-RemotePowershellMetaRunnerTests.temp.ps1"
+        $testFilePath = "Invoke-RemotePowershellMetaRunnerTests.temp.ps1"
+        $testFileRemotePath = "c:\test\Invoke-RemotePowershellMetaRunnerTests.temp.ps1"
 
         try { 
             $testExpectedResult = 'TEST'
             $testScriptBody = "Write-Output '$testExpectedResult'"
             New-Item -Path $testFilePath -Force -Value $testScriptBody -ItemType File
-            $testFilePath = (Resolve-Path -LiteralPath $testFilePath).ProviderPath
+            New-Item -Path $testFileRemotePath -Force -Value $testScriptBody -ItemType File
 
             Context "when neither ScriptFile nor ScriptBody is specified" {
                 It "should throw exception" {
@@ -62,6 +63,12 @@ Describe -Tag "PSCI.unit" "Invoke-RemotePowershellMetaRunner" {
                    $result | Should Be $testExpectedResult
                 }
 
+                It "should invoke script locally for ScriptFile with ScriptFileIsRemotePath" {
+                   $result = Invoke-RemotePowershellMetaRunner -ScriptFile $testFileRemotePath -ConnectionParams $connParams -ScriptFileIsRemotePath
+
+                   $result | Should Be $testExpectedResult
+                }
+
                 It "should invoke script locally for ScriptBody with arguments" {
                    $result = Invoke-RemotePowershellMetaRunner -ScriptBody 'param($x) Write-Output $x' -ConnectionParams $connParams -ScriptArguments 'TEST'
 
@@ -70,6 +77,14 @@ Describe -Tag "PSCI.unit" "Invoke-RemotePowershellMetaRunner" {
 
                 It "should invoke script locally for 2 ScriptFiles" {
                    $result = Invoke-RemotePowershellMetaRunner -ScriptFile @($testFilePath,$testFilePath) -ConnectionParams $connParams
+
+                   $result.Count | Should be 2
+                   $result[0] | Should Be $testExpectedResult
+                   $result[1] | Should Be $testExpectedResult
+                }
+
+                It "should invoke script locally for 2 ScriptFiles with ScriptFileIsRemotePath" {
+                   $result = Invoke-RemotePowershellMetaRunner -ScriptFile @($testFileRemotePath,$testFileRemotePath) -ConnectionParams $connParams -ScriptFileIsRemotePath
 
                    $result.Count | Should be 2
                    $result[0] | Should Be $testExpectedResult
@@ -121,6 +136,12 @@ Describe -Tag "PSCI.unit" "Invoke-RemotePowershellMetaRunner" {
                    $result | Should Be $testExpectedResult
                 }
 
+                It "should invoke script for ScriptFile with ScriptFileIsRemotePath" {
+                   $result = Invoke-RemotePowershellMetaRunner -ScriptFile $testFileRemotePath -ConnectionParams $connParams -ScriptFileIsRemotePath
+
+                   $result | Should Be $testExpectedResult
+                }
+
                 It "should invoke script for ScriptBlock" {
                    $result = Invoke-RemotePowershellMetaRunner -ScriptBody $testScriptBody -ConnectionParams $connParams
 
@@ -153,6 +174,7 @@ Describe -Tag "PSCI.unit" "Invoke-RemotePowershellMetaRunner" {
 
         } finally {
             Remove-Item -LiteralPath $testFilePath -Force 
+            Remove-Item -LiteralPath $testFileRemotePath -Force 
         }
     }
 }
