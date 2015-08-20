@@ -42,9 +42,21 @@ function New-TeamcityTrendReport {
     .PARAMETER OutputDir
     Output directory where .html / .png / .csv files will be generated.
 
-    .PARAMETER TestNameRegex
+    .PARAMETER TestNameConversionRegex
     Regex for shortening test names, e.g. if test is named 'Category: LongName-TestName', and you provide
     regex 'Category: LongName-(.*)', only 'TestName' will be displayed.
+
+    .PARAMETER TestNameIncludeRegex
+    Regex for filtering tests - only names matching this regex will be included.
+
+    .PARAMETER TestNameExcludeRegex
+    Regex for filtering tests - names matching this regex will be excluded.
+
+    .PARAMETER OutputCsvName
+    Name of output csv file.
+
+    .PARAMETER OutputHtmlName
+    Name of output html file.
 
     .PARAMETER NumberOfLastBuilds
     Number of builds that will be trended - all earlier builds will be ignored.
@@ -73,7 +85,23 @@ function New-TeamcityTrendReport {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $TestNameRegex,
+        $TestNameConversionRegex,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $TestNameIncludeRegex,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $TestNameExcludeRegex,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $OutputCsvName = 'TestTrendReport.csv',
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $OutputHtmlName = 'TestTrendReport.html',
 
         [Parameter(Mandatory=$false)]
         [int]
@@ -89,8 +117,8 @@ function New-TeamcityTrendReport {
         Write-Log -Info "Creating directory '$OutputDir'"
         [void](New-Item -Path $OutputDir -ItemType Directory)
     }
-    $csvOutputPath = Join-Path -Path $OutputDir -ChildPath 'TestTrendReport.csv'
-    $htmlOutputPath = Join-Path -Path $OutputDir -ChildPath 'TestTrendReport.html'
+    $csvOutputPath = Join-Path -Path $OutputDir -ChildPath $OutputCsvName
+    $htmlOutputPath = Join-Path -Path $OutputDir -ChildPath $OutputHtmlName
 
     $sql = Get-TeamCityTrendReportSql
     $sql = $sql -f $TeamcityBuildId, $NumberOfLastBuilds
@@ -107,16 +135,24 @@ function New-TeamcityTrendReport {
     $buildIdData = $sqlResult[0]
     $trendData = $sqlResult[1]
 
-    $buildIdMap = @{}
-    foreach ($row in $buildIdData) { 
-        $buildIdMap[[string]($row.build_id)] = $row 
-    }
-    if ($TestNameRegex) {
+    if ($TestNameConversionRegex) {
         foreach ($entry in $trendData) {
-            if ($entry.test_name -imatch $TestNameRegex -and $matches[1]) {
+            if ($entry.test_name -imatch $TestNameConversionRegex -and $matches[1]) {
                 $entry.test_name = $matches[1]
             }
         }
+    }
+
+    if ($TestNameIncludeRegex) {
+        $trendData = $trendData | Where-Object { $_.test_name -imatch $TestNameIncludeRegex }
+    }
+    if ($TestNameExcludeRegex) {
+        $trendData = $trendData | Where-Object { $_.test_name -inotmatch $TestNameExcludeRegex }
+    }
+
+    $buildIdMap = @{}
+    foreach ($row in $buildIdData) { 
+        $buildIdMap[[string]($row.build_id)] = $row 
     }
 
     Write-Log -Info "Generating html report"

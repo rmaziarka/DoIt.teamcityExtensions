@@ -4,8 +4,11 @@
   <settings>
     <parameters>
       <param name="system.testName.regex" value="" spec="text validationMode='any' label='Regex for displaying test names' description='If your test name is LongTestPrefix-ActualTestName, you can provide regex LongTestPrefix-(.*) to output only ActualTestName' display='normal'" />
+      <param name="system.testName.includeRegex" value="" spec="text validationMode='any' label='Include regex' description='Filtering regex - only test names matching this regex will be included' display='normal'" />
+      <param name="system.testName.excludeRegex" value="" spec="text validationMode='any' label='Exclude regex' description='Filtering regex - test names matching this regex will be excluded' display='normal'" />
       <param name="system.numberOfLastBuilds" value="30" spec="text validationMode='not_empty' label='Number of last builds' description='Number of builds that will be trended - all earlier builds will be ignored' display='normal'" />
       <param name="system.generateCsv" value="$false" spec="checkbox checkedValue='$true' description='If checked, CSV file will be generated' uncheckedValue='$false' label='Generate CSV' display='normal'" />
+      <param name="trendReport.outputFilePrefix" value="" spec="select display='normal' description='TeamCity tab where the results will be presented' label='Output tab' label_1='Test Trend' data_1='' label_3='Test Trend 2' data_3='2' label_5='Test Trend 3' data_5='3' " />
       <param name="trendReport.password" value="" spec="password display='hidden'" />
       <param name="trendReport.userId" value="" spec="text display='hidden'"/>
     </parameters>
@@ -23,10 +26,25 @@ if (!$user -or !$pass) {
     throw "Either trendReport.userId or trendReport.password is empty. Please modify this metarunner to include valid userId and password."
 }
 
+$outputFilePrefix = '%trendReport.outputFilePrefix%'
+
 $serverUrl = '%teamcity.serverUrl%' -replace 'http://',''
 $connectionString = "Server=${serverUrl};Database=TeamCity;User Id=${user};Password=${pass}"
 
-New-TeamcityTrendReport -TeamcityBuildId '%teamcity.build.id%' -TeamcityDbConnectionString $connectionString -OutputDir 'TestTrend' -TestNameRegex '%system.testName.regex%' -NumberOfLastBuilds %system.numberOfLastBuilds% -GenerateCsvFile:%system.generateCsv%
+$params = @{
+    TeamcityBuildId = '%teamcity.build.id%'
+    TeamcityDbConnectionString = $connectionString
+    OutputDir = 'TestTrend'
+    OutputCsvName = "TestTrendReport${outputFilePrefix}.csv"
+    OutputHtmlName = "TestTrendReport${outputFilePrefix}.html"
+    TestNameConversionRegex = '%system.testName.regex%'
+    TestNameIncludeRegex = '%system.testName.includeRegex%'
+    TestNameExcludeRegex = '%system.testName.excludeRegex%'
+    NumberOfLastBuilds = %system.numberOfLastBuilds%
+    GenerateCsvFile = %system.generateCsv%
+}
+
+New-TeamcityTrendReport @params
 
 Write-Host "##teamcity[publishArtifacts 'TestTrend => TestTrend']"
 } catch {

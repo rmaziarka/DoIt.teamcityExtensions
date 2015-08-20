@@ -3,8 +3,9 @@
   <description>Runs Powershell command on remote hosts</description>
   <settings>
     <parameters>
-      <param name="powershell.files" value="" spec="text description='Newline- or comma-delimited list of local .ps1 files to run on the remote server(s).' validationMode='any' label='Powershell files' display='normal'" />
       <param name="powershell.command" value="" spec="text description='Command to run on the remote server(s)' validationMode='any' label='Powershell command' display='normal'" />
+      <param name="powershell.files" value="" spec="text description='Newline- or comma-delimited list of local / remote .ps1 files to run on the remote server(s).' validationMode='any' label='Powershell files' display='normal'" />
+      <param name="powershell.filesAreRemote" value="$false" spec="checkbox checkedValue='$true' description='If checked .ps1 files will be read from remote server(s), otherwise they will be read from TC agent (working directory).' uncheckedValue='$false' label='Powershell files - remote path' display='normal'" />
       <param name="powershell.arguments" value="" spec="text description='Newline- or comma-delimited list of arguments that will be passed to Powershell file. Note they should be specified in right order (they should not be named).' validationMode='any' label='Powershell parameters' display='normal'" />
       <param name="powershell.failOnNonZeroExitCode" value="$true" spec="checkbox checkedValue='$true' description='Check to automatically fail the command on non-zero exit code.' uncheckedValue='$false' label='Fail on non-zero exit code' display='normal'" />
       <param name="remote.servers" value="" spec="text description='Newline- or comma-delimited list of remote servers where the Powershell command will run. If empty, command will be run locally.' validationMode='any' label='Remote servers' display='normal'" />
@@ -45,7 +46,7 @@ $connectionParams = Get-TeamcityConnectionParameters `
   -Authentication '%powershell.authentication%' `
   -UseHttps:%use.ssl%
   
-Invoke-RemotePowershellMetaRunner -ScriptFile $powershellFiles -ScriptBody $powershellCommand -ConnectionParams $connectionParams -ScriptArguments $powershellArguments -FailOnNonZeroExitCode:%powershell.failOnNonZeroExitCode%
+Invoke-RemotePowershellMetaRunner -ScriptFile $powershellFiles -ScriptBody $powershellCommand -ConnectionParams $connectionParams -ScriptArguments $powershellArguments -FailOnNonZeroExitCode:%powershell.failOnNonZeroExitCode% -ScriptFileIsRemotePath:%powershell.filesAreRemote%
 } catch {
   Write-ErrorRecord
   exit 1
