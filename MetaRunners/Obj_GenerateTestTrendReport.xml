@@ -31,6 +31,14 @@ $outputFilePrefix = '%trendReport.outputFilePrefix%'
 $serverUrl = '%teamcity.serverUrl%' -replace 'http://',''
 $connectionString = "Server=${serverUrl};Database=TeamCity;User Id=${user};Password=${pass}"
 
+$includeRegex = @'
+%system.testName.includeRegex%
+'@
+
+$excludeRegex = @'
+%system.testName.excludeRegex%
+'@
+
 $params = @{
     TeamcityBuildId = '%teamcity.build.id%'
     TeamcityDbConnectionString = $connectionString
@@ -38,8 +46,8 @@ $params = @{
     OutputCsvName = "TestTrendReport${outputFilePrefix}.csv"
     OutputHtmlName = "TestTrendReport${outputFilePrefix}.html"
     TestNameConversionRegex = '%system.testName.regex%'
-    TestNameIncludeRegex = '%system.testName.includeRegex%'
-    TestNameExcludeRegex = '%system.testName.excludeRegex%'
+    TestNameIncludeRegex = $includeRegex
+    TestNameExcludeRegex = $excludeRegex
     NumberOfLastBuilds = %system.numberOfLastBuilds%
     GenerateCsvFile = %system.generateCsv%
 }
