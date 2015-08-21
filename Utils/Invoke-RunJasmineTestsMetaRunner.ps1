@@ -116,11 +116,11 @@ function Invoke-RunJasmineTestsMetaRunner {
     )
         
     if (!(Test-Path -LiteralPath $PhantomJsPath)) {
-        Write-Log -Critical "Cannot find PhantomJs exe file at '$PhantomJsPath'."
+        throw "Cannot find PhantomJs exe file at '$PhantomJsPath'."
     }
     
     if (!(Test-Path -LiteralPath $RunJasminePath)) {
-        Write-Log -Critical "Cannot find Jasmine script file at '$RunJasminePath'."
+        throw "Cannot find Jasmine script file at '$RunJasminePath'."
     }
 
     $getCoverage = $PSCmdlet.ParameterSetName -eq 'WithCoverage'
@@ -129,16 +129,16 @@ function Invoke-RunJasmineTestsMetaRunner {
         Stop-JsCoverServer -Port $JsCoverServerPort
 
         if (!(Test-Path -LiteralPath $JsCoverPath)) {
-            Write-Log -Critical "Cannot find JsCover jar file at '$JsCoverPath'."
+            throw "Cannot find JsCover jar file at '$JsCoverPath'."
         }
 
         if (!(Test-Path -LiteralPath $DocumentRoot)) {
-            Write-Log -Critical "Cannot find documents root directory at '$DocumentRoot'."
+            throw "Cannot find documents root directory at '$DocumentRoot'."
         }
     
         $testRunnerAbsPath = Join-Path -Path $DocumentRoot -ChildPath $TestRunnerPagePath
         if (!(Test-Path -LiteralPath ($testRunnerAbsPath))) {
-            Write-Log -Critical "Cannot find test runner page at '$testRunnerAbsPath'."
+            throw "Cannot find test runner page at '$testRunnerAbsPath'."
         }
 
         $DocumentRoot = (Resolve-Path -LiteralPath $DocumentRoot).Path
@@ -149,7 +149,7 @@ function Invoke-RunJasmineTestsMetaRunner {
         }
     } else{
         if (!(Test-Path -LiteralPath ($TestRunnerPagePath))) {
-            Write-Log -Critical "Cannot find test runner page at '$TestRunnerPagePath'."
+            throw "Cannot find test runner page at '$TestRunnerPagePath'."
         }
     }
     

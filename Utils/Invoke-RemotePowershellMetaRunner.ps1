@@ -89,11 +89,11 @@ function Invoke-RemotePowershellMetaRunner {
     )
 
     if (!$ScriptFile -and !$ScriptBody) {
-        Write-Log -Critical 'You need to specify either script filename or script body.'
+        throw 'You need to specify either script filename or script body.'
     }
 
     if ($ScriptFile -and $ScriptBody) {
-        Write-Log -Critical 'You cannot specifiy both script filename and script body.'
+        throw 'You cannot specifiy both script filename and script body.'
     }
 
     if ($ScriptFile) {
@@ -127,7 +127,7 @@ function Invoke-RemotePowershellMetaRunner {
             $scriptToRun = ''
             foreach ($file in $ScriptFile) {
                 if (!(Test-Path -LiteralPath $file)) {
-                   Write-Log -Critical "File '$file' does not exist at $([system.environment]::MachineName)."
+                   throw "File '$file' does not exist at $([system.environment]::MachineName)."
                 }
                 $scriptToRun += Get-Content -Path $file -ReadCount 0 | Out-String
                 $scriptToRun += "`n"

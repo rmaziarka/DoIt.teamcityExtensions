@@ -124,7 +124,7 @@ function ConvertTo-TeamcityTest {
 
     Write-Log -Info "Converting file '$CsvInputFilePath' to TeamCity tests - column '$ColumnTestTime'..."
     if (!(Test-Path -Path $CsvInputFilePath)) {
-        Write-Log -Critical "File '$CsvInputFilePath' does not exist."
+        throw "File '$CsvInputFilePath' does not exist."
     }
 
     if ($TestSuiteName) {

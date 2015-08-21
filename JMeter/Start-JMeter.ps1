@@ -115,10 +115,10 @@ function Start-JMeter {
     )
 
     if (!(Test-Path -LiteralPath $JMeterDir)) {
-        Write-Log -Critical "Cannot find JMeter directory at '$JMeterDir'."
+        throw "Cannot find JMeter directory at '$JMeterDir'."
     }
     if (!(Test-Path -LiteralPath $JmxInputFile)) {
-        Write-Log -Critical "Cannot find JMX input file at '$JmxInputFile'."
+        throw "Cannot find JMX input file at '$JmxInputFile'."
     }
 
     if (Test-Path -LiteralPath $JtlOutputFile) {
@@ -138,7 +138,7 @@ function Start-JMeter {
 
     $jMeterPath = Join-Path -Path $JMeterDir -ChildPath "bin\jmeter.bat"
     if (!(Test-Path -LiteralPath $jMeterPath)) {
-       Write-Log -Critical "Cannot find '$jMeterPath'."
+       throw "Cannot find '$jMeterPath'."
     }
 
     if ($JavaPath) {

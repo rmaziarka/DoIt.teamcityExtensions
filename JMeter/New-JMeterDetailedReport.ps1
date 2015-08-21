@@ -79,11 +79,11 @@ function New-JMeterDetailedReport {
     }
 
     if (!(Test-Path -LiteralPath $xslPath)) {
-        Write-Log -Critical "Cannot find JMeter's xsl at '$xslPath'. Please ensure you have provided correct JMeterDir."
+        throw "Cannot find JMeter's xsl at '$xslPath'. Please ensure you have provided correct JMeterDir."
     }
 
     if (!(Test-Path -LiteralPath $InputJtlFilePath)) {
-        Write-Log -Critical "Cannot find input JTL file at '$InputJtlFilePath'."
+        throw "Cannot find input JTL file at '$InputJtlFilePath'."
     }
 
     Write-Log -Info "Generating JMeter detailed report for '$InputJtlFilePath' at '$OutputFilePath'"

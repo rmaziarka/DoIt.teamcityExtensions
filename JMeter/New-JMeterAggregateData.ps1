@@ -107,15 +107,15 @@ function New-JMeterAggregateData {
     )
 
     if (!(Test-Path -LiteralPath $JMeterDir)) {
-        Write-Log -Critical "Cannot find JMeter directory at '$JMeterDir'."
+        throw "Cannot find JMeter directory at '$JMeterDir'."
     }
     if (!(Test-Path -LiteralPath $InputFilePath)) {
-        Write-Log -Critical "Cannot find JMeter input file at '$InputFilePath'."
+        throw "Cannot find JMeter input file at '$InputFilePath'."
     }
 
     $cmdRunnerPath = Join-Path -Path $JMeterDir -ChildPath "lib\ext\CMDRunner.jar"
     if (!(Test-Path -LiteralPath $cmdRunnerPath)) {
-       Write-Log -Critical "Cannot find JMeter CMDRunner plugin at '$cmdRunnerPath'."
+       throw "Cannot find JMeter CMDRunner plugin at '$cmdRunnerPath'."
     }
 
     if (!$OutputFilePath) {

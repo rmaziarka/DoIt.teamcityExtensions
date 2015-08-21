@@ -80,7 +80,7 @@ function Get-TeamcityConnectionParameters {
     )
 
     if ($User -and !$Password) {
-        Write-Log -Critical "Please specify password for given user ('$User')."
+        throw "Please specify password for given user ('$User')."
     }
 
     $params = @{

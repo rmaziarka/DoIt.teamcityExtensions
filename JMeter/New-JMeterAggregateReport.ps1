@@ -121,7 +121,7 @@ function New-JMeterAggregateReport {
     if ($CustomCMDRunnerCommandLines) {
         $cmdRunnerPath = Join-Path -Path $JMeterDir -ChildPath "lib\ext\CMDRunner.jar"
         if (!(Test-Path -LiteralPath $cmdRunnerPath)) {
-            Write-Log -Critical "Cannot find JMeter CMDRunner plugin at '$cmdRunnerPath'."
+            throw "Cannot find JMeter CMDRunner plugin at '$cmdRunnerPath'."
         }
 
         $replaceStrings = @{

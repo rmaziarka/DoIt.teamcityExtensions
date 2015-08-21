@@ -114,12 +114,12 @@ function Wait-JMeter {
     )
 
     if (!$JMeterPid -and !$JMeterPidFile) {
-        Write-Log -Critical 'Please specify one of $JMeterPid or $JMeterPidFile parameters.'
+        throw 'Please specify one of $JMeterPid or $JMeterPidFile parameters.'
     }
 
     if (!$JMeterPid -and $JMeterPidFile) {
         if (!(Test-Path -LiteralPath $JMeterPidFile)) {
-            Write-Log -Critical "No JMeter Pid file at '$JMeterPidFile'. Please investigate why Start-JMeter has not created it."
+            throw "No JMeter Pid file at '$JMeterPidFile'. Please investigate why Start-JMeter has not created it."
         }
         $JMeterPid = Get-Content -Path $JMeterPidFile -ReadCount 1
     }
@@ -140,12 +140,12 @@ function Wait-JMeter {
             if ($ShutdownMode -eq "KillProcess") {
                 Stop-ProcessForcefully -Process $process -KillTimeoutInSeconds 1
                 Write-ProgressExternal -Message ''
-                Write-Log -Critical "JMeter process has not finished after $TimeoutInSeconds s and has been killed."
+                throw "JMeter process has not finished after $TimeoutInSeconds s and has been killed."
             } elseif (!(Test-Path -LiteralPath $JMeterDir)) {
                 Write-Log -Warn "Cannot find JMeter directory at '$JMeterDir'. JMeter process will be stopped in 'KillProcess' mode instead of '$ShutdownMode'"
                 Stop-ProcessForcefully -Process $process -KillTimeoutInSeconds 1
                 Write-ProgressExternal -Message ''
-                Write-Log -Critical "JMeter process has not finished after $TimeoutInSeconds s and has been killed."
+                throw "JMeter process has not finished after $TimeoutInSeconds s and has been killed."
             } else {
                 $javaPath = "java.exe"
                 if ($ShutdownMode -eq "SendShutdownMessage") {
@@ -226,7 +226,7 @@ function Stop-ProcessForcefully {
 		Write-Log -Warn "Kill method thrown exception: $_ - waiting for exit."
 	}
 	if (!$Process.WaitForExit($KillTimeoutInSeconds * 1000)) {
-		Write-Log -Critical "Cannot kill process (pid $($Process.Id)) - still running after $($KillTimeoutInSeconds * 1000 * 2) s"
+		throw "Cannot kill process (pid $($Process.Id)) - still running after $($KillTimeoutInSeconds * 1000 * 2) s"
 	}
     Write-Log -Info "Process $($Process.Id) killed along with its children."
 }
@@ -256,7 +256,7 @@ function Test-JMeterSuccess {
         Write-Log -Info "JMeter process finished and generated jtl file at '$JtlOutputFile'." -Emphasize
         return
     } else {
-        Write-Log -Critical "JMeter process finished but not generated jtl file at '$JtlOutputFile'. Please review stdout/stderr messages which should be logged above."
+        throw "JMeter process finished but not generated jtl file at '$JtlOutputFile'. Please review stdout/stderr messages which should be logged above."
     }
 }
 

@@ -104,7 +104,7 @@ function New-JMeterTeamcityTests {
 
     foreach ($column in $ColumnsToReportAsTests) {
         if (!$prefixMapping.ContainsKey($column)) {
-            Write-Log -Critical "Unrecognized column name: '$column'. Allowed values: $($prefixMapping.Keys)"
+            throw "Unrecognized column name: '$column'. Allowed values: $($prefixMapping.Keys)"
         }
         ConvertTo-TeamcityTest -CsvInputFilePath $JMeterAggregateReportCsvPath -TestSuiteName $testSuiteName -FailureThreshold $FailureThreshold `
             -ColumnTestName "sampler_label" -ColumnTestTime $column -ColumnTestFailure "aggregate_report_error%" -TestClassNamePrefix $prefixMapping.$column `

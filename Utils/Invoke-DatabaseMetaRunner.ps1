@@ -118,7 +118,7 @@ function Invoke-DatabaseMetaRunner {
     )
 
     if ($Action -eq 'DropAndRestore' -and !$BackupLocation) {
-        Write-Log -Critical 'Please specify path to the database backup.'
+        throw 'Please specify path to the database backup.'
     }
 
     $builder = New-Object System.Data.SqlClient.SqlConnectionStringBuilder
