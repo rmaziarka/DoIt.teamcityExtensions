@@ -167,7 +167,7 @@ function New-TeamcityTrendReport {
 
     $javascriptUri= @('http://code.jquery.com/jquery-1.10.2.min.js', 'http://cdn.datatables.net/1.10.0/js/jquery.dataTables.min.js', `
         'http://cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js', 'https://code.jquery.com/ui/1.11.0/jquery-ui.min.js', 
-        'http://cdnjs.cloudflare.com/ajax/libs/rickshaw/1.4.6/rickshaw.min.js')
+        'http://cdnjs.cloudflare.com/ajax/libs/rickshaw/1.5.1/rickshaw.min.js')
 
     Write-Log -Info "Generating Test Trend HTML report at '$htmlOutputPath'."
 
