@@ -184,7 +184,7 @@ function New-JMeterAggregateReport {
                     css={if ($warningThresholdsValues.ContainsKey('Max') -and [decimal]($_.aggregate_report_max) -gt $warningThresholdsValues['Max']) { 'warning' }}},
                 @{n='Error %';e={$_.'aggregate_report_error%'};
                     f="{0:P2}"
-                    css={if ($warningThresholdsValues.ContainsKey('Error %') -and [decimal]($_.'aggregate_report_error%') -gt ($warningThresholdsValues['Error %'] / 100)) { 'warning' }}},
+                    css={if ($warningThresholdsValues.ContainsKey('Error %') -and [decimal](($_.'aggregate_report_error%' -replace '%','')) -gt ($warningThresholdsValues['Error %'] / 100)) { 'warning' }}},
                 @{n='Rate';e={$_.aggregate_report_rate}; 
                            f="{0:F2}"
                            css={if ($warningThresholdsValues.ContainsKey('Rate') -and [decimal]($_.aggregate_report_rate) -gt $warningThresholdsValues['Rate']) { 'warning' }}},
