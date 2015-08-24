@@ -165,8 +165,8 @@ function New-TeamcityTrendReport {
 
     $htmlChart = ConvertTo-EnhancedHTMLFragmentRickshawChart -JavascriptDataVariableName 'TestData'
 
-    $javascriptUri= @('http://code.jquery.com/jquery-1.10.2.min.js', 'http://cdn.datatables.net/1.10.0/js/jquery.dataTables.min.js', `
-        'http://cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js', 'https://code.jquery.com/ui/1.11.0/jquery-ui.min.js', 
+    $javascriptUri= @('http://code.jquery.com/jquery-1.11.3.min.js', 'http://cdn.datatables.net/1.10.8/js/jquery.dataTables.min.js', `
+        'http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js', 'https://code.jquery.com/ui/1.11.4/jquery-ui.min.js', 
         'http://cdnjs.cloudflare.com/ajax/libs/rickshaw/1.5.1/rickshaw.min.js')
 
     Write-Log -Info "Generating Test Trend HTML report at '$htmlOutputPath'."
@@ -174,7 +174,7 @@ function New-TeamcityTrendReport {
     $params = @{'HTMLFragments' = @($htmlChartData, $htmlChart);
                 'JavascriptUri' = $javascriptUri;
                 'CssStyleSheet' = @((Get-DefaultJqueryDataTableCss), (Get-DefaultRickshawCss));
-                'CssUri' = @('http://cdn.datatables.net/1.10.0/css/jquery.dataTables.css', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css')
+                'CssUri' = @('http://cdn.datatables.net/1.10.8/css/jquery.dataTables.css', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.min.css')
                }
 
     ConvertTo-EnhancedHTML @params | Out-File -FilePath $htmlOutputPath -Encoding UTF8
