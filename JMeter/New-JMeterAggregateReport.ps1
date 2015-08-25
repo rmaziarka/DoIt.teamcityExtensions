@@ -184,7 +184,7 @@ function New-JMeterAggregateReport {
                     css={if ($warningThresholdsValues.ContainsKey('Max') -and [decimal]($_.aggregate_report_max) -gt $warningThresholdsValues['Max']) { 'warning' }}},
                 @{n='Error %';e={$_.'aggregate_report_error%'};
                     f="{0:P2}"
-                    css={if ($warningThresholdsValues.ContainsKey('Error %') -and [decimal](($_.'aggregate_report_error%' -replace '%','')) -gt ($warningThresholdsValues['Error %'] / 100)) { 'warning' }}},
+                    css={if ($warningThresholdsValues.ContainsKey('Error %') -and [decimal]($_.'aggregate_report_error%') -gt ($warningThresholdsValues['Error %'] / 100)) { 'warning' }}},
                 @{n='Rate';e={$_.aggregate_report_rate}; 
                            f="{0:F2}"
                            css={if ($warningThresholdsValues.ContainsKey('Rate') -and [decimal]($_.aggregate_report_rate) -gt $warningThresholdsValues['Rate']) { 'warning' }}},
@@ -200,7 +200,16 @@ function New-JMeterAggregateReport {
                      
 
     Write-Log -Info "Generating JMeter Aggregate Report from '$aggregateCsvOutputPath' and images available at '$OutputDir'" 
-    $htmlAggregateReport = Get-Content -Path $aggregateCsvOutputPath -ReadCount 0 | ConvertFrom-CSV | ConvertTo-EnhancedHTMLFragment @params
+
+    $csv = Get-Content -Path $aggregateCsvOutputPath -ReadCount 0 | ConvertFrom-CSV
+    # Remove '%' from column 'aggregate_report_error%'
+    if ($csv -and $csv.'aggregate_report_error%') { 
+        foreach ($row in $csv) {
+            $row.'aggregate_report_error%' = $row.'aggregate_report_error%' -replace '%',''
+        }
+    }
+
+    $htmlAggregateReport = $csv | ConvertTo-EnhancedHTMLFragment @params
     $htmlImages = Get-ChildItem -Path $OutputDir -Filter *.png | Sort | Foreach-Object { ConvertTo-EnhancedHTMLFragmentImage -Header $_.BaseName -Uri $_.Name }
 
     $params = @{'HTMLFragments' = @($htmlAggregateReport, $htmlImages)
