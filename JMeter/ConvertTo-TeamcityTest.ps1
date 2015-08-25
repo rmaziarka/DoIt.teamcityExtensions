@@ -148,7 +148,7 @@ function ConvertTo-TeamcityTest {
             $testNameEscaped = $testName -replace "\|","||" -replace "'","|'" -replace "`n","|n" -replace "`r","|r" -replace "\[","|[" -replace "\]","|]"
             Write-Output -InputObject ("##teamcity[testStarted name='{0}']" -f $testNameEscaped)
             if ($ColumnTestFailure) { 
-                $failureValue = [decimal]$_.$ColumnTestFailure
+                $failureValue = [decimal]($_.$ColumnTestFailure -replace '%', '')
                 if ($failureValue -gt $FailureThreshold) {
                     Write-Output -InputObject ("##teamcity[testFailed name='{0}' message='{1}']" -f $testNameEscaped, "Failure threshold exceeded (${failureValue} > ${FailureThreshold})")
                     $testInfo.Succeeded = $false

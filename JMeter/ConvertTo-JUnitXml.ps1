@@ -133,7 +133,7 @@ function ConvertTo-JUnitXml {
         $xmlWriter.WriteAttributeString('classname', ("{0}{1}" -f $TestClassNamePrefix, $dataObj.$ColumnTestName))
         $xmlWriter.WriteAttributeString('name', $dataObj.$ColumnTestName)
         $xmlWriter.WriteAttributeString('time', $dataObj.$ColumnTestTime)
-        $failureValue = [decimal]$dataObj.$ColumnTestFailure
+        $failureValue = [decimal]($dataObj.$ColumnTestFailure -replace '%', '')
         if ($failureValue -gt $FailureThreshold) {
             $xmlWriter.WriteStartElement('failure')
             $xmlWriter.WriteAttributeString('type', "Failure threshold exceeded ($failureValue)")
