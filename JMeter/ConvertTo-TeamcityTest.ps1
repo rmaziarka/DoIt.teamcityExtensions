@@ -30,8 +30,6 @@ function ConvertTo-TeamcityTest {
     .DESCRIPTION
     If $TestSuiteName is specified, it makes TeamCity to show each row of CSV file as a separate test
     (taking test time from $ColumnTestTime column).
-    If $BuildStatisticName is specified, it publishes a row where column $ColumnTestName = $BuildStatiticTestName
-    as a TeamCity custom metric named $BuildStatisticName (using service message 'buildStatisticValue').
 
     .PARAMETER CsvInputFilePath
     Path to the input CSV file.
@@ -62,17 +60,9 @@ function ConvertTo-TeamcityTest {
     .PARAMETER TestClassNamePrefix
     Prefix that will be added to test name. Can be used to categorize tests (e.g. 'Average.').
 
-    .PARAMETER BuildStatisticName
-    Name of TeamCity custom metric where test with name $BuildStatisticTestName will be reported.
-    Only used if $BuildStatisticTestName is provided.
-
-    .PARAMETER BuildStatisticTestName
-    Name of test which will be reported to TeamCity custom metric.
-
     .EXAMPLE
     ConvertTo-TeamcityTest -CsvInputFilePath "AggregateReport.csv" -TestSuiteName "JMeter" -FailureThreshold 0 `
         -ColumnTestName "sampler_label" -ColumnTestTime "average" -ColumnTestFailure "aggregate_report_error%" -TestClassNamePrefix "Average." `
-        -BuildStatisticTestName "TOTAL" -BuildStatisticName "JMeterAverage"
     #>
     [CmdletBinding()]
     [OutputType([string[]])]
@@ -111,15 +101,7 @@ function ConvertTo-TeamcityTest {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $TestClassNamePrefix,
-
-        [Parameter(Mandatory=$false)]
-        [string]
-        $BuildStatisticName,
-
-        [Parameter(Mandatory=$false)]
-        [string]
-        $BuildStatisticTestName       
+        $TestClassNamePrefix
     )
 
     Write-Log -Info "Converting file '$CsvInputFilePath' to TeamCity tests - column '$ColumnTestTime'..."
@@ -136,7 +118,7 @@ function ConvertTo-TeamcityTest {
     } else {
         $testFilter = { $_.$ColumnTestName -notin $IgnoreTestNames }
     }
-    $buildStatisticOutput = ""
+
     Get-Content -Path $CsvInputFilePath -ReadCount 0 | ConvertFrom-CSV | Where-Object $testFilter | ForEach-Object {
         
         if ($TestSuiteName) {
@@ -157,17 +139,9 @@ function ConvertTo-TeamcityTest {
             Write-Output -InputObject ("##teamcity[testFinished name='{0}' duration='{1}']" -f $testNameEscaped, [decimal]::round($_.$ColumnTestTime))
             $testInfo.Duration = $_.$ColumnTestTime
         }
-        if ($BuildStatisticName -and $_.$ColumnTestName -eq $BuildStatisticTestName) {
-            $buildStatisticOutput = ("##teamcity[buildStatisticValue key='{0}' value='{1}']" -f $BuildStatisticName, $_.$ColumnTestTime)
-        }
     }
     
     if ($TestSuiteName) {
         Write-Output -InputObject "##teamcity[testSuiteFinished name='$TestSuiteName']"
     }
-    
-    if ($buildStatisticOutput) {
-        Write-Output -InputObject $buildStatisticOutput
-    }
-
 }

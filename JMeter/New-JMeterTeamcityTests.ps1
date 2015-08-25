@@ -39,9 +39,6 @@ function New-JMeterTeamcityTests {
     For example, if $ColumnsToReportsAsTests = @('average','median') and you have tests 'x', 'y', there will be
     tests average.x, average.y, median.x, median.y
 
-    .PARAMETER BuildStatisticTestName
-    Name of test that will be reported as TeamCity custom metrics.
-
     .PARAMETER IncludeTotal
     If true, 'TOTAL' row will also be included as TeamCity test.
 
@@ -67,10 +64,6 @@ function New-JMeterTeamcityTests {
         [Parameter(Mandatory=$false)]
         [string[]]
         $ColumnsToReportAsTests = @('average', 'aggregate_report_median', 'aggregate_report_90%_line'),
-
-        [Parameter(Mandatory=$false)]
-        [string]
-        $BuildStatisticTestName = 'TOTAL',
 
         [Parameter(Mandatory=$false)]
         [switch]
@@ -109,20 +102,6 @@ function New-JMeterTeamcityTests {
         ConvertTo-TeamcityTest -CsvInputFilePath $JMeterAggregateReportCsvPath -TestSuiteName $testSuiteName -FailureThreshold $FailureThreshold `
             -ColumnTestName "sampler_label" -ColumnTestTime $column -ColumnTestFailure "aggregate_report_error%" -TestClassNamePrefix $prefixMapping.$column `
             -IgnoreTestNames $ignoredTests
-    }
-
-    if ($BuildStatisticTestName) {
-        ConvertTo-TeamcityTest -CsvInputFilePath $JMeterAggregateReportCsvPath `
-            -ColumnTestName "sampler_label" -ColumnTestTime "average" -BuildStatisticTestName $BuildStatisticTestName -BuildStatisticName "JMeterAverage"
-
-        ConvertTo-TeamcityTest -CsvInputFilePath $JMeterAggregateReportCsvPath `
-            -ColumnTestName "sampler_label" -ColumnTestTime "aggregate_report_median" -BuildStatisticTestName $BuildStatisticTestName -BuildStatisticName "JMeterMedian"
-
-        ConvertTo-TeamcityTest -CsvInputFilePath $JMeterAggregateReportCsvPath `
-            -ColumnTestName "sampler_label" -ColumnTestTime "aggregate_report_90%_line" -BuildStatisticTestName $BuildStatisticTestName -BuildStatisticName "JMeter90Line"
-
-        ConvertTo-TeamcityTest -CsvInputFilePath $JMeterAggregateReportCsvPath `
-            -ColumnTestName "sampler_label" -ColumnTestTime "aggregate_report_error%" -BuildStatisticTestName $BuildStatisticTestName -BuildStatisticName "JMeterErrors"
     }
 
 }
