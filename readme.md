@@ -1,1 +1,2 @@
 Set of TeamCity metarunners written in Powershell. They require whole PSCI library installed at TeamCity agent.
+Documentation is available at [PSCI wiki](https://github.com/ObjectivityBSS/PSCI/wiki/PSCI.teamcityExtensions).
