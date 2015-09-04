@@ -31,7 +31,7 @@ function Invoke-CopyUploadFilesMetaRunner {
 		The file or directory path that should be copied locally or uploaded to remote server.
 
     .PARAMETER ConnectionParams
-        Connection parameters created by New-ConnectionParameters function.
+        Connection parameters created by [[New-ConnectionParameters]] function.
 
 	.PARAMETER Destination
 		The path where the file will be saved to (must be directory).

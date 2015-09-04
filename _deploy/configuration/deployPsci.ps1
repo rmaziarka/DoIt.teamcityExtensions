@@ -41,7 +41,7 @@ function Deploy-Psci {
     Tokens resolved for given environment / nodeName.
 
     .PARAMETER ConnectionParams
-    ConnectionParameters object describing how to connect to the remote noed (see New-ConnectionParameters).
+    ConnectionParameters object describing how to connect to the remote noed (see [[New-ConnectionParameters]]).
 
     .EXAMPLE
         Deploy-Psci

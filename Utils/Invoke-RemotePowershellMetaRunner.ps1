@@ -41,7 +41,7 @@ function Invoke-RemotePowershellMetaRunner {
     If true, $ScriptFile will mean the scripts are on remote hosts.
     
     .PARAMETER ConnectionParams
-    Connection parameters created by New-ConnectionParameters function.
+    Connection parameters created by [[New-ConnectionParameters]] function.
 
     .PARAMETER FailOnNonZeroExitCode
     If true, script will automatically fail on non-zero exit code.
