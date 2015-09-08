@@ -7,7 +7,7 @@
       <param name="jasmine.runJasminePath" value="%env.TC_Jasmine%\run-jscover-jasmine.js" spec="text validationMode='not_empty' label='Jasmine' description='Path to Jasmine script' display='normal'" />
       <param name="jasmine.testRunnerPagePath" spec="text validationMode='not_empty' label='Test runner page' description='Path to test runner html page. If tests are executed with coverage it has to be relative to DocumentRoot' display='normal'" />
       <param name="jasmine.enableCoverage" value="$true" spec="checkbox checkedValue='$true' description='If checked information about tests coverage will be collected' uncheckedValue='$false' label='Collect coverage' display='normal'" />
-      <param name="jasmine.jsCoverPath" value="%env.TC_Jasmine%\JSCover-all.jar" spec="text label='PhantomJs' description='Path to JsCover'" />
+      <param name="jasmine.jsCoverPath" value="%env.TC_Jasmine%\JSCover-all.jar" spec="text label='JsCover' description='Path to JsCover'" />
       <param name="jasmine.outputDir" spec="text label='Reports directory' description='Directory with generated coverage reports' display='normal'" />
       <param name="jasmine.documentRoot" value="." spec="text label='Scripts root directory' description='Path to the root directory of tested scripts' display='normal'" />
       <param name="jasmine.noInstrumentPaths" spec="text label='Paths not instrumented' description='URLs not to be instrumented by JsCover (e.g. external libraries, tests)' display='normal'" />
@@ -22,13 +22,13 @@
 $ErrorActionPreference = "Stop"
 try { 
 if (%jasmine.enableCoverage%) {
-[void](Invoke-RunJasmineTestsMetaRunner -PhantomJsPath '%jasmine.phantomJsPath%' `
+[void](Invoke-RunJasmineTests -PhantomJsPath '%jasmine.phantomJsPath%' `
 -RunJasminePath '%jasmine.runJasminePath%' -TestRunnerPagePath '%jasmine.testRunnerPagePath%' `
 -JsCoverPath '%jasmine.jsCoverPath%' -DocumentRoot '%jasmine.documentRoot%' -OutputDir '%jasmine.outputDir%' `
 -NoInstrumentPaths (Get-TeamcityArrayParameter -Param '%jasmine.noInstrumentPaths%') `
 -NoInstrumentRegExp (Get-TeamcityArrayParameter -Param '%jasmine.noInstrumentRegExp%'))
 } else {
-[void](Invoke-RunJasmineTestsMetaRunner -PhantomJsPath '%jasmine.phantomJsPath%' `
+[void](Invoke-RunJasmineTests -PhantomJsPath '%jasmine.phantomJsPath%' `
 -RunJasminePath '%jasmine.runJasminePath%' -TestRunnerPagePath '%jasmine.testRunnerPagePath%')
 }
 } catch {
