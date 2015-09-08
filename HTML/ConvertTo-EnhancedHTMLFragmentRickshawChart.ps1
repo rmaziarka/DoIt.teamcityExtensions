@@ -63,10 +63,10 @@ function ConvertTo-EnhancedHTMLFragmentRickshawChart {
 
 <div id="options">
     <form id="chartFilterForm">
-	    <label>Number of last builds: <input id="testHistoryNumber" type="number" min="0" value="0"/></label>
+        <label>Number of last builds: <input id="testHistoryNumber" type="number" min="0" value="0"/></label>
         <label>Include build numbers: <input id="includeBuilds" type="text" /></label>
         <label>Exclude build numbers: <input id="excludeBuilds" type="text" /></label>
-	    <label>Test name regex: <input id="testNameRegex" type="text" /></label>
+        <label>Test name regex: <input id="testNameRegex" type="text" /></label>
         <label>Chart type:
         <select id="chartRenderer">
             <option value="line">Line</option>
@@ -76,14 +76,14 @@ function ConvertTo-EnhancedHTMLFragmentRickshawChart {
         </select>
         </label>
         <input id="showFailedBuilds" type="checkbox" checked>Show failed</input>
-	    <input type="submit" value="Update" action="javascript:void(0)" />
+        <input type="submit" value="Update" action="javascript:void(0)" />
     </form>
 </div>
 
 <div id="contentChart">
     <div id="legend"></div>
     <div id="chartContainer">
-	    <div id="chart"></div>
+        <div id="chart"></div>
         <div id="preview"></div>
     </div>
 </div>
@@ -92,23 +92,23 @@ function ConvertTo-EnhancedHTMLFragmentRickshawChart {
 
 <script type="text/javascript">
 jQuery('#chartFilterForm').submit(function (event) {
-	event.preventDefault();
-	var numLastBuilds = jQuery('#testHistoryNumber')[0].value
-	var testNameRegex = jQuery('#testNameRegex')[0].value
+    event.preventDefault();
+    var numLastBuilds = jQuery('#testHistoryNumber')[0].value
+    var testNameRegex = jQuery('#testNameRegex')[0].value
     var includeBuilds = parseIncludeExcludeBuilds(jQuery('#includeBuilds')[0].value)
     var excludeBuilds = parseIncludeExcludeBuilds(jQuery('#excludeBuilds')[0].value)
     var showFailedBuilds = jQuery('#showFailedBuilds').prop('checked')
-	
-	if (testNameRegex) {
+    
+    if (testNameRegex) {
         testNameRegex = new RegExp(testNameRegex, "i");
-	}
-	
+    }
+    
     var newChartData = []
-	for (var i = 0; i < ${JavascriptDataVariableName}.length; i++) {
-		var testSeries = ${JavascriptDataVariableName}[i];
-		if (!testNameRegex || testNameRegex.test(testSeries.name)) {
-			if (numLastBuilds > 0 || includeBuilds != null || excludeBuilds != null || !showFailedBuilds) {
-				var testSeriesDataLength = testSeries.data.length;
+    for (var i = 0; i < ${JavascriptDataVariableName}.length; i++) {
+        var testSeries = ${JavascriptDataVariableName}[i];
+        if (!testNameRegex || testNameRegex.test(testSeries.name)) {
+            if (numLastBuilds > 0 || includeBuilds != null || excludeBuilds != null || !showFailedBuilds) {
+                var testSeriesDataLength = testSeries.data.length;
 
                 var x = 1;
                 var hasAtLeastOneValue = false;
@@ -144,19 +144,19 @@ jQuery('#chartFilterForm').submit(function (event) {
                    }
                    newChartData.push({ name : testSeries.name, color: testSeries.color, data: newData });
                 }
-		   } else { 
-		        newChartData.push(testSeries);
+           } else { 
+                newChartData.push(testSeries);
            }
-		}
-	}
-	if (newChartData.length > 0) {
+        }
+    }
+    if (newChartData.length > 0) {
         chartData = newChartData;
         
-		createGraph();
+        createGraph();
         createTable();
-	} else {
-		alert('No tests matching specified criteria.');
-	}
+    } else {
+        alert('No tests matching specified criteria.');
+    }
 });
 
 var parseIncludeExcludeBuilds = function(input) {
@@ -185,73 +185,73 @@ var parseIncludeExcludeBuilds = function(input) {
 }
 
 var createGraph = function() {
-	jQuery('#legend').empty();
+    jQuery('#legend').empty();
     jQuery('#chartContainer').html('<div id="chart"></div><div id="preview"></div>')
 
     // prepare xLabelMap for proper x labeling
     var xLabelMap = {}
-	for (var i = 0; i < chartData.length; i++) {
-		var data = chartData[0].data
-		for (var j = 0; j < data.length; j++) {
+    for (var i = 0; i < chartData.length; i++) {
+        var data = chartData[0].data
+        for (var j = 0; j < data.length; j++) {
             xLabelMap[data[j].x] = '#' + data[j].xLabel
-		}
-	}
+        }
+    }
 
     var graphRenderer = jQuery('#chartRenderer option:selected')[0].value;
-	
-	graphObj = new Rickshaw.Graph( {
-			element: document.getElementById("chart"),
-			width: $Width,
-			height: $Height,
+    
+    graphObj = new Rickshaw.Graph( {
+            element: document.getElementById("chart"),
+            width: $Width,
+            height: $Height,
             preserve: true,
-			renderer: graphRenderer,
-			series: chartData,
-			interpolation: 'linear',
+            renderer: graphRenderer,
+            series: chartData,
+            interpolation: 'linear',
             padding: {top: 0.01, left: 0.015, right: 0.015, bottom: 0.01}
-	})
+    })
 
-	graphObj.render();
+    graphObj.render();
 
     var preview = new Rickshaw.Graph.RangeSlider( {
-    	graph: graphObj,
-    	element: document.getElementById('preview'),
+        graph: graphObj,
+        element: document.getElementById('preview'),
     } );
 
-	var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-		graph: graphObj,
-		xFormatter: function(x) {
-			return xLabelMap[x];
-		},
+    var hoverDetail = new Rickshaw.Graph.HoverDetail( {
+        graph: graphObj,
+        xFormatter: function(x) {
+            return xLabelMap[x];
+        },
         yFormatter: function(y) {
             return y + ' ms';
         }
-	} );
+    } );
 
-	var legend = new Rickshaw.Graph.Legend( {
-		graph: graphObj,
-		element: document.getElementById('legend')
-	} );
+    var legend = new Rickshaw.Graph.Legend( {
+        graph: graphObj,
+        element: document.getElementById('legend')
+    } );
 
-	var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight( {
-		graph: graphObj,
-		legend: legend
-	} );
+    var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight( {
+        graph: graphObj,
+        legend: legend
+    } );
 
-	var shelving = new Rickshaw.Graph.Behavior.Series.Toggle( {
-		graph: graphObj,
-		legend: legend
-	} );
+    var shelving = new Rickshaw.Graph.Behavior.Series.Toggle( {
+        graph: graphObj,
+        legend: legend
+    } );
 
-	var xAxis = new Rickshaw.Graph.Axis.X( {
-		graph: graphObj,
-		tickFormat: function (x) { return xLabelMap[x]; }
-	} );
+    var xAxis = new Rickshaw.Graph.Axis.X( {
+        graph: graphObj,
+        tickFormat: function (x) { return xLabelMap[x]; }
+    } );
 
-	xAxis.render();
+    xAxis.render();
 
-	var yAxis = new Rickshaw.Graph.Axis.Y( {
-		graph: graphObj,
-		tickFormat: function (y) {
+    var yAxis = new Rickshaw.Graph.Axis.Y( {
+        graph: graphObj,
+        tickFormat: function (y) {
             if (y == 0) {
                 return '';
             }
@@ -263,12 +263,12 @@ var createGraph = function() {
             }
             
         },
-	} );
+    } );
 
-	yAxis.render();
+    yAxis.render();
 
     appendFilterTableOnClick('#legend .line .action, #legend .line .label');
-	return graphObj;
+    return graphObj;
 }
 
 var appendFilterTableOnClick = function(selector) {
@@ -282,8 +282,8 @@ var appendFilterTableOnClick = function(selector) {
 }
 
 var createTable = function() {
-	var no = 1;
-	var tableDataSet = [];
+    var no = 1;
+    var tableDataSet = [];
     var i = 0;
 
     var lines = jQuery('#legend .line');
@@ -291,33 +291,33 @@ var createTable = function() {
         var line = lines[i];
         if (!line.series.disabled) {
             var data = line.series.data;
-		    var newRow = [ no++, line.series.name ];
-		    data.forEach(function (row) {
-			    newRow.push(row.y);
-		    });
-		    tableDataSet.push(newRow);
-	    }
+            var newRow = [ no++, line.series.name ];
+            data.forEach(function (row) {
+                newRow.push(row.y);
+            });
+            tableDataSet.push(newRow);
+        }
     };
 
-	if (tableDataSet == []) {
-		return;
-	}
+    if (tableDataSet == []) {
+        return;
+    }
 
-	var columns = [ ];
-	columns.push({ "title" : "No" });
-	columns.push({ "title" : "Test name" });
+    var columns = [ ];
+    columns.push({ "title" : "No" });
+    columns.push({ "title" : "Test name" });
     
     var dataColumns = chartData[0].data
     for (i = 0; i < dataColumns.length; i++) {  
-	    columns.push({ "title": "#" + dataColumns[i].xLabel });
-	}
-	
+        columns.push({ "title": "#" + dataColumns[i].xLabel });
+    }
+    
     if (tableObj) {
         tableObj.fnClearTable();
         tableObj.fnDestroy();
     }
     jQuery('#tableContainer').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="tableData"></table>');
-	tableObj = jQuery('#tableData').dataTable( {
+    tableObj = jQuery('#tableData').dataTable( {
         "data": tableDataSet,
         "columns": columns,
         "searching": false

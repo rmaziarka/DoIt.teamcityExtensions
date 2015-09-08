@@ -67,33 +67,33 @@ Functions - deploy only non-DSC configurations
 Adhoc     - don't use configuration files, but deploy configurations $ConfigurationsFilter to nodes $NodesFilter
 #>
 param(
-	[Parameter(Mandatory=$false)]
-	[string]
-	$ProjectRootPath = '.', # Modify this path according to your project structure. This is relative to the directory where deploy.ps1 resides ($PSScriptRoot).
-
-	[Parameter(Mandatory=$false)]
-	[string]
-	$PSCILibraryPath = '..\..\..', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
-
-	[Parameter(Mandatory=$false)]
-	[string]
-	$PackagesPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.  Leave empty for packageless deployment.
+    [Parameter(Mandatory=$false)]
+    [string]
+    $ProjectRootPath = '.', # Modify this path according to your project structure. This is relative to the directory where deploy.ps1 resides ($PSScriptRoot).
 
     [Parameter(Mandatory=$false)]
-	[string]
-	$DeployConfigurationPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath (by default '$PackagePath\DeployScripts\configuration').
-
-	[Parameter(Mandatory=$false)]
-	[string[]]
-	$Environment = @('ExperimentalAgents'),
+    [string]
+    $PSCILibraryPath = '..\..\..', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
 
     [Parameter(Mandatory=$false)]
-	[hashtable]
-	$TokensOverride,
-	
-	[Parameter(Mandatory=$false)]
-	[string[]]
-	$ServerRolesFilter = 'Psci',
+    [string]
+    $PackagesPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.  Leave empty for packageless deployment.
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $DeployConfigurationPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath (by default '$PackagePath\DeployScripts\configuration').
+
+    [Parameter(Mandatory=$false)]
+    [string[]]
+    $Environment = @('ExperimentalAgents'),
+
+    [Parameter(Mandatory=$false)]
+    [hashtable]
+    $TokensOverride,
+    
+    [Parameter(Mandatory=$false)]
+    [string[]]
+    $ServerRolesFilter = 'Psci',
     
     [Parameter(Mandatory=$false)]
     [string[]]
@@ -102,11 +102,11 @@ param(
     [Parameter(Mandatory=$false)]
     [string[]]
     $NodesFilter,
-	
+    
     [Parameter(Mandatory=$false)]
     [ValidateSet('All', 'DSC', 'Functions', 'Adhoc')]
-	[string]
-	$DeployType = 'All'
+    [string]
+    $DeployType = 'All'
 )
 
 $global:ErrorActionPreference = "Stop"
@@ -116,11 +116,11 @@ try {
     Push-Location -Path $PSScriptRoot
 
     if (![System.IO.Path]::IsPathRooted($PSCILibraryPath)) {
-    	$PSCILibraryPath = Join-Path -Path $ProjectRootPath -ChildPath $PSCILibraryPath
+        $PSCILibraryPath = Join-Path -Path $ProjectRootPath -ChildPath $PSCILibraryPath
     }
     if (!(Test-Path "$PSCILibraryPath\PSCI.psd1")) {
         Write-Output -InputObject "Cannot find PSCI library at '$PSCILibraryPath'. Please ensure your ProjectRootPath and PSCILibraryPath parameters are correct."
-    	exit 1
+        exit 1
     }
     Import-Module "$PSCILibraryPath\PSCI.psd1" -Force
 
@@ -128,7 +128,7 @@ try {
     Remove-Item -LiteralPath $PSCIGlobalConfiguration.LogFile -ErrorAction SilentlyContinue
 
     Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -DeployConfigurationPath $DeployConfigurationPath -ValidatePackagesPath
-	
+    
     ############# Deployment - no custom code here, you need to put your configuration scripts under 'configuration' directory
 
     # This will start the deployment according to configuration files from $DeployConfigurationPath

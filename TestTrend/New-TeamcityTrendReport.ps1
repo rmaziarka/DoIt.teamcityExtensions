@@ -253,36 +253,36 @@ function Get-TeamCityTrendReportSql {
         @query  AS NVARCHAR(MAX)
 
     if object_id('tempdb..#builds') is not null
-	    drop table #builds;
+        drop table #builds;
 
     if object_id('tempdb..#tests') is not null
-	    drop table #tests;
+        drop table #tests;
 
     select top {1}
         build_id,
         build_number,
         cast(row_number() over (partition by build_number order by build_number) as varchar) as build_row,
-		count(build_number) over (partition by build_number order by build_number) non_distinct_build_numbers,
+        count(build_number) over (partition by build_number order by build_number) non_distinct_build_numbers,
         success
     into
-	    #builds
+        #builds
     from (
         select
-		    build_id, 
-		    build_number,
+            build_id, 
+            build_number,
             cast(1 as bit) as success
-	    from
-		    dbo.running r
-	    where 
-		    build_id = {0}
-	    union all
-	    select
-	        h.build_id, 
-		    h.build_number,
+        from
+            dbo.running r
+        where 
+            build_id = {0}
+        union all
+        select
+            h.build_id, 
+            h.build_number,
             cast(case when h.status = 1 then 1 else 0 end as bit) as success
-	    from
-		    dbo.history h
-	    inner join
+        from
+            dbo.history h
+        inner join
             (select 
                 build_type_id
              from
@@ -296,41 +296,41 @@ function Get-TeamCityTrendReportSql {
                 dbo.history
              where
                 build_id = {0}
-	       ) currentBuild
-	    on currentBuild.build_type_id = h.build_type_id
+           ) currentBuild
+        on currentBuild.build_type_id = h.build_type_id
         where
             h.status <> 0 -- cancelled
     ) x
     where 
-		exists (select 1 from dbo.test_info where build_id = x.build_id)
+        exists (select 1 from dbo.test_info where build_id = x.build_id)
     order by 
-		build_id desc;
+        build_id desc;
 
     select
-		build_id,
-		case when non_distinct_build_numbers = 1 then b.build_number else b.build_number + '_' + build_row end build_number,
-		success
-	from
-		#builds b
+        build_id,
+        case when non_distinct_build_numbers = 1 then b.build_number else b.build_number + '_' + build_row end build_number,
+        success
+    from
+        #builds b
 
-	select
-		b.build_id,
-		tn.test_name,
-		ti.duration
-	into
-		#tests
-	from
-		#builds b
-	inner join
-	    dbo.test_info ti
-	on ti.build_id = b.build_id
-	inner join
-		dbo.test_names tn
-	on tn.id = ti.test_name_id
-	/*inner join
-		dbo.test_info tiFilter
-	on  tiFilter.test_name_id = tn.id
-	and tiFilter.build_id = (select top 1 build_id from #builds order by build_id desc)*/
+    select
+        b.build_id,
+        tn.test_name,
+        ti.duration
+    into
+        #tests
+    from
+        #builds b
+    inner join
+        dbo.test_info ti
+    on ti.build_id = b.build_id
+    inner join
+        dbo.test_names tn
+    on tn.id = ti.test_name_id
+    /*inner join
+        dbo.test_info tiFilter
+    on  tiFilter.test_name_id = tn.id
+    and tiFilter.build_id = (select top 1 build_id from #builds order by build_id desc)*/
     where
         ti.status <> 0 -- ignored tests
 
@@ -342,7 +342,7 @@ function Get-TeamCityTrendReportSql {
                 ).value('.', 'NVARCHAR(MAX)') 
             ,1,1,'')
 
-	
+    
     set @query = 'select test_name, ' + @cols + '
                   from 
                  (

@@ -161,7 +161,7 @@ function Wait-JMeter {
 
                 # wait additional minute for shutdown
                 $killTimeout = 60
-                if (!$process.WaitForExit($killTimeout * 1000)) {				
+                if (!$process.WaitForExit($killTimeout * 1000)) {                
                     Write-Log -Info "JMeter process is still running after $killTimeout s - killing."
                     Stop-ProcessForcefully -Process $process -KillTimeoutInSeconds $killTimeout
                 }
@@ -199,7 +199,7 @@ function Stop-ProcessForcefully {
     Stop-ProcessForcefully -Process $process
     #>
 
-	[CmdletBinding()]
+    [CmdletBinding()]
     [OutputType([void])]
     param(
         [Parameter(Mandatory=$true)]
@@ -210,24 +210,24 @@ function Stop-ProcessForcefully {
         [int]
         $KillTimeoutInSeconds
     )
-	
-	$childProcesses = Get-WmiObject -Class Win32_Process -Filter "ParentProcessID=$($Process.Id)" | Select-Object -ExpandProperty ProcessID
-	
-	try { 
-		if ($childProcesses) {
-			Write-Log -Info "Killing child processes: $childProcesses"
-			Stop-Process -Id $childProcesses -Force
-		} else {
-			Write-Log -Info "No child processes for pid $($Process.Id)"
-		}
+    
+    $childProcesses = Get-WmiObject -Class Win32_Process -Filter "ParentProcessID=$($Process.Id)" | Select-Object -ExpandProperty ProcessID
+    
+    try { 
+        if ($childProcesses) {
+            Write-Log -Info "Killing child processes: $childProcesses"
+            Stop-Process -Id $childProcesses -Force
+        } else {
+            Write-Log -Info "No child processes for pid $($Process.Id)"
+        }
         Write-Log -Info "Killing process $($Process.Id)"
-		$Process.Kill()
-	} catch {
-		Write-Log -Warn "Kill method thrown exception: $_ - waiting for exit."
-	}
-	if (!$Process.WaitForExit($KillTimeoutInSeconds * 1000)) {
-		throw "Cannot kill process (pid $($Process.Id)) - still running after $($KillTimeoutInSeconds * 1000 * 2) s"
-	}
+        $Process.Kill()
+    } catch {
+        Write-Log -Warn "Kill method thrown exception: $_ - waiting for exit."
+    }
+    if (!$Process.WaitForExit($KillTimeoutInSeconds * 1000)) {
+        throw "Cannot kill process (pid $($Process.Id)) - still running after $($KillTimeoutInSeconds * 1000 * 2) s"
+    }
     Write-Log -Info "Process $($Process.Id) killed along with its children."
 }
 

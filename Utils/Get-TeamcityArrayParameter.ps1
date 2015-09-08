@@ -38,8 +38,8 @@ function Get-TeamcityArrayParameter {
     #>
 
     [CmdletBinding()]
-	[OutputType([string[]])]
-	param(
+    [OutputType([string[]])]
+    param(
         [Parameter(Mandatory = $false)]
         [string]
         $Param

@@ -24,14 +24,14 @@ SOFTWARE.
 
 function Invoke-CopyFilesMetaRunner {
     <#
-	.SYNOPSIS
-		A helper for TeamCity MetaRunner that copies files locally.
+    .SYNOPSIS
+        A helper for TeamCity MetaRunner that copies files locally.
 
-	.PARAMETER Path
-		The file or directory path that should be copied locally or uploaded to remote server.
+    .PARAMETER Path
+        The file or directory path that should be copied locally or uploaded to remote server.
 
-	.PARAMETER Destination
-		The path where the file will be saved to (must be directory).
+    .PARAMETER Destination
+        The path where the file will be saved to (must be directory).
 
     .PARAMETER Include
         The files to be included in copying.
@@ -42,13 +42,13 @@ function Invoke-CopyFilesMetaRunner {
     .PARAMETER ClearDestination
         If $true then all content from $Destination will be deleted.
 
-	.EXAMPLE			
+    .EXAMPLE            
         Invoke-CopyFilesMetaRunner -Path c:\temp\test.exe -Destination c:\temp\
 
-	#>
-	[CmdletBinding()]
-	[OutputType([void])]
-	param(
+    #>
+    [CmdletBinding()]
+    [OutputType([void])]
+    param(
         [Parameter(Mandatory = $true)]
         [string[]]
         $Path,

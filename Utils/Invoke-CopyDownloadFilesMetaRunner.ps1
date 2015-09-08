@@ -24,17 +24,17 @@ SOFTWARE.
 
 function Invoke-CopyDownloadFilesMetaRunner {
     <#
-	.SYNOPSIS
-		A helper for TeamCity MetaRunner that downloads files.
+    .SYNOPSIS
+        A helper for TeamCity MetaRunner that downloads files.
 
-	.PARAMETER Path
-		The file or directory path that should be copied locally or downloaded from remote server.
+    .PARAMETER Path
+        The file or directory path that should be copied locally or downloaded from remote server.
 
     .PARAMETER ConnectionParams
         Connection parameters created by [[New-ConnectionParameters]] function.
 
-	.PARAMETER Destination
-		The path where the file will be saved to (must be directory).
+    .PARAMETER Destination
+        The path where the file will be saved to (must be directory).
 
     .PARAMETER Include
         The files to be included in copying.
@@ -45,13 +45,13 @@ function Invoke-CopyDownloadFilesMetaRunner {
     .PARAMETER ClearDestination
         If $true then all content from $Destination will be deleted.
 
-	.EXAMPLE			
+    .EXAMPLE            
         Invoke-CopyDownloadFilesMetaRunner -Path c:\temp\test.exe -Destination c:\temp\ -ConnectionParams (New-ConnectionParameters -Nodes 'remote-server.com')
 
-	#>
-	[CmdletBinding()]
-	[OutputType([void])]
-	param(
+    #>
+    [CmdletBinding()]
+    [OutputType([void])]
+    param(
         [Parameter(Mandatory = $true)]
         [string[]]
         $Path,

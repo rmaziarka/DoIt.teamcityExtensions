@@ -24,52 +24,52 @@ SOFTWARE.
 
 function Invoke-RunJasmineTestsMetaRunner {
     <#
-	.SYNOPSIS
+    .SYNOPSIS
     A helper for TeamCity MetaRunner that runs javascript unit tests with code coverage.
 
     .DESCRIPTION
     Executes Jasmine tests using PhantomJS. Coverage information is gathered using JsCover.
 
     .PARAMETER PhantomJsPath
-	Path to PhantomJS executable.
+    Path to PhantomJS executable.
 
-	.PARAMETER RunJasminePath
-	Path to Jasmine script.
+    .PARAMETER RunJasminePath
+    Path to Jasmine script.
 
-	.PARAMETER TestRunnerPagePath
-	Path to test runner html page. If tests are executed with coverage it has to be relative to DocumentRoot
+    .PARAMETER TestRunnerPagePath
+    Path to test runner html page. If tests are executed with coverage it has to be relative to DocumentRoot
 
-	.PARAMETER JsCoverPath
-	Path to JsCover (typically JsCover-all.jar).
+    .PARAMETER JsCoverPath
+    Path to JsCover (typically JsCover-all.jar).
 
     .PARAMETER DocumentRoot
-	Path to the root directory of tested scripts.
+    Path to the root directory of tested scripts.
 
     .PARAMETER OutputDir
-	Path to the directory where results will be stored. If exists it will be cleared.
+    Path to the directory where results will be stored. If exists it will be cleared.
 
-	.PARAMETER NoInstrumentPaths
-	URLs not to be instrumented by JsCover.
+    .PARAMETER NoInstrumentPaths
+    URLs not to be instrumented by JsCover.
 
-	.PARAMETER NoInstrumentRegExp
-	Regular expressions of URLs not to be instrumented by JsCover.
+    .PARAMETER NoInstrumentRegExp
+    Regular expressions of URLs not to be instrumented by JsCover.
 
-	.PARAMETER JsCoverServerPort
-	The port for JsCover web server to listen on
+    .PARAMETER JsCoverServerPort
+    The port for JsCover web server to listen on
 
-	.PARAMETER WaitForJsCoverServer
-	Time to wait in seconds for JsCover server to stand up.
+    .PARAMETER WaitForJsCoverServer
+    Time to wait in seconds for JsCover server to stand up.
 
-	.EXAMPLE			
+    .EXAMPLE            
     Invoke-RunJasmineTestsMetaRunner -PhantomJsPath 'bin\phantomjs.exe' -RunJasminePath 'bin\run-jscover-jasmine.js' -TestRunnerPagePath 'Source\Web.Tests\SpecRunner.html' 
 
     Invoke-RunJasmineTestsMetaRunner -PhantomJsPath 'bin\phantomjs.exe' -RunJasminePath 'bin\run-jscover-jasmine.js' -TestRunnerPagePath 'Web.Tests\SpecRunner.html' `
         -JsCoverPath 'bin\JSCover-all.jar' -DocumentRoot 'Source' -OutputDir '.jscover' `
         -NoInstrumentPaths @('Web/Scripts', 'Web.Tests') -NoInstrumentRegExp '.*_test.js'
 
-	#>
-	[CmdletBinding(DefaultParametersetName='WithoutCoverage')]
-	[OutputType([void])]
+    #>
+    [CmdletBinding(DefaultParametersetName='WithoutCoverage')]
+    [OutputType([void])]
     param(
         [Parameter(ParameterSetName='WithoutCoverage', Mandatory=$true)]
         [Parameter(ParameterSetName='WithCoverage', Mandatory=$true)]
@@ -190,28 +190,28 @@ function Start-JsCoverServer {
     .SYNOPSIS
     Starts JsCover local web server.
     
-	.PARAMETER JsCoverPath
-	Path to JsCover (typically JsCover-all.jar).
+    .PARAMETER JsCoverPath
+    Path to JsCover (typically JsCover-all.jar).
 
     .PARAMETER DocumentRoot
-	Path to the root directory of tested scripts.
+    Path to the root directory of tested scripts.
 
     .PARAMETER OutputDir
-	Path to the directory where results will be stored. If exists it will be cleared.
+    Path to the directory where results will be stored. If exists it will be cleared.
 
-	.PARAMETER NoInstrumentPaths
-	URLs not to be instrumented by JsCover.
+    .PARAMETER NoInstrumentPaths
+    URLs not to be instrumented by JsCover.
 
-	.PARAMETER NoInstrumentRegExp
-	Regular expressions of URLs not to be instrumented by JsCover.
+    .PARAMETER NoInstrumentRegExp
+    Regular expressions of URLs not to be instrumented by JsCover.
 
-	.PARAMETER Port
-	The port to listen on
+    .PARAMETER Port
+    The port to listen on
 
-	.PARAMETER WaitForServerWarmup
-	Time to wait in seconds for JsCover server to stand up.
+    .PARAMETER WaitForServerWarmup
+    Time to wait in seconds for JsCover server to stand up.
 
-	.EXAMPLE			
+    .EXAMPLE            
     Start-JsCoverServer -JsCoverPath 'bin\JSCover-all.jar' -DocumentRoot 'Source' -OutputDir '.jscover' `
         -NoInstrumentPaths @('Web/Scripts', 'Web.Tests') -NoInstrumentRegExp '.*_test.js' -WaitForServerWarmup 4
     #>

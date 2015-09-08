@@ -38,8 +38,8 @@ function Get-TeamcityHashtableParameter {
     #>
 
     [CmdletBinding()]
-	[OutputType([hashtable])]
-	param(
+    [OutputType([hashtable])]
+    param(
         [Parameter(Mandatory = $false)]
         [string]
         $Param

@@ -24,14 +24,14 @@ SOFTWARE.
 
 function Invoke-ClearDirectoryMetaRunner {
     <#
-	.SYNOPSIS
-		A helper for TeamCity MetaRunner that clears current directory using specified regex.
+    .SYNOPSIS
+        A helper for TeamCity MetaRunner that clears current directory using specified regex.
 
-	.PARAMETER IncludeRegex
-		Paths that match this regex will be deleted.
+    .PARAMETER IncludeRegex
+        Paths that match this regex will be deleted.
 
     .PARAMETER ExcludeRegex
-		Paths that match this regex will be ignored.
+        Paths that match this regex will be ignored.
 
     .PARAMETER BaseDirectory
         Root directory where the search will start. If empty, current location will be used.
@@ -39,16 +39,16 @@ function Invoke-ClearDirectoryMetaRunner {
     .PARAMETER ItemsToMatch
         Determins which items will be matched (FilesAndDirectories, Files or Directories).
 
-	.PARAMETER VerboseLog
-		Set to $true for verbose output.
+    .PARAMETER VerboseLog
+        Set to $true for verbose output.
 
-	.EXAMPLE			
+    .EXAMPLE            
         Invoke-ClearDirectoryMetaRunner -Regex '(bin|obj)$' -ItemsToMatch Directories -Verbose
 
-	#>
-	[CmdletBinding()]
-	[OutputType([void])]
-	param(
+    #>
+    [CmdletBinding()]
+    [OutputType([void])]
+    param(
         [Parameter(Mandatory = $false)]
         [string]
         $IncludeRegex,
