@@ -44,7 +44,6 @@ Export-ModuleMember -Function `
     Invoke-SqlMetaRunner, `
     Invoke-DatabaseMetaRunner, `
     Invoke-RemotePowershellMetaRunner, `
-    Invoke-RunJasmineTestsMetaRunner, `
     Start-JMeter, `
     Test-RunCondition, `
     Wait-JMeter
