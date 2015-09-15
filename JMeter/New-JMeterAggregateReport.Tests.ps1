@@ -29,7 +29,7 @@ Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psd1" -Force
 
         Context "when invoking with existing JTL" {
             
-            New-JmeterAggregateReport -JMeterDir 'c:\a\apache-jmeter-2.13' -InputJtlFilePath 'c:\a\globalAggregateResult.jtl' -OutputDir 'c:\a\test' -JavaPath 'c:\jdk7_x64\bin\java.exe'
+            New-JmeterAggregateReport -JMeterDir 'c:\a\apache-jmeter-2.13' -InputJtlFilePath 'c:\a\globalAggregateResult.jtl' -OutputDir 'c:\a\test' -JavaPath 'c:\jdk7_x64\bin\java.exe -Timeout 1000'
 
             It "should work" {
               
