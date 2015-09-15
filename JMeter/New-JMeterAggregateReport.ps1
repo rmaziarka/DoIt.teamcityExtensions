@@ -52,6 +52,9 @@ function New-JMeterAggregateReport {
     String containing warning thresholds for each column. For example if $WarningThresholds = 'Average=3000,Max=30000,Error %=0', 
     samples with Average > 3000, Max > 30000 or Error % > 0 will be marked red in the output html.
 
+    .PARAMETER TimeoutInSeconds
+    Timeout to wait for external process (CMDRunner) to be finished.
+
     .PARAMETER CustomCMDRunnerCommandLines
     List of custom command line parameters - each will be passed to a separate invocation of CMDRunner.
 
@@ -88,6 +91,10 @@ function New-JMeterAggregateReport {
         [Parameter(Mandatory=$false)]
         [string]
         $WarningThresholds = 'Average=3000,Median=3000,90% Line=3000,Max=30000,Error %=0',
+
+        [Parameter(Mandatory=$false)]
+        [int]
+        $TimeoutInSeconds,
 
         [Parameter(Mandatory=$false)]
         [string[]]
@@ -150,7 +157,7 @@ function New-JMeterAggregateReport {
             }
             if ($shouldRun) { 
                 $cmdArgs = "-jar `"$cmdRunnerPath`" --tool Reporter $cmdLine"
-                [void](Start-ExternalProcess -Command $javaPath -ArgumentList $cmdArgs)
+                [void](Start-ExternalProcess -Command $javaPath -ArgumentList $cmdArgs -TimeoutInSeconds $TimeoutInSeconds)
             }
         }
     }
