@@ -39,7 +39,7 @@ Base directory where PSCI library resides, relative to $ProjectRootPath.
 Path to the directory where packages reside, relative to $ProjectRootPath.
 
 .PARAMETER DeployConfigurationPath
-Path to the directory where configuration files reside, relative to $ProjectRootPath. By default '$PackagePath\DeployScripts\configuration'.
+Path to the directory where configuration files reside, relative to $ProjectRootPath. By default '$ProjectRootPath\deploy' or '$PackagesPath\DeployScripts\deploy'.
 
 .PARAMETER Environment
 Environment where the packages should be deployed (chooses ServerRoles / Tokens specified in the configuration scripts).
@@ -52,19 +52,19 @@ you can pass them using this parameter. It should be a 'flat' hashtable containi
 Allows to limit server roles to deploy.
 
 .PARAMETER NodesFilter
-List of Nodes where configurations will be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
-If not set, configurations will be deployed to all nodes according to the ServerRoles defined in the configuration files.
+List of Nodes where steps will be deployed - can be used if you don't want to deploy to all nodes defined in the configuration files.
+If not set, steps will be deployed to all nodes according to the ServerRoles defined in the configuration files.
 
-.PARAMETER ConfigurationsFilter
-List of Configurations to deploy - can be used if you don't want to deploy all configurations defined in the configuration files.
-If not set, configurations will be deployed according to the ServerRoles defined in the configuration files.
+.PARAMETER StepsFilter
+List of Steps to deploy - can be used if you don't want to deploy all steps defined in the configuration files.
+If not set, steps will be deployed according to the ServerRoles defined in the configuration files.
 
 .PARAMETER DeployType
 Deployment type:
 All       - deploy everything according to configuration files (= Provision + Deploy)
 DSC       - deploy only DSC configurations
-Functions - deploy only non-DSC configurations
-Adhoc     - don't use configuration files, but deploy configurations $ConfigurationsFilter to nodes $NodesFilter
+Functions - deploy only Powershell functions
+Adhoc     - don't use configuration files, but deploy steps $StepsFilter to nodes $NodesFilter
 #>
 param(
     [Parameter(Mandatory=$false)]
@@ -81,7 +81,7 @@ param(
 
     [Parameter(Mandatory=$false)]
     [string]
-    $DeployConfigurationPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath (by default '$PackagePath\DeployScripts\configuration').
+    $DeployConfigurationPath = '', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath (by default '$ProjectRootPath\deploy' or '$PackagePath\DeployScripts\deploy').
 
     [Parameter(Mandatory=$false)]
     [string[]]
@@ -97,7 +97,7 @@ param(
     
     [Parameter(Mandatory=$false)]
     [string[]]
-    $ConfigurationsFilter,
+    $StepsFilter,
 
     [Parameter(Mandatory=$false)]
     [string[]]
@@ -134,7 +134,7 @@ try {
     # This will start the deployment according to configuration files from $DeployConfigurationPath
     Start-Deployment -Environment $Environment `
                      -ServerRolesFilter $ServerRolesFilter `
-                     -ConfigurationsFilter $ConfigurationsFilter `
+                     -StepsFilter $StepsFilter `
                      -NodesFilter $NodesFilter `
                      -TokensOverride $TokensOverride `
                      -DeployType $DeployType            

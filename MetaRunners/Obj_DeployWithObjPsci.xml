@@ -6,7 +6,7 @@
       <param name="psci.deploy.environment" value="" spec="text description='Comma- or newline-delimited list of environments where the package will be deployed (as defined in deployConfiguration.ps1)'  validationMode='not_empty' label='Environment' display='normal'" />
       <param name="psci.deploy.serverRolesToDeploy" value="" spec="text description='List of server roles to deploy (leave empty for all, as defined for the selected environment in deployConfiguration.ps1)'  validationMode='any' label='ServerRoles to deploy' display='normal'" />
       <param name="psci.deploy.nodesFilter" value="" spec="text description='List of destination nodes (servers) - leave empty to use nodes defined in configuration files'  validationMode='any' label='Nodes override' display='normal'" />
-      <param name="psci.deploy.configurationsFilter" value="" spec="text description='List of configurations which will be deployed to destination nodes - leave empty to use configurations defined in configuration files'  validationMode='any' label='Configurations override' display='normal'" />
+      <param name="psci.deploy.configurationsFilter" value="" spec="text description='List of steps which will be run on destination nodes - leave empty to use steps defined in configuration files'  validationMode='any' label='Steps override' display='normal'" />
       <param name="psci.deploy.tokensOverride" value="" spec="text description='Comma- or newline-delimited tokens to override during deployment - e.g. User=Me,Password=secret. You need to escape , with \, and \ with \\.'  validationMode='any' label='Tokens override' display='normal'" />
       <param name="psci.deploy.deployps1" value="DeployScripts\deploy.ps1" spec="text description='Path to deploy.ps1' validationMode='not_empty' label='Path to deploy.ps1' display='normal'" />
       <param name="psci.deploy.projectRootPath" value="" spec="text description='Base project directory (leave empty for default defined in deploy.ps1)' validationMode='any' label='Path to project root' display='normal'" />
@@ -69,9 +69,16 @@ if ('%psci.deploy.nodesFilter%') {
 '@
 }
 if ('%psci.deploy.configurationsFilter%') {
-  $params.ConfigurationsFilter = Get-TeamcityArrayParameter -Param @' 
+  $stepsFilter = Get-TeamcityArrayParameter -Param @'
 %psci.deploy.configurationsFilter%
 '@
+
+  $content = Get-Content -Path "%psci.deploy.deployps1%" -ReadCount 0 | Out-String
+  if ($content -imatch '\$ConfigurationsFilter') {
+    $params.ConfigurationsFilter = $stepsFilter
+  } else {
+    $params.StepsFilter = $stepsFilter
+  }
 }
 if ('%psci.deploy.tokensOverride%') {
   $params.TokensOverride = $tokensOverride
