@@ -31,8 +31,8 @@ function ConvertTo-EnhancedHTMLFragmentRickshawChart {
     .PARAMETER JavascriptDataVariableName
     Name of Javascript variable created by ConvertTo-EnhancedHTMLFragmentRickshawJavascriptData.
 
-    .PARAMETER TestTimeThresholdData
-    Data read from CSV file containing test time thresholds (columns TestName, PassedTime, FailedTime).
+    .PARAMETER JavascriptTestTimeThresholdDataVariableName
+    Name of Javascript variable with hashtable containing test time thresholds.
 
     .PARAMETER Width
     Chart width.
