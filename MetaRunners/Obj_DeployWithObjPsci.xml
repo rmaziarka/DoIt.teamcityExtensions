@@ -25,7 +25,11 @@
           <param name="jetbrains_powershell_script_code"><![CDATA[$global:ErrorActionPreference = "Stop"
 $psciAgentPath = [Environment]::GetEnvironmentVariable('PSCI_PATH', 'Machine')
 if (!$psciAgentPath ) {
-  Write-Error "No PSCI_PATH environment variable. Please ensure PSCI is installed on agent."
+  Write-Host "No PSCI_PATH environment variable. Please ensure PSCI is installed on agent."
+  exit 1
+}
+if (!(Test-Path -Path '%psci.deploy.deployps1%')) {
+  Write-Host "Cannot find file '%psci.deploy.deployps1%' in directory '$((Get-Location).Path)'"
   exit 1
 }
 try { 

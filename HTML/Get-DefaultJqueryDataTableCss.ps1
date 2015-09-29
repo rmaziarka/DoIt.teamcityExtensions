@@ -84,15 +84,29 @@ table.dataTable tfoot th { padding: 8px 10px }
     text-align: center;
     width: 100%;
 }
+
 #tableData_wrapper {
-    display: inline-block;
+    margin: 0 auto;
     max-width: 1300px;
-    overflow-x: scroll;
 }
+
 table.dataTable {
     width: auto;
     white-space: nowrap;
 }
+
+
+table.dataTable td {
+    max-width: 620px;
+    white-space: nowrap;
+    overflow: hidden; 
+    text-overflow: ellipsis;
+}
+
+.ui-tooltip {
+    max-width: 1200px;
+}
+
 "@
 
 }

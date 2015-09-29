@@ -315,6 +315,21 @@ return @"
     margin-right: 5px;
 }
 
+/* test threshold - failed */
+.ttf {
+    background-color: #FF6961 !important;
+}
+
+/* test threshold - inconclusive */
+.tti {
+    background-color: #FDFD96 !important;
+}
+
+/* test threshold - passed */
+.ttp {
+    background-color: #77DD77 !important;
+}
+
 "@
 
 }
