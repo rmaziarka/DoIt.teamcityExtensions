@@ -75,6 +75,7 @@ function ConvertTo-EnhancedHTMLFragmentRickshawChart {
         <label>Exclude build numbers: <input id="excludeBuilds" type="text" /></label>
         <label>Test name regex: <input id="testNameRegex" type="text" /></label>
         <label>Relative to build: <input id="relativeToBuild" type="text" /></label>
+        <input id="relativeToBuildPercent" type="checkbox">Percent</input>
         <label>Chart type:
         <select id="chartRenderer">
             <option value="line">Line</option>
@@ -116,6 +117,11 @@ var dataModel = function() {
     return self;
 }();
 
+var GraphUnitEnum = {
+     ms: 0,
+     percent: 1
+};
+
 var inputModel = function() {
     var self = {
         numLastBuilds: 0,
@@ -125,6 +131,8 @@ var inputModel = function() {
         showFailedBuilds: false,
         relativeToBuild: '',
         relativeToBuildInt: null,
+        relativeToBuildPercent: false,
+        graphUnit: GraphUnitEnum.ms,
         graphRenderer: 'line',
 
         refreshModel: function() { 
@@ -139,6 +147,9 @@ var inputModel = function() {
             self.relativeToBuild = jQuery('#relativeToBuild')[0].value;
             self.relativeToBuildInt = parseInt(self.relativeToBuild, 10);
             self.graphRenderer = jQuery('#chartRenderer option:selected')[0].value;
+
+            var relativeToBuildPercent = jQuery('#relativeToBuildPercent').prop('checked');
+            self.graphUnit = (self.relativeToBuild && relativeToBuildPercent) ? GraphUnitEnum.percent : GraphUnitEnum.ms;
         },
 
         validateRelativeToBuild: function(chartData) {
@@ -236,12 +247,20 @@ var inputModel = function() {
                 return null;
             }
             var baseBuild = jQuery.grep(testSeriesData, function (element, index) {
-                    return (element.xLabel == self.relativeToBuild);
+                return (element.xLabel == self.relativeToBuild);
             });
             if (baseBuild.length == 0) {
                 return;
             }
             return baseBuild[0].y;
+        },
+
+        calculateRelativeValue: function (baseValue, value) {
+            var result = (baseValue == null || value == null ? null : value - baseValue);
+            if (result != null && self.graphUnit == GraphUnitEnum.percent) {
+                result = Math.round(result / baseValue * 100);
+            }
+            return result;
         },
 
         filterTestSeries: function(testSeries) {
@@ -263,23 +282,32 @@ var inputModel = function() {
                 }
                 var yValue = element.y;
                 if (element.y != null) {
-                    hasAtLeastOneValue = true;
                     if (self.relativeToBuild && !self.isRelativeToBuildDynamic()) {
-                        yValue = baseBuildValue == null ? null : yValue - baseBuildValue;
+                        yValue = self.calculateRelativeValue(baseBuildValue, yValue);
                     }
-                }             
+                }
+                if (yValue != null) {
+                    hasAtLeastOneValue = true;
+                }
                 return { x : x++, y: yValue, xLabel: element.xLabel };
             });
 
             // if relativeToBuild is dynamic (negative), we need to filter new data once again, in order to prevent using values that have been filtered out
             if (self.isRelativeToBuildDynamic()) {
+                hasAtLeastOneValue = false;
                 newData = jQuery.map(newData, function (element, index) {
                     var yValue = null;
                     if (index >= -self.relativeToBuildInt) {
                         var baseBuildValue = newData[index + self.relativeToBuildInt].y;
-                        yValue = baseBuildValue == null ? null : element.y - baseBuildValue;
+                        yValue = self.calculateRelativeValue(baseBuildValue, element.y);
+                        if (yValue != null) {
+                            hasAtLeastOneValue = true;
+                        }
+                        return { x: element.x, y: yValue, xLabel: element.xLabel };
+                    } else {
+                        return null;
                     }
-                    return { x: element.x, y: yValue, xLabel: element.xLabel };
+                    
                 });
             }
 
@@ -340,7 +368,12 @@ var graphModel = function() {
                     return xLabelMap[x];
                 },
                 yFormatter: function(y) {
-                    return y + ' ms';
+                    if (inputModel.graphUnit == GraphUnitEnum.ms) { 
+                        return y + ' ms';
+                    } else if (inputModel.graphUnit == GraphUnitEnum.percent) {
+                        return y + '%';
+                    }
+                    return y;
                 }
             } );
 
@@ -372,11 +405,15 @@ var graphModel = function() {
                     if (y == 0) {
                         return '';
                     }
-                    var seconds = y / 1000;
-                    if (seconds > 10 || y % 10 == 0) {
-                        return seconds + 's';
-                    } else {
-                        return seconds.toFixed(2) + 's';
+                    if (inputModel.graphUnit == GraphUnitEnum.ms) { 
+                        var seconds = y / 1000;
+                        if (seconds > 10 || y % 10 == 0) {
+                            return seconds + 's';
+                        } else {
+                            return seconds.toFixed(2) + 's';
+                        }
+                    } else if (inputModel.graphUnit == GraphUnitEnum.percent) {
+                        return y + '%';
                     }
             
                 },
@@ -451,7 +488,7 @@ var tableModel = function() {
                                 relativeColumnName = col.xLabel;
                             }
                             if (relativeColumnName != inputModel.relativeToBuild) {
-                                cellClassName = cellData < 0 ? 'ttp' : 'ttf'
+                                cellClassName = cellData <= 0 ? 'ttp' : 'ttf'
                             }
                         } else if (dataModel.hasTestTimeThresholdData()) { 
                             var testName = rowData[1];
@@ -473,7 +510,17 @@ var tableModel = function() {
                         if (cellClassName) { 
                             `$(cell).addClass(cellClassName);
                         }
-                    }
+                    },
+                    render: function(data, type, row, meta) {
+                        if (data == null) {
+                            return data;
+                        }
+                        if (inputModel.graphUnit == GraphUnitEnum.percent && data !== Infinity && data !== -Infinity) {
+                            return data + '%';
+                        }
+                        return data;
+                    },
+                    type: (inputModel.graphUnit == GraphUnitEnum.percent ? 'num-fmt' : 'num')
                 };
                 if (dataColumns[i].xLabel == inputModel.relativeToBuild) {
                     columnOptions.className = 'relativeBuildColumn'
