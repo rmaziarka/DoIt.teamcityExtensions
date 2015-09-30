@@ -58,6 +58,10 @@ function New-TeamcityTrendReport {
     .PARAMETER OutputHtmlName
     Name of output html file.
 
+    .PARAMETER InputThresholdCsvPath
+    Path to the CSV with test time thresholds - columns TestName,PassedTime,FailedTime.
+    Tests with time <= PassedTime will be marked green, Passed Time < time < FailedTime amber, and time >= FailedTime red.
+
     .PARAMETER NumberOfLastBuilds
     Number of builds that will be trended - all earlier builds will be ignored.
 
@@ -104,14 +108,19 @@ function New-TeamcityTrendReport {
         $OutputHtmlName = 'TestTrendReport.html',
 
         [Parameter(Mandatory=$false)]
+        [string]
+        $InputThresholdCsvPath,
+
+        [Parameter(Mandatory=$false)]
         [int]
         $NumberOfLastBuilds = 30,
 
         [Parameter(Mandatory=$false)]
         [switch]
         $GenerateCsvFile
-
     )
+
+    $testTimeThresholdData = Get-TestTimeThresholdData -InputThresholdCsvPath $InputThresholdCsvPath
 
     if (!(Test-Path -LiteralPath $OutputDir)) {
         Write-Log -Info "Creating directory '$OutputDir'"
@@ -155,26 +164,32 @@ function New-TeamcityTrendReport {
         $buildIdMap[[string]($row.build_id)] = $row 
     }
 
+
     Write-Log -Info "Generating html report"
     if ($GenerateCsvFile) {
         ConvertTo-CsvInBuildNameOrder -BuildIdMap $buildIdMap -TrendData $trendData -CsvOutputPath $csvOutputPath
     }
 
-    $htmlChartData = $trendData | ConvertTo-EnhancedHTMLFragmentJavascriptData -JavascriptVariableName 'TestData' -PropertySeriesName 'test_name' -BuildIdMap $buildIdMap `
+    $htmlChartData = $trendData | ConvertTo-EnhancedHTMLFragmentRickshawJavascriptData -JavascriptVariableName 'TestData' -PropertySeriesName 'test_name' -BuildIdMap $buildIdMap `
         -PrefixCode "var palette = new Rickshaw.Color.Palette({ scheme: 'munin' } );"
 
-    $htmlChart = ConvertTo-EnhancedHTMLFragmentRickshawChart -JavascriptDataVariableName 'TestData'
+    $htmlTestTimeThresholdData = $testTimeThresholdData | ConvertTo-EnhancedHTMLFragmentJavascriptHashtable -JavascriptVariableName 'TestTimeThresholdData'
 
-    $javascriptUri= @('http://code.jquery.com/jquery-1.11.3.min.js', 'http://cdn.datatables.net/1.10.8/js/jquery.dataTables.min.js', `
+    $htmlChart = ConvertTo-EnhancedHTMLFragmentRickshawChart -JavascriptDataVariableName 'TestData' -JavascriptTestTimeThresholdDataVariableName 'TestTimeThresholdData'
+
+    $javascriptUri= @('http://code.jquery.com/jquery-1.11.3.min.js', 'http://cdn.datatables.net/1.10.9/js/jquery.dataTables.min.js',
+        'http://cdn.datatables.net/fixedcolumns/3.1.0/js/dataTables.fixedColumns.min.js',
         'http://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js', 'https://code.jquery.com/ui/1.11.4/jquery-ui.min.js', 
         'http://cdnjs.cloudflare.com/ajax/libs/rickshaw/1.5.1/rickshaw.min.js')
 
     Write-Log -Info "Generating Test Trend HTML report at '$htmlOutputPath'."
 
-    $params = @{'HTMLFragments' = @($htmlChartData, $htmlChart);
+    $params = @{'HTMLFragments' = @($htmlChartData, $htmlTestTimeThresholdData, $htmlChart);
                 'JavascriptUri' = $javascriptUri;
                 'CssStyleSheet' = @((Get-DefaultJqueryDataTableCss), (Get-DefaultRickshawCss));
-                'CssUri' = @('http://cdn.datatables.net/1.10.8/css/jquery.dataTables.css', 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.min.css')
+                'CssUri' = @('http://cdn.datatables.net/1.10.9/css/jquery.dataTables.css', 
+                    'https://cdn.datatables.net/fixedcolumns/3.1.0/css/fixedColumns.dataTables.min.css',
+                    'http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.min.css')
                }
 
     ConvertTo-EnhancedHTML @params | Out-File -FilePath $htmlOutputPath -Encoding UTF8

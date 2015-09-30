@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function ConvertTo-EnhancedHTMLFragmentJavascriptData {
+function ConvertTo-EnhancedHTMLFragmentRickshawJavascriptData {
 
     <#
     .SYNOPSIS
@@ -44,7 +44,7 @@ function ConvertTo-EnhancedHTMLFragmentJavascriptData {
     Hashmap mapping build_id to sql row.
 
     .EXAMPLE
-    ConvertTo-EnhancedHTMLFragmentJavascriptData -InputObject $trendData -JavascriptVariableName 'TestData' -PropertySeriesName 'test_name' -BuildIdMap $buildIdMap `
+    ConvertTo-EnhancedHTMLFragmentRickshawJavascriptData -InputObject $trendData -JavascriptVariableName 'TestData' -PropertySeriesName 'test_name' -BuildIdMap $buildIdMap `
         -PrefixCode "var palette = new Rickshaw.Color.Palette({ scheme: 'munin' } );"
     #>
 
