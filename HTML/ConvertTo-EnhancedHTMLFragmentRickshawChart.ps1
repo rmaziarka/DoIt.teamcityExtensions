@@ -74,6 +74,7 @@ function ConvertTo-EnhancedHTMLFragmentRickshawChart {
         <label>Include build numbers: <input id="includeBuilds" type="text" /></label>
         <label>Exclude build numbers: <input id="excludeBuilds" type="text" /></label>
         <label>Test name regex: <input id="testNameRegex" type="text" /></label>
+        <label>Relative to build: <input id="relativeToBuild" type="text" /></label>
         <label>Chart type:
         <select id="chartRenderer">
             <option value="line">Line</option>
@@ -98,290 +99,464 @@ function ConvertTo-EnhancedHTMLFragmentRickshawChart {
 </div>
 
 <script type="text/javascript">
-jQuery('#chartFilterForm').submit(function (event) {
-    event.preventDefault();
-    var numLastBuilds = jQuery('#testHistoryNumber')[0].value
-    var testNameRegex = jQuery('#testNameRegex')[0].value
-    var includeBuilds = parseIncludeExcludeBuilds(jQuery('#includeBuilds')[0].value)
-    var excludeBuilds = parseIncludeExcludeBuilds(jQuery('#excludeBuilds')[0].value)
-    var showFailedBuilds = jQuery('#showFailedBuilds').prop('checked')
-    
-    if (testNameRegex) {
-        testNameRegex = new RegExp(testNameRegex, "i");
-    }
-    
-    var newChartData = []
-    for (var i = 0; i < ${JavascriptDataVariableName}.length; i++) {
-        var testSeries = ${JavascriptDataVariableName}[i];
-        if (!testNameRegex || testNameRegex.test(testSeries.name)) {
-            if (numLastBuilds > 0 || includeBuilds != null || excludeBuilds != null || !showFailedBuilds) {
-                var testSeriesDataLength = testSeries.data.length;
 
-                var x = 1;
-                var hasAtLeastOneValue = false;
-                var newData = jQuery.map(testSeries.data, function (element, index) {
-                    if (numLastBuilds > 0 && index < testSeriesDataLength - numLastBuilds) {
-                        return null;
-                    }
-                    if (includeBuilds != null && includeBuilds.indexOf(element.xLabel) === -1) {
-                        return null;
-                    }
-                    if (excludeBuilds != null && excludeBuilds.indexOf(element.xLabel) !== -1) {
-                        return null;
-                    }
-                    if (!showFailedBuilds && !element.success) {
-                        return null;
-                    }
-                    if (element.y != null) {
-                        hasAtLeastOneValue = true;
-                    }
-                    return { x : x++, y: element.y, xLabel: element.xLabel };
-                });
-                if (newData.length > 0 && hasAtLeastOneValue) {
-                   if (includeBuilds != null) {
-                      // sort in includeBuilds order
-                      newData.sort(function(a, b) {
-                        var indexA = includeBuilds.indexOf(a.xLabel);
-                        var indexB = includeBuilds.indexOf(b.xLabel);
-                        return (indexA == indexB) ? 0 : (indexA > indexB) ? 1 : -1;
-                      });
-                      for (var j = 0; j < newData.length; j++) {
-                        newData[j].x = j+1;
-                      }
-                   }
-                   newChartData.push({ name : testSeries.name, color: testSeries.color, data: newData });
-                }
-           } else { 
-                newChartData.push(testSeries);
-           }
-        }
-    }
-    if (newChartData.length > 0) {
-        chartData = newChartData;
-        
-        createGraph();
-        createTable();
-    } else {
-        alert('No tests matching specified criteria.');
-    }
-});
+var dataModel = function() {
+    var self = {
+        originalChartData: ${JavascriptDataVariableName}.reverse(),
+        chartData: null,
+        testTimeThresholdData: ${JavascriptTestTimeThresholdDataVariableName},
+        width: $Width,
+        height: $Height,
 
-var parseIncludeExcludeBuilds = function(input) {
-    if (input == null || input === "") {
-        return null;
-    }
-    var inputEntries = input.split(",");
-    var output = []
-    for (var i = 0; i < inputEntries.length; i++) {
-        var rangeEntries = inputEntries[i].split("-")
-        if (rangeEntries.length === 1) {
-            output.push(inputEntries[i]);
-        } else if (rangeEntries.length === 2) {
-            if (rangeEntries[1] >= rangeEntries[0]) { 
-                for (var j = rangeEntries[0]; j <= rangeEntries[1]; j++) {
-                    output.push(j.toString());
-                }
-            } else {
-                for (var j = rangeEntries[0]; j >= rangeEntries[1]; j--) {
-                    output.push(j.toString());
-                }
-            }
-        }
-    }
-    return output;
-}
-
-var createGraph = function() {
-    jQuery('#legend').empty();
-    jQuery('#chartContainer').html('<div id="chart"></div><div id="preview"></div>')
-
-    // prepare xLabelMap for proper x labeling
-    var xLabelMap = {}
-    for (var i = 0; i < chartData.length; i++) {
-        var data = chartData[0].data
-        for (var j = 0; j < data.length; j++) {
-            xLabelMap[data[j].x] = '#' + data[j].xLabel
-        }
-    }
-
-    var graphRenderer = jQuery('#chartRenderer option:selected')[0].value;
-    
-    graphObj = new Rickshaw.Graph( {
-            element: document.getElementById("chart"),
-            width: $Width,
-            height: $Height,
-            preserve: true,
-            renderer: graphRenderer,
-            series: chartData,
-            interpolation: 'linear',
-            padding: {top: 0.01, left: 0.015, right: 0.015, bottom: 0.01}
-    })
-
-    graphObj.render();
-
-    var preview = new Rickshaw.Graph.RangeSlider( {
-        graph: graphObj,
-        element: document.getElementById('preview'),
-    } );
-
-    var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-        graph: graphObj,
-        xFormatter: function(x) {
-            return xLabelMap[x];
-        },
-        yFormatter: function(y) {
-            return y + ' ms';
-        }
-    } );
-
-    var legend = new Rickshaw.Graph.Legend( {
-        graph: graphObj,
-        element: document.getElementById('legend')
-    } );
-
-    var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight( {
-        graph: graphObj,
-        legend: legend
-    } );
-
-    var shelving = new Rickshaw.Graph.Behavior.Series.Toggle( {
-        graph: graphObj,
-        legend: legend
-    } );
-
-    var xAxis = new Rickshaw.Graph.Axis.X( {
-        graph: graphObj,
-        tickFormat: function (x) { return xLabelMap[x]; }
-    } );
-
-    xAxis.render();
-
-    var yAxis = new Rickshaw.Graph.Axis.Y( {
-        graph: graphObj,
-        tickFormat: function (y) {
-            if (y == 0) {
-                return '';
-            }
-            var seconds = y / 1000
-            if (seconds > 10 || y % 10 == 0) {
-                return seconds + 's';
-            } else {
-                return seconds.toFixed(2) + 's';
-            }
-            
-        },
-    } );
-
-    yAxis.render();
-
-    appendFilterTableOnClick('#legend .line .action, #legend .line .label');
-    return graphObj;
-}
-
-var appendFilterTableOnClick = function(selector) {
-    jQuery(selector).each(function (index, element) {
-        var oldOnClick = element.onclick;
-        element.onclick = function(e) {
-            oldOnClick(e);
-            createTable();
-        }
-    });
-}
-
-var createTable = function() {
-    var no = 1;
-    var tableDataSet = [];
-    var i = 0;
-
-    var lines = jQuery('#legend .line');
-    for (i = 0; i < lines.length; i++) { 
-        var line = lines[i];
-        if (!line.series.disabled) {
-            var data = line.series.data;
-            var newRow = [ no++, line.series.name ];
-            data.forEach(function (row) {
-                newRow.push(row.y);
-            });
-            tableDataSet.push(newRow);
+        hasTestTimeThresholdData: function() {
+            return (self.testTimeThresholdData != null && Object.getOwnPropertyNames(self.testTimeThresholdData).length > 0);
         }
     };
 
-    if (tableDataSet == []) {
-        return;
-    }
+    return self;
+}();
 
-    var columns = [ ];
-    columns.push({ title : "No" });
-    columns.push({ 
-        title : "Test name", 
-        createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
-            if (cellData.length > 90) {
-                cell.title = cellData       
-                `$(cell).tooltip( {
-                    delay: 0,
-                    track: true
+var inputModel = function() {
+    var self = {
+        numLastBuilds: 0,
+        testNameRegex: '',
+        includeBuilds: '',
+        excludeBuilds: '',
+        showFailedBuilds: false,
+        relativeToBuild: '',
+        relativeToBuildInt: null,
+        graphRenderer: 'line',
 
-                })
+        refreshModel: function() { 
+            self.numLastBuilds = jQuery('#testHistoryNumber')[0].value;
+            self.testNameRegex = jQuery('#testNameRegex')[0].value;
+            if (self.testNameRegex) {
+                self.testNameRegex = new RegExp(self.testNameRegex, "i");
             }
-        }
-    });
-    
-    var dataColumns = chartData[0].data
-    for (i = 0; i < dataColumns.length; i++) {  
-        columns.push({ 
-            title: "#" + dataColumns[i].xLabel,
-            createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
-                if (cellData === null || typeof cellData === 'undefined') {
-                    return
+            self.includeBuilds = self.parseIncludeExcludeBuilds(jQuery('#includeBuilds')[0].value);
+            self.excludeBuilds = self.parseIncludeExcludeBuilds(jQuery('#excludeBuilds')[0].value);
+            self.showFailedBuilds = jQuery('#showFailedBuilds').prop('checked');
+            self.relativeToBuild = jQuery('#relativeToBuild')[0].value;
+            self.relativeToBuildInt = parseInt(self.relativeToBuild, 10);
+            self.graphRenderer = jQuery('#chartRenderer option:selected')[0].value;
+        },
+
+        validateRelativeToBuild: function(chartData) {
+            if (chartData.length == 0 || !self.relativeToBuild || self.isRelativeToBuildDynamic()) {
+                return true;
+            }
+            var data = chartData[0].data;
+            for (i = 0; i < data.length; i++) {
+                if (data[i].xLabel == self.relativeToBuild) {
+                    return true;
                 }
-                var testName = rowData[1];
-                var thresholdData = testTimeThresholdData[testName];
-                var cellClassName = '';
-                if (!thresholdData) {
-                    thresholdData = testTimeThresholdData['*'];
-                }
-                if (thresholdData) {
-                    if (cellData <= thresholdData.PassedTime) {
-                        cellClassName = 'ttp';
-                    } else if (cellData >= thresholdData.FailedTime) {
-                        cellClassName = 'ttf';
+            }
+            return false;
+        },
+
+        isAnyFilterSet: function() {
+            return (self.numLastBuilds > 0 || self.includeBuilds != null || self.excludeBuilds != null || !self.showFailedBuilds || self.relativeToBuild);
+        },
+
+        filterTestName: function(testName) {
+            return (!self.testNameRegex || self.testNameRegex.test(testName));
+        },
+
+        filterNumLastBuilds: function(index, testSeriesDataLength) {
+            return (!self.numLastBuilds || self.numLastBuilds <= 0 || index >= testSeriesDataLength - self.numLastBuilds);
+        },
+
+        filterIncludeBuilds: function(xLabel) {
+            return (!self.includeBuilds || self.includeBuilds.indexOf(xLabel) !== -1);
+        },
+
+        filterExcludeBuilds: function(xLabel) {
+            return (!self.excludeBuilds || self.excludeBuilds.indexOf(xLabel) === -1);
+        },
+
+        filterShowFailedBuilds: function(success) {
+            return (self.filterShowFailedBuilds || success);
+        },
+
+        filterBuild: function(index, testSeriesDataLength, xLabel, success) {
+            return (self.filterNumLastBuilds(index, testSeriesDataLength) &&
+                    self.filterIncludeBuilds(xLabel) &&
+                    self.filterExcludeBuilds(xLabel) && 
+                    self.filterShowFailedBuilds(success)
+                   );
+        },
+
+        parseIncludeExcludeBuilds: function(input) {
+            if (input == null || input === "") {
+                return null;
+            }
+            var inputEntries = input.split(",");
+            var output = []
+            for (var i = 0; i < inputEntries.length; i++) {
+                var rangeEntries = inputEntries[i].split("-")
+                if (rangeEntries.length === 1) {
+                    output.push(inputEntries[i]);
+                } else if (rangeEntries.length === 2) {
+                    if (rangeEntries[1] >= rangeEntries[0]) { 
+                        for (var j = rangeEntries[0]; j <= rangeEntries[1]; j++) {
+                            output.push(j.toString());
+                        }
                     } else {
-                        cellClassName = 'tti';
+                        for (var j = rangeEntries[0]; j >= rangeEntries[1]; j--) {
+                            output.push(j.toString());
+                        }
                     }
                 }
-                if (cellClassName) { 
-                    `$(cell).addClass(cellClassName);
+            }
+            return output;
+        },
+
+        sortInIncludeBuildsOrder: function(data) {
+            if (self.includeBuilds == null) {
+                return;
+            }
+
+            // sort in includeBuilds order
+            data.sort(function(a, b) {
+                var indexA = self.includeBuilds.indexOf(a.xLabel);
+                var indexB = self.includeBuilds.indexOf(b.xLabel);
+                return (indexA == indexB) ? 0 : (indexA > indexB) ? 1 : -1;
+            });
+            for (var j = 0; j < data.length; j++) {
+                data[j].x = j+1;
+            }
+        },
+
+        isRelativeToBuildDynamic: function() {
+            return (self.relativeToBuild && self.relativeToBuildInt && self.relativeToBuildInt < 0);
+        },
+
+        getBaseBuildValue: function(testSeriesData) {
+            if (!self.relativeToBuild || self.isRelativeToBuildDynamic()) {
+                return null;
+            }
+            var baseBuild = jQuery.grep(testSeriesData, function (element, index) {
+                    return (element.xLabel == self.relativeToBuild);
+            });
+            if (baseBuild.length == 0) {
+                return;
+            }
+            return baseBuild[0].y;
+        },
+
+        filterTestSeries: function(testSeries) {
+            if (!self.filterTestName(testSeries.name)) {
+                return null;
+            }
+            if (!self.isAnyFilterSet()) {
+                return testSeries;
+            }
+
+            var testSeriesDataLength = testSeries.data.length;
+            var x = 1;
+            var hasAtLeastOneValue = false;
+            var baseBuildValue = self.getBaseBuildValue(testSeries.data);
+
+            var newData = jQuery.map(testSeries.data, function (element, index) {
+                if (!self.filterBuild(index, testSeriesDataLength, element.xLabel, element.success)) {
+                    return null;
+                }
+                var yValue = element.y;
+                if (element.y != null) {
+                    hasAtLeastOneValue = true;
+                    if (self.relativeToBuild && !self.isRelativeToBuildDynamic()) {
+                        yValue = baseBuildValue == null ? null : yValue - baseBuildValue;
+                    }
+                }             
+                return { x : x++, y: yValue, xLabel: element.xLabel };
+            });
+
+            // if relativeToBuild is dynamic (negative), we need to filter new data once again, in order to prevent using values that have been filtered out
+            if (self.isRelativeToBuildDynamic()) {
+                newData = jQuery.map(newData, function (element, index) {
+                    var yValue = null;
+                    if (index >= -self.relativeToBuildInt) {
+                        var baseBuildValue = newData[index + self.relativeToBuildInt].y;
+                        yValue = baseBuildValue == null ? null : element.y - baseBuildValue;
+                    }
+                    return { x: element.x, y: yValue, xLabel: element.xLabel };
+                });
+            }
+
+            if (newData.length > 0 && hasAtLeastOneValue) {
+                self.sortInIncludeBuildsOrder(newData);
+                return { name : testSeries.name, color: testSeries.color, data: newData };
+            } else {
+                return null;
+            }
+        }
+
+    };
+    return self;
+}();
+
+var graphModel = function() {
+    var self = {
+
+        graphObj: null,
+        graphLinesObj: null,
+
+        createGraph: function(dataModel, inputModel, createTableCallback) {
+            var chartData = dataModel.chartData;
+            jQuery('#legend').empty();
+            jQuery('#chartContainer').html('<div id="chart"></div><div id="preview"></div>')
+
+            // prepare xLabelMap for proper x labeling
+            var xLabelMap = {}
+            for (var i = 0; i < chartData.length; i++) {
+                var data = chartData[0].data
+                for (var j = 0; j < data.length; j++) {
+                    xLabelMap[data[j].x] = '#' + data[j].xLabel
                 }
             }
-        });
-    }
     
-    if (tableObj) {
-        tableObj.fnClearTable();
-        tableObj.fnDestroy();
-    }
-    jQuery('#tableContainer').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="tableData"></table>');
-    tableObj = jQuery('#tableData').dataTable( {
-        data: tableDataSet,
-        columns: columns,
-        searching: false,
-        scrollX: true,
-        fixedColumns: {
-            leftColumns: 2
-        }
-    } ); 
-    
-}
+            self.graphObj = new Rickshaw.Graph( {
+                    element: document.getElementById("chart"),
+                    width: dataModel.width,
+                    height: dataModel.height,
+                    preserve: true,
+                    renderer: inputModel.graphRenderer,
+                    series: chartData,
+                    interpolation: 'linear',
+                    padding: {top: 0.01, left: 0.015, right: 0.015, bottom: 0.01},
+                    min: 'auto'
+            })
 
-${JavascriptDataVariableName} = ${JavascriptDataVariableName}.reverse();
-var chartData = ${JavascriptDataVariableName}.slice();
-var testTimeThresholdData = ${JavascriptTestTimeThresholdDataVariableName}
-var graphObj = null;
-var tableObj = null;
+            self.graphObj.render();
+
+            var preview = new Rickshaw.Graph.RangeSlider( {
+                graph: self.graphObj,
+                element: document.getElementById('preview'),
+            } );
+
+            var hoverDetail = new Rickshaw.Graph.HoverDetail( {
+                graph: self.graphObj,
+                xFormatter: function(x) {
+                    return xLabelMap[x];
+                },
+                yFormatter: function(y) {
+                    return y + ' ms';
+                }
+            } );
+
+            var legend = new Rickshaw.Graph.Legend( {
+                graph: self.graphObj,
+                element: document.getElementById('legend')
+            } );
+
+            var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight( {
+                graph: self.graphObj,
+                legend: legend
+            } );
+
+            var shelving = new Rickshaw.Graph.Behavior.Series.Toggle( {
+                graph: self.graphObj,
+                legend: legend
+            } );
+
+            var xAxis = new Rickshaw.Graph.Axis.X( {
+                graph: self.graphObj,
+                tickFormat: function (x) { return xLabelMap[x]; }
+            } );
+
+            xAxis.render();
+
+            var yAxis = new Rickshaw.Graph.Axis.Y( {
+                graph: self.graphObj,
+                tickFormat: function (y) {
+                    if (y == 0) {
+                        return '';
+                    }
+                    var seconds = y / 1000;
+                    if (seconds > 10 || y % 10 == 0) {
+                        return seconds + 's';
+                    } else {
+                        return seconds.toFixed(2) + 's';
+                    }
+            
+                },
+            } );
+
+            yAxis.render();
+
+            jQuery('#legend .line .action, #legend .line .label').each(createTableCallback);
+            self.graphLinesObj = jQuery('#legend .line');
+            return self.graphObj;
+        }
+    };
+    return self;
+}();
+
+var tableModel = function() {
+    var self = {
+
+        tableObj: null,
+
+        createTable: function(dataModel, graphModel, inputModel) {
+            var chartData = dataModel.chartData;
+            var no = 1;
+            var tableDataSet = [];
+            var i = 0;
+
+            var lines = graphModel.graphLinesObj;
+            for (i = 0; i < lines.length; i++) { 
+                var line = lines[i];
+                if (!line.series.disabled) {
+                    var data = line.series.data;
+                    var newRow = [ no++, line.series.name ];
+                    data.forEach(function (row) {
+                        newRow.push(row.y);
+                    });
+                    tableDataSet.push(newRow);
+                }
+            };
+
+            if (tableDataSet == []) {
+                return;
+            }
+
+            var columns = [ ];
+            columns.push({ title : "No" });
+            columns.push({ 
+                title : "Test name", 
+                createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+                    if (cellData.length > 90) {
+                        cell.title = cellData       
+                        `$(cell).tooltip( {
+                            delay: 0,
+                            track: true
+                        })
+                    }
+                }
+            });
+    
+            var dataColumns = chartData[0].data;
+            for (i = 0; i < dataColumns.length; i++) {
+                var columnOptions = { 
+                    title: "#" + dataColumns[i].xLabel,
+                    createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
+                        if (cellData === null || typeof cellData === 'undefined') {
+                            return
+                        }
+                        var cellClassName = '';
+                        if (inputModel.relativeToBuild) {
+                            var col = dataColumns[colIndex-2];
+                            var relativeColumnName = '';
+                            if (col != null) {
+                                relativeColumnName = col.xLabel;
+                            }
+                            if (relativeColumnName != inputModel.relativeToBuild) {
+                                cellClassName = cellData < 0 ? 'ttp' : 'ttf'
+                            }
+                        } else if (dataModel.hasTestTimeThresholdData()) { 
+                            var testName = rowData[1];
+                            var thresholdData = dataModel.testTimeThresholdData[testName];
+                            
+                            if (!thresholdData) {
+                                thresholdData = dataModel.testTimeThresholdData['*'];
+                            }
+                            if (thresholdData) {
+                                if (cellData <= thresholdData.PassedTime) {
+                                    cellClassName = 'ttp';
+                                } else if (cellData >= thresholdData.FailedTime) {
+                                    cellClassName = 'ttf';
+                                } else {
+                                    cellClassName = 'tti';
+                                }
+                            }
+                        }
+                        if (cellClassName) { 
+                            `$(cell).addClass(cellClassName);
+                        }
+                    }
+                };
+                if (dataColumns[i].xLabel == inputModel.relativeToBuild) {
+                    columnOptions.className = 'relativeBuildColumn'
+                }
+                columns.push(columnOptions)
+            }
+    
+            if (self.tableObj) {
+                self.tableObj.fnClearTable();
+                self.tableObj.fnDestroy();
+            }
+            jQuery('#tableContainer').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="tableData"></table>');
+            self.tableObj = jQuery('#tableData').dataTable( {
+                data: tableDataSet,
+                columns: columns,
+                searching: false,
+                scrollX: true,
+                fixedColumns: {
+                    leftColumns: 2
+                }
+            } ); 
+        }
+    };
+    return self;
+}();
+
+var mainController = function() {
+    var self = {
+        dataModel: null,
+        inputModel: null,
+        graphModel: null,
+        tableModel: null,
+
+        init: function(dataModel, inputModel, graphModel, tableModel) {
+            self.dataModel = dataModel;
+            self.inputModel = inputModel;
+            self.graphModel = graphModel;
+            self.tableModel = tableModel;
+        },
+
+        showGraphAndTable: function() {
+            self.inputModel.refreshModel();
+
+            if (!self.inputModel.validateRelativeToBuild(dataModel.originalChartData)) {
+                alert('Invalid relative build number: ' + self.inputModel.relativeToBuild + '. You need to enter either valid build number or a negative value.');
+                return;
+            }
+            var newChartData = [];
+            for (var i = 0; i < self.dataModel.originalChartData.length; i++) {
+                var testSeries = self.dataModel.originalChartData[i];
+                testSeries = self.inputModel.filterTestSeries(testSeries);
+                if (testSeries) { 
+                    newChartData.push(testSeries);
+                }
+            }
+            if (newChartData.length > 0) {
+                self.dataModel.chartData = newChartData;
+                self.graphModel.createGraph(self.dataModel, self.inputModel, self.createTableCallback);
+                self.tableModel.createTable(self.dataModel, self.graphModel, self.inputModel);
+            } else {
+                alert('No tests matching specified criteria.');
+            }
+        },
+
+        createTableCallback: function (index, element) {
+            var oldOnClick = element.onclick;
+            element.onclick = function(e) {
+                oldOnClick(e);
+                self.tableModel.createTable(self.dataModel, self.inputModel);
+            }
+        }
+    };
+    return self;
+}();
+
+jQuery('#chartFilterForm').submit(function (event) {
+    event.preventDefault();
+    mainController.showGraphAndTable();
+});
 
 jQuery(document).ready(function() {
-    createGraph();
-    createTable();
+    mainController.init(dataModel, inputModel, graphModel, tableModel);
+    mainController.showGraphAndTable();
 });
 </script>
 

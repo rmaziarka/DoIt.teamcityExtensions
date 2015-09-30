@@ -330,6 +330,10 @@ return @"
     background-color: #77DD77 !important;
 }
 
+.relativeBuildColumn {
+    background-color: #FDFD96 !important;
+}
+
 "@
 
 }
