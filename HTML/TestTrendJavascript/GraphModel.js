@@ -109,7 +109,8 @@ var graphModel = function() {
 
             var xAxis = new Rickshaw.Graph.Axis.X( {
                 graph: self.graphObj,
-                tickFormat: function (x) { return xLabelMap[x]; }
+                tickFormat: function (x) { return xLabelMap[x]; },
+                orientation: 'bottom'
             } );
 
             xAxis.render();

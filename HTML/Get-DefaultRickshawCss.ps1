@@ -205,7 +205,7 @@ return @"
     vertical-align: top;
     margin-right: 3px;
     width: 390px;
-    max-height: 500px;
+    max-height: 538px;
     overflow: auto;
 
 }
@@ -374,6 +374,16 @@ return @"
 .formSubmit {
     text-align: center;
 }
+
+.rickshaw_graph svg {
+    height: 520px;
+}
+
+/* when orientation is bottom, ticks are displayed twice... - on top and on bottom, we don't want the one on top */
+.rickshaw_graph .x_ticks_d3 {
+    display: none;
+}
+
 "@
 
 }
