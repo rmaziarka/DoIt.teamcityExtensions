@@ -5,6 +5,7 @@ var inputModel = function() {
         includeBuilds: '',
         excludeBuilds: '',
         showFailedBuilds: false,
+        minimalValue: -Infinity,
         relativeToBuild: '',
         relativeToBuildInt: null,
         relativeToBuildPercent: false,
@@ -22,6 +23,12 @@ var inputModel = function() {
             self.showFailedBuilds = jQuery('#showFailedBuilds').prop('checked');
             self.relativeToBuild = jQuery('#relativeToBuild')[0].value;
             self.relativeToBuildInt = parseInt(self.relativeToBuild, 10);
+            self.minimalValue = jQuery('#minimalValue')[0].value;
+            if (self.minimalValue) {
+                self.minimalValue = parseInt(self.minimalValue, 10);
+            } else {
+                self.minimalValue = -Infinity;
+            }
             self.graphRenderer = jQuery('#chartRenderer option:selected')[0].value;
 
             var relativeToBuildPercent = jQuery('#relativeToBuildPercent').prop('checked');
@@ -42,7 +49,8 @@ var inputModel = function() {
         },
 
         isAnyFilterSet: function() {
-            return (self.numLastBuilds > 0 || self.includeBuilds != null || self.excludeBuilds != null || !self.showFailedBuilds || self.relativeToBuild);
+            return (self.numLastBuilds > 0 || self.includeBuilds != null || self.excludeBuilds != null || 
+                !self.showFailedBuilds || self.relativeToBuild || self.minimalValue != -Infinity);
         },
 
         filterTestName: function(testName) {
@@ -162,6 +170,9 @@ var inputModel = function() {
                         yValue = self.calculateRelativeValue(baseBuildValue, yValue);
                     }
                 }
+                if (yValue < self.minimalValue) {
+                    yValue = null;
+                }
                 if (yValue != null) {
                     hasAtLeastOneValue = true;
                 }
@@ -176,6 +187,9 @@ var inputModel = function() {
                     if (index >= -self.relativeToBuildInt) {
                         var baseBuildValue = newData[index + self.relativeToBuildInt].y;
                         yValue = self.calculateRelativeValue(baseBuildValue, element.y);
+                        if (yValue < self.minimalValue) {
+                           yValue = null;
+                        }
                         if (yValue != null) {
                             hasAtLeastOneValue = true;
                         }

@@ -288,17 +288,36 @@ return @"
 }
 
 #contentChart {
+    margin-top: 15px;
+}
+
+#mainContent {   
     width: 1300px;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 15px;
+}
+
+.sectionToggle {
+    position: absolute:
+    left: -5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.sectionHeader {
+    font-weight: bold;
+}
+
+.sectionVisible:after {
+    content: "\000AB";
+}
+
+.sectionHidden:after {
+    content: "\000BB";
 }
 
 #options {
     text-align: center;
-    width: 1300px;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 #chartFilterForm label {

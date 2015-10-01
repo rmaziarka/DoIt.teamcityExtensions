@@ -70,35 +70,44 @@ function ConvertTo-EnhancedHTMLFragmentRickshawChart {
    
     $result = @"
 
-<div id="options">
-    <form id="chartFilterForm">
-        <label>Number of last builds: <input id="testHistoryNumber" type="number" min="0" value="0"/></label>
-        <label>Include build numbers: <input id="includeBuilds" type="text" /></label>
-        <label>Exclude build numbers: <input id="excludeBuilds" type="text" /></label>
-        <label>Test name regex: <input id="testNameRegex" type="text" /></label>
-        <label>Relative to build: <input id="relativeToBuild" type="text" /></label>
-        <input id="relativeToBuildPercent" type="checkbox">Percent</input>
-        <label>Chart type:
-        <select id="chartRenderer">
-            <option value="line">Line</option>
-            <option value="scatterplot">Scatter</option>
-            <option value="area">Area</option>
-            <option value="bar">Bar</option>
-        </select>
-        </label>
-        <input id="showFailedBuilds" type="checkbox" checked>Show failed</input>
-        <input type="submit" value="Update" action="javascript:void(0)" />
-    </form>
-</div>
+    <div id="mainContent">
+        <div class="sectionToggle"><span class="sectionVisible"></span><span class="sectionHeader"> Options</span></div>
+        <div id="options">
+            <form id="chartFilterForm">
+                <label>Number of last builds: <input id="testHistoryNumber" type="number" min="0" value="0"/></label>
+                <label>Include build numbers: <input id="includeBuilds" type="text" /></label>
+                <label>Exclude build numbers: <input id="excludeBuilds" type="text" /></label>
+                <label>Test name regex: <input id="testNameRegex" type="text" /></label>
+                <label>Minimal value: <input id="minimalValue" type="text" /></label>
+                <label>Relative to build: <input id="relativeToBuild" type="text" /></label>
+                <input id="relativeToBuildPercent" type="checkbox">Percent</input>
+                <label>Chart type:
+                <select id="chartRenderer">
+                    <option value="line">Line</option>
+                    <option value="scatterplot">Scatter</option>
+                    <option value="area">Area</option>
+                    <option value="bar">Bar</option>
+                </select>
+                </label>
+                <input id="showFailedBuilds" type="checkbox" checked>Show failed</input>
+                <input type="submit" value="Update" action="javascript:void(0)" />
+            </form>
+        </div>
 
-<div id="contentChart">
-    <div id="legend"></div>
-    <div id="chartContainer">
-        <div id="chart"></div>
-        <div id="preview"></div>
+        <div class="sectionToggle"><span class="sectionVisible"></span><span class="sectionHeader"> Chart</span></div>
+        <div id="contentChart">
+            <div id="legend"></div>
+            <div id="chartContainer">
+                <div id="chart"></div>
+                <div id="preview"></div>
+            </div>
+        </div>
+
+        <div class="sectionToggle"><span class="sectionVisible"></span><span class="sectionHeader"> Table</span></div>
+        <div id="tableContainer">
+        </div>
     </div>
-</div>
-<div id="tableContainer">
+
 </div>
 
 <script type="text/javascript">
@@ -124,10 +133,13 @@ jQuery('#chartFilterForm').submit(function (event) {
     mainController.showGraphAndTable();
 });
 
+jQuery('.sectionToggle').click(mainController.toggleSection);
+
 jQuery(document).ready(function() {
     mainController.init(dataModel, inputModel, graphModel, tableModel);
     mainController.showGraphAndTable();
 });
+
 </script>
 "@
 

@@ -42,6 +42,17 @@ var mainController = function() {
                 oldOnClick(e);
                 self.tableModel.createTable(self.dataModel, self.graphModel, self.inputModel);
             }
+        },
+
+        toggleSection: function() {
+            var currentElement = $(this);
+            var nextElement = currentElement.next();
+            nextElement.fadeToggle('fast');
+            currentElement.find('span:first').toggleClass('sectionVisible sectionHidden');    
+            if (nextElement[0].id == 'tableContainer' && nextElement.is(':visible')) {  
+                tableModel.tableObj.fnAdjustColumnSizing();  
+            }
+            return false;
         }
     };
     return self;
