@@ -4,6 +4,29 @@ var graphModel = function() {
         graphObj: null,
         graphLinesObj: null,
 
+        toggleSeries: function(testName) {
+            var graphLine = self.graphLinesObj.filter(function () { return this.series.name == testName });
+            graphLine.find('.label').trigger('click');
+        },
+
+        getSeriesData: function() {
+            var result = [];
+            var lines = self.graphLinesObj;
+            var no = 1;
+            for (i = 0; i < lines.length; i++) { 
+                var line = lines[i];
+                if (!line.series.disabled) {
+                    var data = line.series.data;
+                    var newRow = [ no++, line.series.name ];
+                    data.forEach(function (row) {
+                        newRow.push(row.y);
+                    });
+                    result.push(newRow);
+                }
+            };
+            return result;
+        },
+
         createGraph: function(dataModel, inputModel, createTableCallback) {
             var chartData = dataModel.chartData;
             jQuery('#legend').empty();

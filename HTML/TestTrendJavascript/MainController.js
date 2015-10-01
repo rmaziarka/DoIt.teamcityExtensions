@@ -40,7 +40,7 @@ var mainController = function() {
             var oldOnClick = element.onclick;
             element.onclick = function(e) {
                 oldOnClick(e);
-                self.tableModel.createTable(self.dataModel, self.inputModel);
+                self.tableModel.createTable(self.dataModel, self.graphModel, self.inputModel);
             }
         }
     };

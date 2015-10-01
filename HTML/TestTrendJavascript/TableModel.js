@@ -3,37 +3,18 @@ var tableModel = function() {
 
         tableObj: null,
         selectedTestName: null,
+        graphModel: null,
 
         selectOneRow: function() {
-            var testName = $(this).text;
-            var row = $(this).parent();
-            if (row.hasClass('selected')) {
-                row.removeClass('selected');
-            } else {
-                row.parent().find('tr.selected').removeClass('selected');
-                row.addClass('selected');
-            }
-
+            var testName = $(this).text();
+            graphModel.toggleSeries(testName);
         },
 
         createTable: function(dataModel, graphModel, inputModel) {
+            self.graphModel = graphModel;
             var chartData = dataModel.chartData;
-            var no = 1;
-            var tableDataSet = [];
+            var tableDataSet = graphModel.getSeriesData();
             var i = 0;
-
-            var lines = graphModel.graphLinesObj;
-            for (i = 0; i < lines.length; i++) { 
-                var line = lines[i];
-                if (!line.series.disabled) {
-                    var data = line.series.data;
-                    var newRow = [ no++, line.series.name ];
-                    data.forEach(function (row) {
-                        newRow.push(row.y);
-                    });
-                    tableDataSet.push(newRow);
-                }
-            };
 
             if (tableDataSet == []) {
                 return;
