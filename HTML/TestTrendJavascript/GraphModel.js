@@ -9,6 +9,23 @@ var graphModel = function() {
             graphLine.find('.label').trigger('click');
         },
 
+        toggleOnSeriesClick: function() {
+            var hoverActiveElement = $('#chart .detail div.item.active');
+            if (!hoverActiveElement) {
+                return;
+            }
+            var hoverActiveText = hoverActiveElement.text();
+            if (!hoverActiveText) {
+                return;
+            }
+                
+            var testNameRegex = new RegExp('(.*):.*$')
+            var match = hoverActiveText.match(testNameRegex);
+            if (match) { 
+                self.toggleSeries(match[1]);
+            }
+        },
+
         getSeriesData: function() {
             var result = [];
             var lines = self.graphLinesObj;
@@ -120,6 +137,7 @@ var graphModel = function() {
             yAxis.render();
 
             jQuery('#legend .line .action, #legend .line .label').each(createTableCallback);
+            jQuery('#chart').on('click', self.toggleOnSeriesClick);
             self.graphLinesObj = jQuery('#legend .line');
             return self.graphObj;
         }

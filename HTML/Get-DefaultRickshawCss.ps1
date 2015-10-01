@@ -321,7 +321,7 @@ return @"
 }
 
 #chartFilterForm {
-    width: 940px;
+    width: 1050px;
     margin-left: auto;
     margin-right: auto;
 }
