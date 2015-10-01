@@ -320,6 +320,16 @@ return @"
     text-align: center;
 }
 
+#chartFilterForm {
+    width: 940px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#chartFilterForm table {
+    width: 100%
+}
+
 #chartFilterForm label {
    margin-left: 5px;
 }
@@ -353,6 +363,17 @@ return @"
     background-color: #FDFD96 !important;
 }
 
+.formLabel {
+    text-align: right;
+}
+
+.formInput {
+    text-align: left;
+}
+
+.formSubmit {
+    text-align: center;
+}
 "@
 
 }

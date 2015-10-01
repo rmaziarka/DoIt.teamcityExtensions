@@ -74,23 +74,79 @@ function ConvertTo-EnhancedHTMLFragmentRickshawChart {
         <div class="sectionToggle"><span class="sectionVisible"></span><span class="sectionHeader"> Options</span></div>
         <div id="options">
             <form id="chartFilterForm">
-                <label>Number of last builds: <input id="testHistoryNumber" type="number" min="0" value="0"/></label>
-                <label>Include build numbers: <input id="includeBuilds" type="text" /></label>
-                <label>Exclude build numbers: <input id="excludeBuilds" type="text" /></label>
-                <label>Test name regex: <input id="testNameRegex" type="text" /></label>
-                <label>Minimal value: <input id="minimalValue" type="text" /></label>
-                <label>Relative to build: <input id="relativeToBuild" type="text" /></label>
-                <input id="relativeToBuildPercent" type="checkbox">Percent</input>
-                <label>Chart type:
-                <select id="chartRenderer">
-                    <option value="line">Line</option>
-                    <option value="scatterplot">Scatter</option>
-                    <option value="area">Area</option>
-                    <option value="bar">Bar</option>
-                </select>
-                </label>
-                <input id="showFailedBuilds" type="checkbox" checked>Show failed</input>
-                <input type="submit" value="Update" action="javascript:void(0)" />
+                <table>
+                    <tr>
+                        <td class="formLabel">
+                            <label for="testHistoryNumber" title="Number of last builds.">Num of last builds:</label>
+                        </td>
+                        <td class="formInput">
+                            <input id="testHistoryNumber" type="number" min="0" value="0" />
+                        </td>
+                        <td class="formLabel">
+                            <label for="testNameRegex" title="Filter test names with a regex.">Test name regex:</label>
+                        </td>
+                        <td class="formInput">
+                            <input id="testNameRegex" type="text" placeholder="Test name regex"/>
+                        </td>
+                        <td class="formLabel">
+                            <label for="relativeToBuild" title="Calculate times relative to specific build number. If negative, it will be relative to previous build (-1 -&gt; preceding build, -2 -&gt; current-2 etc.).">Relative to build:</label>
+                        </td>
+                        <td class="formInput">
+                            <input id="relativeToBuild" type="text" placeholder="Relative to build" />
+                        </td>
+                        <td class="formLabel">
+                            <label for="chartRenderer">Chart type:</label>
+                        </td>
+                        <td class="formInput">
+                            <select id="chartRenderer">
+                                <option value="line">Line</option>
+                                <option value="scatterplot">Scatter</option>
+                                <option value="area">Area</option>
+                                <option value="bar">Bar</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="formLabel">
+                            <label for="includeBuild" title="List of build numbers to include. Can use , and - (e.g. 1,5-7).">Include builds:</label>
+                        </td>
+                        <td class="formInput">
+                            <input id="includeBuilds" type="text" placeholder="Include build numbers" />
+                        </td>
+                        <td class="formLabel">
+                            <label for="minimalValue" title="Minimal time - tests below this value will be excluded.">Minimal value:</label>
+                        </td>
+                        <td class="formInput">
+                            <input id="minimalValue" type="text" placeholder="Minimal value" />
+                        </td>
+                        <td class="formLabel">
+                            <label for="relativeToBuildPercent" title="If checked and relative build is set, the difference will be expressed in percents.">Relative percent:</label>
+                        </td>
+                        <td class="formInput">
+                            <input id="relativeToBuildPercent" type="checkbox"></input>
+                        </td>
+                        <td class="formLabel">
+                            <label for="showFailedBuilds" title="If unchecked, failed builds will be excluded.">Show failed:</label>
+                        </td>
+                        <td class="formInput">
+                            <input id="showFailedBuilds" type="checkbox" checked></input>
+                        </td>
+                     
+                    </tr>
+                    <tr>
+                        <td class="formLabel">
+                            <label for="excludeBuilds" title="List of build numbers to exclude. Can use , and - (e.g. 1,5-7).">Exclude builds:</label>
+                        </td>
+                        <td class="formInput" colspan="7">
+                            <input id="excludeBuilds" type="text" placeholder="Exclude build numbers"/>
+                        </td class="formInput">
+                    </tr>
+                    <tr>
+                        <td colspan="8" class="formSubmit">
+                            <input type="submit" value="Update" action="javascript:void(0)" />
+                        </td>
+                    </tr>
+                </table>
             </form>
         </div>
 
