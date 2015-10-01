@@ -65,326 +65,139 @@ function ConvertTo-EnhancedHTMLFragmentRickshawChart {
         [int]
         $Height = 500
     )
+
+    $javascriptFiles = Get-ChildItem -Path "$PSScriptRoot\TestTrendJavascript\*.js" | Get-Content -ReadCount 0 | Out-String
    
-    return @"
+    $result = @"
 
-<div id="options">
-    <form id="chartFilterForm">
-        <label>Number of last builds: <input id="testHistoryNumber" type="number" min="0" value="0"/></label>
-        <label>Include build numbers: <input id="includeBuilds" type="text" /></label>
-        <label>Exclude build numbers: <input id="excludeBuilds" type="text" /></label>
-        <label>Test name regex: <input id="testNameRegex" type="text" /></label>
-        <label>Chart type:
-        <select id="chartRenderer">
-            <option value="line">Line</option>
-            <option value="scatterplot">Scatter</option>
-            <option value="area">Area</option>
-            <option value="bar">Bar</option>
-        </select>
-        </label>
-        <input id="showFailedBuilds" type="checkbox" checked>Show failed</input>
-        <input type="submit" value="Update" action="javascript:void(0)" />
-    </form>
-</div>
+    <div id="mainContent">
+        <div class="sectionToggle"><span class="sectionVisible"></span><span class="sectionHeader"> Options</span></div>
+        <div id="options">
+            <form id="chartFilterForm">
+                <table>
+                    <tr>
+                        <td class="formLabel">
+                            <label for="testHistoryNumber" title="Number of last builds.">Num of last builds:</label>
+                        </td>
+                        <td class="formInput">
+                            <input id="testHistoryNumber" type="number" min="0" value="0" />
+                        </td>
+                        <td class="formLabel">
+                            <label for="testNameRegex" title="Filter test names with a regex.">Test name regex:</label>
+                        </td>
+                        <td class="formInput">
+                            <input id="testNameRegex" type="text" placeholder="Test name regex"/>
+                        </td>
+                        <td class="formLabel">
+                            <label for="relativeToBuild" title="Calculate times relative to specific build number. If negative, it will be relative to previous build (-1 -&gt; preceding build, -2 -&gt; current-2 etc.).">Relative to build:</label>
+                        </td>
+                        <td class="formInput">
+                            <input id="relativeToBuild" type="text" placeholder="Relative to build" />
+                        </td>
+                        <td class="formLabel">
+                            <label for="chartRenderer">Chart type:</label>
+                        </td>
+                        <td class="formInput">
+                            <select id="chartRenderer">
+                                <option value="line">Line</option>
+                                <option value="scatterplot">Scatter</option>
+                                <option value="area">Area</option>
+                                <option value="bar">Bar</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="formLabel">
+                            <label for="includeBuild" title="List of build numbers to include. Can use , and - (e.g. 1,5-7).">Include builds:</label>
+                        </td>
+                        <td class="formInput">
+                            <input id="includeBuilds" type="text" placeholder="Include build numbers" />
+                        </td>
+                        <td class="formLabel">
+                            <label for="minimalValue" title="Minimal time - tests below this value will be excluded.">Minimal value:</label>
+                        </td>
+                        <td class="formInput">
+                            <input id="minimalValue" type="text" placeholder="Minimal value" />
+                        </td>
+                        <td class="formLabel">
+                            <label for="relativeToBuildPercent" title="If checked and relative build is set, the difference will be expressed in percents.">Relative percent:</label>
+                        </td>
+                        <td class="formInput">
+                            <input id="relativeToBuildPercent" type="checkbox"></input>
+                        </td>
+                        <td class="formLabel">
+                            <label for="showFailedBuilds" title="If unchecked, failed builds will be excluded.">Show failed:</label>
+                        </td>
+                        <td class="formInput">
+                            <input id="showFailedBuilds" type="checkbox" checked></input>
+                        </td>
+                     
+                    </tr>
+                    <tr>
+                        <td class="formLabel">
+                            <label for="excludeBuilds" title="List of build numbers to exclude. Can use , and - (e.g. 1,5-7).">Exclude builds:</label>
+                        </td>
+                        <td class="formInput" colspan="7">
+                            <input id="excludeBuilds" type="text" placeholder="Exclude build numbers"/>
+                        </td class="formInput">
+                    </tr>
+                    <tr>
+                        <td colspan="8" class="formSubmit">
+                            <input type="submit" value="Update" action="javascript:void(0)" />
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
 
-<div id="contentChart">
-    <div id="legend"></div>
-    <div id="chartContainer">
-        <div id="chart"></div>
-        <div id="preview"></div>
+        <div class="sectionToggle"><span class="sectionVisible"></span><span class="sectionHeader"> Chart</span></div>
+        <div id="contentChart">
+            <div id="legend"></div>
+            <div id="chartContainer">
+                <div id="chart"></div>
+                <div id="preview"></div>
+            </div>
+        </div>
+
+        <div class="sectionToggle"><span class="sectionVisible"></span><span class="sectionHeader"> Table</span></div>
+        <div id="tableContainer">
+        </div>
     </div>
-</div>
-<div id="tableContainer">
+
 </div>
 
 <script type="text/javascript">
-jQuery('#chartFilterForm').submit(function (event) {
-    event.preventDefault();
-    var numLastBuilds = jQuery('#testHistoryNumber')[0].value
-    var testNameRegex = jQuery('#testNameRegex')[0].value
-    var includeBuilds = parseIncludeExcludeBuilds(jQuery('#includeBuilds')[0].value)
-    var excludeBuilds = parseIncludeExcludeBuilds(jQuery('#excludeBuilds')[0].value)
-    var showFailedBuilds = jQuery('#showFailedBuilds').prop('checked')
-    
-    if (testNameRegex) {
-        testNameRegex = new RegExp(testNameRegex, "i");
-    }
-    
-    var newChartData = []
-    for (var i = 0; i < ${JavascriptDataVariableName}.length; i++) {
-        var testSeries = ${JavascriptDataVariableName}[i];
-        if (!testNameRegex || testNameRegex.test(testSeries.name)) {
-            if (numLastBuilds > 0 || includeBuilds != null || excludeBuilds != null || !showFailedBuilds) {
-                var testSeriesDataLength = testSeries.data.length;
 
-                var x = 1;
-                var hasAtLeastOneValue = false;
-                var newData = jQuery.map(testSeries.data, function (element, index) {
-                    if (numLastBuilds > 0 && index < testSeriesDataLength - numLastBuilds) {
-                        return null;
-                    }
-                    if (includeBuilds != null && includeBuilds.indexOf(element.xLabel) === -1) {
-                        return null;
-                    }
-                    if (excludeBuilds != null && excludeBuilds.indexOf(element.xLabel) !== -1) {
-                        return null;
-                    }
-                    if (!showFailedBuilds && !element.success) {
-                        return null;
-                    }
-                    if (element.y != null) {
-                        hasAtLeastOneValue = true;
-                    }
-                    return { x : x++, y: element.y, xLabel: element.xLabel };
-                });
-                if (newData.length > 0 && hasAtLeastOneValue) {
-                   if (includeBuilds != null) {
-                      // sort in includeBuilds order
-                      newData.sort(function(a, b) {
-                        var indexA = includeBuilds.indexOf(a.xLabel);
-                        var indexB = includeBuilds.indexOf(b.xLabel);
-                        return (indexA == indexB) ? 0 : (indexA > indexB) ? 1 : -1;
-                      });
-                      for (var j = 0; j < newData.length; j++) {
-                        newData[j].x = j+1;
-                      }
-                   }
-                   newChartData.push({ name : testSeries.name, color: testSeries.color, data: newData });
-                }
-           } else { 
-                newChartData.push(testSeries);
-           }
-        }
-    }
-    if (newChartData.length > 0) {
-        chartData = newChartData;
-        
-        createGraph();
-        createTable();
-    } else {
-        alert('No tests matching specified criteria.');
-    }
-});
+var dataModel = function() {
+    var self = {
+        originalChartData: ${JavascriptDataVariableName}.reverse(),
+        chartData: null,
+        testTimeThresholdData: ${JavascriptTestTimeThresholdDataVariableName},
+        width: $Width,
+        height: $Height,
 
-var parseIncludeExcludeBuilds = function(input) {
-    if (input == null || input === "") {
-        return null;
-    }
-    var inputEntries = input.split(",");
-    var output = []
-    for (var i = 0; i < inputEntries.length; i++) {
-        var rangeEntries = inputEntries[i].split("-")
-        if (rangeEntries.length === 1) {
-            output.push(inputEntries[i]);
-        } else if (rangeEntries.length === 2) {
-            if (rangeEntries[1] >= rangeEntries[0]) { 
-                for (var j = rangeEntries[0]; j <= rangeEntries[1]; j++) {
-                    output.push(j.toString());
-                }
-            } else {
-                for (var j = rangeEntries[0]; j >= rangeEntries[1]; j--) {
-                    output.push(j.toString());
-                }
-            }
-        }
-    }
-    return output;
-}
-
-var createGraph = function() {
-    jQuery('#legend').empty();
-    jQuery('#chartContainer').html('<div id="chart"></div><div id="preview"></div>')
-
-    // prepare xLabelMap for proper x labeling
-    var xLabelMap = {}
-    for (var i = 0; i < chartData.length; i++) {
-        var data = chartData[0].data
-        for (var j = 0; j < data.length; j++) {
-            xLabelMap[data[j].x] = '#' + data[j].xLabel
-        }
-    }
-
-    var graphRenderer = jQuery('#chartRenderer option:selected')[0].value;
-    
-    graphObj = new Rickshaw.Graph( {
-            element: document.getElementById("chart"),
-            width: $Width,
-            height: $Height,
-            preserve: true,
-            renderer: graphRenderer,
-            series: chartData,
-            interpolation: 'linear',
-            padding: {top: 0.01, left: 0.015, right: 0.015, bottom: 0.01}
-    })
-
-    graphObj.render();
-
-    var preview = new Rickshaw.Graph.RangeSlider( {
-        graph: graphObj,
-        element: document.getElementById('preview'),
-    } );
-
-    var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-        graph: graphObj,
-        xFormatter: function(x) {
-            return xLabelMap[x];
-        },
-        yFormatter: function(y) {
-            return y + ' ms';
-        }
-    } );
-
-    var legend = new Rickshaw.Graph.Legend( {
-        graph: graphObj,
-        element: document.getElementById('legend')
-    } );
-
-    var highlighter = new Rickshaw.Graph.Behavior.Series.Highlight( {
-        graph: graphObj,
-        legend: legend
-    } );
-
-    var shelving = new Rickshaw.Graph.Behavior.Series.Toggle( {
-        graph: graphObj,
-        legend: legend
-    } );
-
-    var xAxis = new Rickshaw.Graph.Axis.X( {
-        graph: graphObj,
-        tickFormat: function (x) { return xLabelMap[x]; }
-    } );
-
-    xAxis.render();
-
-    var yAxis = new Rickshaw.Graph.Axis.Y( {
-        graph: graphObj,
-        tickFormat: function (y) {
-            if (y == 0) {
-                return '';
-            }
-            var seconds = y / 1000
-            if (seconds > 10 || y % 10 == 0) {
-                return seconds + 's';
-            } else {
-                return seconds.toFixed(2) + 's';
-            }
-            
-        },
-    } );
-
-    yAxis.render();
-
-    appendFilterTableOnClick('#legend .line .action, #legend .line .label');
-    return graphObj;
-}
-
-var appendFilterTableOnClick = function(selector) {
-    jQuery(selector).each(function (index, element) {
-        var oldOnClick = element.onclick;
-        element.onclick = function(e) {
-            oldOnClick(e);
-            createTable();
-        }
-    });
-}
-
-var createTable = function() {
-    var no = 1;
-    var tableDataSet = [];
-    var i = 0;
-
-    var lines = jQuery('#legend .line');
-    for (i = 0; i < lines.length; i++) { 
-        var line = lines[i];
-        if (!line.series.disabled) {
-            var data = line.series.data;
-            var newRow = [ no++, line.series.name ];
-            data.forEach(function (row) {
-                newRow.push(row.y);
-            });
-            tableDataSet.push(newRow);
+        hasTestTimeThresholdData: function() {
+            return (self.testTimeThresholdData != null && Object.getOwnPropertyNames(self.testTimeThresholdData).length > 0);
         }
     };
 
-    if (tableDataSet == []) {
-        return;
-    }
+    return self;
+}();
+"@ + $javascriptFiles + @"
+jQuery('#chartFilterForm').submit(function (event) {
+    event.preventDefault();
+    mainController.showGraphAndTable();
+});
 
-    var columns = [ ];
-    columns.push({ title : "No" });
-    columns.push({ 
-        title : "Test name", 
-        createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
-            if (cellData.length > 90) {
-                cell.title = cellData       
-                `$(cell).tooltip( {
-                    delay: 0,
-                    track: true
-
-                })
-            }
-        }
-    });
-    
-    var dataColumns = chartData[0].data
-    for (i = 0; i < dataColumns.length; i++) {  
-        columns.push({ 
-            title: "#" + dataColumns[i].xLabel,
-            createdCell: function(cell, cellData, rowData, rowIndex, colIndex) {
-                if (cellData === null || typeof cellData === 'undefined') {
-                    return
-                }
-                var testName = rowData[1];
-                var thresholdData = testTimeThresholdData[testName];
-                var cellClassName = '';
-                if (!thresholdData) {
-                    thresholdData = testTimeThresholdData['*'];
-                }
-                if (thresholdData) {
-                    if (cellData <= thresholdData.PassedTime) {
-                        cellClassName = 'ttp';
-                    } else if (cellData >= thresholdData.FailedTime) {
-                        cellClassName = 'ttf';
-                    } else {
-                        cellClassName = 'tti';
-                    }
-                }
-                if (cellClassName) { 
-                    `$(cell).addClass(cellClassName);
-                }
-            }
-        });
-    }
-    
-    if (tableObj) {
-        tableObj.fnClearTable();
-        tableObj.fnDestroy();
-    }
-    jQuery('#tableContainer').html('<table cellpadding="0" cellspacing="0" border="0" class="display" id="tableData"></table>');
-    tableObj = jQuery('#tableData').dataTable( {
-        data: tableDataSet,
-        columns: columns,
-        searching: false,
-        scrollX: true,
-        fixedColumns: {
-            leftColumns: 2
-        }
-    } ); 
-    
-}
-
-${JavascriptDataVariableName} = ${JavascriptDataVariableName}.reverse();
-var chartData = ${JavascriptDataVariableName}.slice();
-var testTimeThresholdData = ${JavascriptTestTimeThresholdDataVariableName}
-var graphObj = null;
-var tableObj = null;
+jQuery('.sectionToggle').click(mainController.toggleSection);
 
 jQuery(document).ready(function() {
-    createGraph();
-    createTable();
+    mainController.init(dataModel, inputModel, graphModel, tableModel);
+    mainController.showGraphAndTable();
 });
-</script>
 
+</script>
 "@
 
+    return $result
 }

@@ -88,7 +88,7 @@ function New-TeamcityTrendReport {
         $OutputDir,
 
         [Parameter(Mandatory=$false)]
-        [string]
+        [string[]]
         $TestNameConversionRegex,
 
         [Parameter(Mandatory=$false)]
@@ -146,8 +146,10 @@ function New-TeamcityTrendReport {
 
     if ($TestNameConversionRegex) {
         foreach ($entry in $trendData) {
-            if ($entry.test_name -imatch $TestNameConversionRegex -and $matches[1]) {
-                $entry.test_name = $matches[1]
+            foreach ($regex in $TestNameConversionRegex) { 
+                if ($entry.test_name -imatch $regex -and $matches[1]) {
+                    $entry.test_name = $matches[1]
+                }
             }
         }
     }

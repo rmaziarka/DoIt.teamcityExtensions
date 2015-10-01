@@ -205,7 +205,7 @@ return @"
     vertical-align: top;
     margin-right: 3px;
     width: 390px;
-    max-height: 500px;
+    max-height: 538px;
     overflow: auto;
 
 }
@@ -288,17 +288,46 @@ return @"
 }
 
 #contentChart {
+    margin-top: 15px;
+}
+
+#mainContent {   
     width: 1300px;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 15px;
+}
+
+.sectionToggle {
+    position: absolute:
+    left: -5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.sectionHeader {
+    font-weight: bold;
+}
+
+.sectionVisible:after {
+    content: "\000AB";
+}
+
+.sectionHidden:after {
+    content: "\000BB";
 }
 
 #options {
     text-align: center;
-    width: 1300px;
+}
+
+#chartFilterForm {
+    width: 1050px;
     margin-left: auto;
     margin-right: auto;
+}
+
+#chartFilterForm table {
+    width: 100%
 }
 
 #chartFilterForm label {
@@ -328,6 +357,31 @@ return @"
 /* test threshold - passed */
 .ttp {
     background-color: #77DD77 !important;
+}
+
+.relativeBuildColumn {
+    background-color: #FDFD96 !important;
+}
+
+.formLabel {
+    text-align: right;
+}
+
+.formInput {
+    text-align: left;
+}
+
+.formSubmit {
+    text-align: center;
+}
+
+.rickshaw_graph svg {
+    height: 520px;
+}
+
+/* when orientation is bottom, ticks are displayed twice... - on top and on bottom, we don't want the one on top */
+.rickshaw_graph .x_ticks_d3 {
+    display: none;
 }
 
 "@
