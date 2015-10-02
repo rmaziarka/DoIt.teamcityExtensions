@@ -79,12 +79,14 @@ var tableModel = function() {
                         if (data == null) {
                             return data;
                         }
-                        if (inputModel.graphUnit == GraphUnitEnum.percent && data !== Infinity && data !== -Infinity) {
+                        if (inputModel.graphUnit == GraphUnitEnum.percent && data !== Infinity && data !== -Infinity && data !== NaN) {
                             return data + '%';
+                        } else if (inputModel.graphUnit == GraphUnitEnum.ms) {
+                            return data + ' ms';
                         }
                         return data;
                     },
-                    type: (inputModel.graphUnit == GraphUnitEnum.percent ? 'num-fmt' : 'num')
+                    type: 'num-fmt'
                 };
                 if (dataColumns[i].xLabel == inputModel.relativeToBuild) {
                     columnOptions.className = 'relativeBuildColumn'
