@@ -198,7 +198,7 @@ jQuery(document).ready(function() {
 
 // we need to extend num-fmt sorting to accommodate 'ms' suffix
 jQuery.extend(jQuery.fn.dataTable.ext.type.order, {
-	"num-fmt-pre": function(a) {
+    "num-fmt-pre": function(a) {
         if (!a) {
             return a;
         }
@@ -207,8 +207,8 @@ jQuery.extend(jQuery.fn.dataTable.ext.type.order, {
         }
         a = a.replace(/ms|%/, '');
         return parseFloat(a);
-	    }
-	});
+        }
+    });
 
 </script>
 "@
