@@ -109,12 +109,14 @@ var graphModel = function() {
 
             var xAxis = new Rickshaw.Graph.Axis.X( {
                 graph: self.graphObj,
-                tickFormat: function (x) { return xLabelMap[x]; },
-                orientation: 'bottom'
+                tickFormat: function (x) { 
+                    return xLabelMap[x]; 
+                },
+                orientation: 'top'
             } );
 
             xAxis.render();
-
+                      
             var yAxis = new Rickshaw.Graph.Axis.Y( {
                 graph: self.graphObj,
                 tickFormat: function (y) {
@@ -131,8 +133,7 @@ var graphModel = function() {
                     } else if (inputModel.graphUnit == GraphUnitEnum.percent) {
                         return y + '%';
                     }
-            
-                },
+                }
             } );
 
             yAxis.render();
