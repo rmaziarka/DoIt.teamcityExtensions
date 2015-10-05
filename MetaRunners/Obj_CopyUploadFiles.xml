@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="Obj: Copy / upload files">
+<meta-runner name="PSCI: Copy / upload files">
   <description>Copies files locally or uploads files to remote servers using WinRM</description>
   <settings>
     <parameters>

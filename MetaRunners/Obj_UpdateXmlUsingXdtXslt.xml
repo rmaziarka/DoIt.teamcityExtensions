@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="Obj: Update XML file (using XDT/XSLT)">
+<meta-runner name="PSCI: Update XML file (using XDT/XSLT)">
   <description>Applies XDT transform or XSLT stylesheet to XML files</description>
   <settings>
     <parameters>

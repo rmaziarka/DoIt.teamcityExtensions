@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="Obj: Test Trend Report">
+<meta-runner name="PSCI: Test Trend Report">
   <description>Generates a trend report basing on test results.</description>
   <settings>
     <parameters>

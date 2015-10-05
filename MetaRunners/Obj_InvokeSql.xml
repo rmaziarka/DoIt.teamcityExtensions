@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="Obj: Invoke SQL">
+<meta-runner name="PSCI: Invoke SQL">
   <description>Invoke SQL command on specified SQL Server database</description>
   <settings>
     <parameters>

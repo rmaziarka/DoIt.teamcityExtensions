@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="Obj: Update text file (using regex)">
+<meta-runner name="PSCI: Update text file (using regex)">
   <description>Replaces all occurences of regex with specified string</description>
   <settings>
     <parameters>

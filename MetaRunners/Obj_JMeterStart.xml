@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="Obj: JMeter start">
+<meta-runner name="PSCI: JMeter start">
   <description>Start JMeter in foreground or background</description>
   <settings>
     <parameters>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="Obj: Copy / download files">
+<meta-runner name="PSCI: Copy / download files">
   <description>Copies files locally or downloads files from remote server using WinRM</description>
   <settings>
     <parameters>

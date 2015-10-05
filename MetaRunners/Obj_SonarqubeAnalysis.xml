@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="Obj: Sonarqube Analysis">
+<meta-runner name="PSCI: Sonarqube Analysis">
   <description>Sonarqube analysis</description>
   <settings>
     <parameters>
