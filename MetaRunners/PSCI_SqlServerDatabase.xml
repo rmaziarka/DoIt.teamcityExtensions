@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="PSCI: SQL Server database">
+  <description>Drops, creates and restores SQL server databases</description>
+  <settings>
+    <parameters>
+      <param name="sqlServer.action" value="" spec="select label_2='Drop and Create' data_2='DropAndCreate' data_1='Drop' display='normal' label='Action' data_4='DropAndRestore' label_4='Drop and Restore'" />
+      <param name="sqlServer.database.server" value="" spec="text description='Name of database server' validationMode='not_empty' label='Database server' display='normal'" />
+      <param name="sqlServer.database.name" value="" spec="text validationMode='not_empty' label='Database name' display='normal'" />
+      <param name="sqlServer.integratedSecurity" value="$false" spec="checkbox checkedValue='$true' description='Check for Windows Authentication, uncheck for SQL Server Authentication' uncheckedValue='$false' label='Integrated Security' display='normal'" />
+      <param name="sqlServer.username" value="" spec="text description='Username' validationMode='any' label='Username' display='normal'" />
+      <param name="sqlServer.password" value="zxx775d03cbe80d301b" spec="password description='Password' label='Password' display='normal'" />
+      <param name="sqlServer.backup.location" value="" spec="text description='Path to database backup. Only used if action is Drop and Restore.' validationMode='any' label='Backup location' display='normal'" />
+      <param name="sqlServer.timeout" value="" spec="text description='Query timeout in seconds (default 120)' validationMode='any' label='Query timeout' display='normal'" />
+    </parameters>
+    <build-runners>
+      <runner name="Run Invoke-DatabaseMetaRunner" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x64" />
+          <param name="jetbrains_powershell_errorToError" value="true" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_noprofile" value="true" />
+          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\PSCI\Boot\PSCI.boot.ps1
+
+try {
+$params = @{
+    'DatabaseServer' = '%sqlServer.database.server%';
+    'DatabaseName' = '%sqlServer.database.name%';
+    'Action' = '%sqlServer.action%';
+    'IntegratedSecurity' = %sqlServer.integratedSecurity%;
+    'Username' = '%sqlServer.username%';
+    'Password' = '%sqlServer.password%';
+    'QueryTimeoutInSeconds' = '%sqlServer.timeout%';
+    'BackupLocation' = '%sqlServer.backup.location%';
+  }
+
+  [void](Invoke-DatabaseMetaRunner @params)
+} catch {
+  Write-ErrorRecord
+}]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+

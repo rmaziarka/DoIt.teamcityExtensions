@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <meta-runner name="PSCI: Deploy with PSCI">
-  <description>Deploys a package that has been created using Obj.PSCI</description>
+  <description>Deploys a package that has been created using PSCI</description>
   <settings>
     <parameters>
       <param name="psci.deploy.environment" value="" spec="text description='Comma- or newline-delimited list of environments where the package will be deployed (as defined in deployConfiguration.ps1)'  validationMode='not_empty' label='Environment' display='normal'" />
@@ -10,7 +10,7 @@
       <param name="psci.deploy.tokensOverride" value="" spec="text description='Comma- or newline-delimited tokens to override during deployment - e.g. User=Me,Password=secret. You need to escape , with \, and \ with \\.'  validationMode='any' label='Tokens override' display='normal'" />
       <param name="psci.deploy.deployps1" value="DeployScripts\deploy.ps1" spec="text description='Path to deploy.ps1' validationMode='not_empty' label='Path to deploy.ps1' display='normal'" />
       <param name="psci.deploy.projectRootPath" value="" spec="text description='Base project directory (leave empty for default defined in deploy.ps1)' validationMode='any' label='Path to project root' display='normal'" />
-      <param name="psci.deploy.objPSCIPath" value="" spec="text description='Path to PSCI (leave empty for default defined in deploy.ps1, put AGENT_PSCI for PSCI available at Teamcity agent)' validationMode='any' label='Path to PSCI' display='normal'" />
+      <param name="psci.deploy.psciPath" value="" spec="text description='Path to PSCI (leave empty for default defined in deploy.ps1, put AGENT_PSCI for PSCI available at Teamcity agent)' validationMode='any' label='Path to PSCI' display='normal'" />
       <param name="psci.deploy.packagesPath" value="" spec="text description='Path to packages directory (leave empty for default defined in deploy.ps1)' validationMode='any' label='Path to packages' display='normal'" />
       <param name="psci.deploy.deployConfigurationPath" value="" spec="text description='Path to configuration files (leave empty for default defined in deploy.ps1)' validationMode='any' label='Path to configuration files' display='normal'" />
       <param name="psci.deploy.deployType" value="All" spec="select description='Deploy type' data_2='Provision' data_1='All' display='normal' label='Deploy type' data_4='Adhoc' data_3='Deploy'" />
@@ -90,11 +90,11 @@ if ('%psci.deploy.tokensOverride%') {
 if ('%psci.deploy.projectRootPath%') {
   $params.ProjectRootPath = '%psci.deploy.projectRootPath%'
 }
-if ('%psci.deploy.objPSCIPath%') {
-  if ('%psci.deploy.objPSCIPath%' -ieq 'AGENT_PSCI') {
+if ('%psci.deploy.psciPath%') {
+  if ('%psci.deploy.psciPath%' -ieq 'AGENT_PSCI') {
     $psciPath = [Environment]::GetEnvironmentVariable('PSCI_PATH', 'Machine')
   } else {
-    $psciPath = '%psci.deploy.objPSCIPath%'
+    $psciPath = '%psci.deploy.psciPath%'
   } 
 
   $content = Get-Content -Path "%psci.deploy.deployps1%" -ReadCount 0 | Out-String

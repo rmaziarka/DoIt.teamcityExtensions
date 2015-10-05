@@ -7,7 +7,7 @@
       <param name="psci.build.buildps1" value="" spec="text description='Path to build.ps1' validationMode='not_empty' label='Path to build.ps1' display='normal'" />
       <param name="psci.build.version" value="%build.number%" spec="text description='Version number' validationMode='any' label='Version' display='normal'" />
       <param name="psci.build.projectRootPath" value="" spec="text description='Base project directory (leave empty for default defined in build.ps1)' validationMode='any' label='Path to project root' display='normal'" />
-      <param name="psci.build.objPSCIPath" value="" spec="text description='Path to PSCI (leave empty for default defined in build.ps1, put AGENT_PSCI for PSCI available at Teamcity agent)' validationMode='any' label='Path to PSCI' display='normal'" />
+      <param name="psci.build.psciPath" value="" spec="text description='Path to PSCI (leave empty for default defined in build.ps1, put AGENT_PSCI for PSCI available at Teamcity agent)' validationMode='any' label='Path to PSCI' display='normal'" />
       <param name="psci.build.packagesPath" value="" spec="text description='Path to packages directory (leave empty for default defined in build.ps1)' validationMode='any' label='Path to packages' display='normal'" />
     </parameters>
     <build-runners>
@@ -24,11 +24,11 @@ if ('%psci.build.version%') {
 if ('%psci.build.projectRootPath%') {
   $params.ProjectRootPath = '%psci.build.projectRootPath%'
 }
-if ('%psci.build.objPSCIPath%') {
-  if ('%psci.build.objPSCIPath%' -ieq 'AGENT_PSCI') {
+if ('%psci.build.psciPath%') {
+  if ('%psci.build.psciPath%' -ieq 'AGENT_PSCI') {
     $psciPath = [Environment]::GetEnvironmentVariable('PSCI_PATH', 'Machine')
   } else {
-    $psciPath = '%psci.build.objPSCIPath%'
+    $psciPath = '%psci.build.psciPath%'
   } 
 
   $content = Get-Content -Path '%psci.build.buildps1%' -ReadCount 0 | Out-String

@@ -1,2 +1,3 @@
 /_deploy/configuration/tokensSensitive.ps1
 /_deploy/deploy.log.txt
+/TestTrend/New-TeamcityTrendReport.Tests.ps1
