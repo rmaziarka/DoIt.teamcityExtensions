@@ -10,8 +10,10 @@
       <param name="trendReport.generateCsv" value="$false" spec="checkbox checkedValue='$true' description='If checked, CSV file will be generated' uncheckedValue='$false' label='Generate output CSV' display='normal'" />
       <param name="trendReport.inputThresholdCsv" value="" spec="text display='normal' description='Path to the CSV with test thresholds - columns TestName,PassedTime,FailedTime. Tests with time &lt;= PassedTime will be marked green, Passed Time &lt; time &lt; FailedTime amber, and time &gt;= FailedTime red.' label='Input threshold CSV'" />
       <param name="trendReport.outputFilePrefix" value="" spec="select display='normal' description='TeamCity tab where the results will be presented' label='Output tab' label_1='Test Trend' data_1='' label_3='Test Trend 2' data_3='2' label_5='Test Trend 3' data_5='3' " />
-      <param name="trendReport.password" value="" spec="password display='hidden'" />
-      <param name="trendReport.userId" value="" spec="text display='hidden'"/>
+      <param name="trendReport.tcServerDbConnection.databaseName" value="" spec="text display='hidden'"/>
+      <param name="trendReport.tcServerDbConnection.integratedSecurity" value="false" spec="text display='hidden'"/>
+      <param name="trendReport.tcServerDbConnection.userId" value="" spec="text display='hidden'"/>
+      <param name="trendReport.tcServerDbConnection.password" value="" spec="password display='hidden'" />
     </parameters>
     <build-runners>
       <runner name="Generate Test Trend Reports" type="jetbrains_powershell">
@@ -21,16 +23,21 @@
           <param name="jetbrains_powershell_script_code"><![CDATA[. c:\PSCI\Boot\PSCI.boot.ps1
 try { 
 
-$user = '%trendReport.userId%'
-$pass = '%trendReport.password%'
-if (!$user -or !$pass) {
-    throw "Either trendReport.userId or trendReport.password is empty. Please modify this metarunner to include valid userId and password."
+$user = '%trendReport.tcServerDbConnection.userId%'
+$pass = '%trendReport.tcServerDbConnection.password%'
+$integratedSecurity = '%trendReport.integratedSecurity%' -ieq 'true'
+if (!$integratedSecurity -and (!$user -or !$pass)) {
+        throw "When integratedSecurity is false, userId and password must not be empty. Please modify this metarunner to enable integratedSecurity or include valid userId and password."
 }
-
+$databaseName = '%trendReport.tcServerDbConnection.databaseName%'
 $outputFilePrefix = '%trendReport.outputFilePrefix%'
 
 $serverUrl = '%teamcity.serverUrl%' -replace 'http://',''
-$connectionString = "Server=${serverUrl};Database=TeamCity;User Id=${user};Password=${pass}"
+if ($integratedSecurity) {
+    $connectionString = "Server=${serverUrl};Database=${databaseName};Integrated Security=SSPI"
+} else { 
+    $connectionString = "Server=${serverUrl};Database=${databaseName};User Id=${user};Password=${pass}"
+}
 
 $includeRegex = @'
 %trendReport.testName.includeRegex%

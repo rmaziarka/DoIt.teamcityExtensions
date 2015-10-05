@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <meta-runner name="PSCI: Invoke SQL">
-  <description>Invoke SQL command on specified SQL Server database</description>
+  <description>Invoke SQL command at specified SQL Server database</description>
   <settings>
     <parameters>
       <param name="sqlRun.databaseServer" value="" spec="text description='Name of database server' validationMode='not_empty' label='Database Server' display='normal'" />

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <meta-runner name="PSCI: Update text file (using regex)">
-  <description>Replaces all occurences of regex with specified string</description>
+  <description>Replaces all occurrences of regex with specified string</description>
   <settings>
     <parameters>
       <param name="config.files" value="" spec="text description='Newline- or comma delimited paths to the files that will be modified' validationMode='not_empty' label='Path to files to update' display='normal'" />
