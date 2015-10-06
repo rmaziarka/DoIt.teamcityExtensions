@@ -3,7 +3,7 @@
   <description>Tags current or any other build</description>
   <settings>
     <parameters>
-      <param name="build.tag" value="" spec="text description='Comma-separated list of build tags to apply for current build' validationMode='not_empty' label='Build tags' display='normal'" />
+      <param name="build.tag" value="" spec="text description='Comma-separated list of tags to apply to build' validationMode='not_empty' label='Build tags' display='normal'" />
       <param name="build.id.to.tag" value="" spec="text description='Build id to tag. Leave empty for current build.' validationMode='' label='Build ID' display='normal'" />
       <param name="build.tag.mode" value="POST" spec="select description='Specify whether to replace or add tags' label_1='Add tags' data_1='POST' label_2='Replace tags' data_2='PUT' label='Tag mode' display='normal'" />
       <param name="build.tag.password" value="" spec="password display='hidden'" />
