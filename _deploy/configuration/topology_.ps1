@@ -28,7 +28,3 @@ Environment Default {
     # ServerConnection AgentsNodes -Nodes 'localhost' -RemotingCredential { $Tokens.Credentials.PSCredential }
     ServerRole Psci -Steps 'Deploy-Psci' -ServerConnections AgentsNodes
 }
-
-Environment BrowserTestingCrossDomainAgents {
-    ServerConnection AgentsNodes -Protocol HTTPS
-}
