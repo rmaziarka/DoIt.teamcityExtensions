@@ -3,8 +3,8 @@
   <description>Deploys a package that has been created using PSCI</description>
   <settings>
     <parameters>
-      <param name="psci.deploy.environment" value="" spec="text description='Comma- or newline-delimited list of environments where the package will be deployed (as defined in deployConfiguration.ps1)'  validationMode='not_empty' label='Environment' display='normal'" />
-      <param name="psci.deploy.serverRolesToDeploy" value="" spec="text description='List of server roles to deploy (leave empty for all, as defined for the selected environment in deployConfiguration.ps1)'  validationMode='any' label='ServerRoles to deploy' display='normal'" />
+      <param name="psci.deploy.environment" value="" spec="text description='Comma- or newline-delimited list of environments where the package will be deployed (as defined in topology)'  validationMode='not_empty' label='Environment' display='normal'" />
+      <param name="psci.deploy.serverRolesToDeploy" value="" spec="text description='List of server roles to deploy (leave empty for all, as defined for the selected environment in topology)'  validationMode='any' label='ServerRoles to deploy' display='normal'" />
       <param name="psci.deploy.nodesFilter" value="" spec="text description='List of destination nodes (servers) - leave empty to use nodes defined in configuration files'  validationMode='any' label='Nodes override' display='normal'" />
       <param name="psci.deploy.configurationsFilter" value="" spec="text description='List of steps which will be run on destination nodes - leave empty to use steps defined in configuration files'  validationMode='any' label='Steps override' display='normal'" />
       <param name="psci.deploy.tokensOverride" value="" spec="text description='Comma- or newline-delimited tokens to override during deployment - e.g. User=Me,Password=secret. You need to escape , with \, and \ with \\.'  validationMode='any' label='Tokens override' display='normal'" />
