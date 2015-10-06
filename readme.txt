@@ -1,1 +1,0 @@
-Set of TeamCity metarunners written in Powershell. They require whole PSCI library installed at TeamCity agent.
