@@ -87,7 +87,7 @@ table.dataTable tfoot th { padding: 8px 10px }
 
 #tableData_wrapper {
     margin: 0 auto;
-    max-width: 1300px;
+    max-width: 1360px;
 }
 
 table.dataTable {

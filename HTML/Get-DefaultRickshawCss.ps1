@@ -290,7 +290,7 @@ return @"
 }
 
 #mainContent {   
-    width: 1300px;
+    width: 1360px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -387,7 +387,7 @@ return @"
 
 #chart {
     display: block;
-    position: absolute;
+    position: relative;
     padding-top: 10px;
     left: 60px;
 }
