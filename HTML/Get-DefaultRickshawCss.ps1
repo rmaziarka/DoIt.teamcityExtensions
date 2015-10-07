@@ -41,7 +41,6 @@ return @"
     position: relative;
     display: inline-block;
     vertical-align: top;
-    border: 1px solid #f0f0f0;
 }
 .rickshaw_graph svg {
     display: block;    
@@ -90,7 +89,7 @@ return @"
 .rickshaw_graph .detail {
     pointer-events: none;
     position: absolute;
-    top: 0;
+    top: 10px;
     z-index: 2;
     background: rgba(0, 0, 0, 0.1);
     bottom: 0;
@@ -177,7 +176,6 @@ return @"
     width: 4px;
     height: 4px;
     margin-left: -3px;
-    margin-top: -3.5px;
     border-radius: 5px;
     position: absolute;
     box-shadow: 0 0 2px rgba(0, 0, 0, 0.6);
@@ -376,13 +374,42 @@ return @"
 }
 
 .rickshaw_graph svg {
-    height: 540px;
+	border: 1px solid #f0f0f0;
 }
 
 .x_ticks_d3 text {
-    transform: rotate(10deg) translate(0em, 2em);
+    transform: rotate(15deg) translate(0em, .5em);
 }
 
+.x_grid_d3 text{
+    display: none;
+}
+
+#chart {
+	display: block;
+	position: absolute;
+	padding-top: 10px;
+	left: 60px;
+}
+#y_axis {
+	position: absolute;
+	width: 60px;
+    stroke: rgba(0, 0, 0, 0.1);
+    stroke-width: 1px;
+	margin-top: 5px;
+	top: 19px;
+	bottom: 0px;
+}
+#x_axis {
+	position: absolute;
+    stroke: rgba(0, 0, 0, 0.1);
+    stroke-width: 1px;
+	left: 61px;
+	top: 524px;
+}
+#preview {
+	left: 60px;
+}
 "@
 
 }

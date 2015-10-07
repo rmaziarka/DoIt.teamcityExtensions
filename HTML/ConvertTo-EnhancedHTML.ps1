@@ -127,9 +127,11 @@ See New-TeamcityTrendReport or New-JMeterAggregateReport
         }
     }
     if ($CssStyleSheet) {
+        $stylesheet += "<style>"
         foreach ($css in $CssStyleSheet) {
-            $stylesheet += "<style>$css</style>"
+            $stylesheet += "$css`r`n"
         }
+        $stylesheet += "</style>"
     }
 
 

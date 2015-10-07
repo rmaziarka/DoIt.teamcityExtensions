@@ -47,7 +47,7 @@ var graphModel = function() {
         createGraph: function(dataModel, inputModel, createTableCallback) {
             var chartData = dataModel.chartData;
             jQuery('#legend').empty();
-            jQuery('#chartContainer').html('<div id="chart"></div><div id="preview"></div>')
+            jQuery('#chartContainer').html('<div id="preview"></div><div id="y_axis"></div><div id="chart"></div><div id="x_axis"></div>')
 
             // prepare xLabelMap for proper x labeling
             var xLabelMap = {}
@@ -112,7 +112,8 @@ var graphModel = function() {
                 tickFormat: function (x) { 
                     return xLabelMap[x]; 
                 },
-                orientation: 'top'
+                orientation:'bottom',
+				element: document.getElementById('x_axis')
             } );
 
             xAxis.render();
@@ -133,7 +134,9 @@ var graphModel = function() {
                     } else if (inputModel.graphUnit == GraphUnitEnum.percent) {
                         return y + '%';
                     }
-                }
+                },
+                orientation:'left',
+				element: document.getElementById('y_axis')
             } );
 
             yAxis.render();
