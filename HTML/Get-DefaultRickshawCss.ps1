@@ -374,7 +374,7 @@ return @"
 }
 
 .rickshaw_graph svg {
-	border: 1px solid #f0f0f0;
+    border: 1px solid #f0f0f0;
 }
 
 .x_ticks_d3 text {
@@ -386,29 +386,29 @@ return @"
 }
 
 #chart {
-	display: block;
-	position: absolute;
-	padding-top: 10px;
-	left: 60px;
+    display: block;
+    position: absolute;
+    padding-top: 10px;
+    left: 60px;
 }
 #y_axis {
-	position: absolute;
-	width: 60px;
+    position: absolute;
+    width: 60px;
     stroke: rgba(0, 0, 0, 0.1);
     stroke-width: 1px;
-	margin-top: 5px;
-	top: 19px;
-	bottom: 0px;
+    margin-top: 5px;
+    top: 19px;
+    bottom: 0px;
 }
 #x_axis {
-	position: absolute;
+    position: absolute;
     stroke: rgba(0, 0, 0, 0.1);
     stroke-width: 1px;
-	left: 61px;
-	top: 524px;
+    left: 61px;
+    top: 524px;
 }
 #preview {
-	left: 60px;
+    left: 60px;
 }
 "@
 

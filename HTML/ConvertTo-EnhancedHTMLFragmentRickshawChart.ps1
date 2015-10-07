@@ -154,10 +154,10 @@ function ConvertTo-EnhancedHTMLFragmentRickshawChart {
         <div id="contentChart">
             <div id="legend"></div>
             <div id="chartContainer">
-			    <div id="preview"></div>
-				<div id="y_axis"></div>
+                <div id="preview"></div>
+                <div id="y_axis"></div>
                 <div id="chart"></div>
-				<div id="x_axis"></div>
+                <div id="x_axis"></div>
             </div>
         </div>
 
