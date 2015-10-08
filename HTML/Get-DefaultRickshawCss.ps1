@@ -397,15 +397,15 @@ return @"
     stroke: rgba(0, 0, 0, 0.1);
     stroke-width: 1px;
     margin-top: 5px;
-    top: 19px;
+    top: 20px;
     bottom: 0px;
 }
 #x_axis {
-    position: absolute;
+    position: relative;
     stroke: rgba(0, 0, 0, 0.1);
     stroke-width: 1px;
     left: 61px;
-    top: 524px;
+    width: 820px;
 }
 #preview {
     left: 60px;
