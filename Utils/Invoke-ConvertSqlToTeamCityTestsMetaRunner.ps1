@@ -52,6 +52,10 @@ function Invoke-ConvertSqlToTeamCityTestsMetaRunner {
     List of columns that will be reported as TeamCity tests (each column will be mapped to one category).
     For example, if $ColumnsToReportsAsTests = @('average','median') and you have tests 'x', 'y', there will be
     tests average.x, average.y, median.x, median.y
+
+    .EXAMPLE
+    Invoke-ConvertSqlToTeamCityTestsMetaRunner -DatabaseServer 'localhost' -DatabaseName 'LoadTest2010' -IntegratedSecurity `
+    -ColumnTestName 'Name' -ColumnsToReportAsTests 'Average', 'Minimum', 'Maximum' -Query $sql
     #>
     [CmdletBinding()]
     [OutputType([void])]

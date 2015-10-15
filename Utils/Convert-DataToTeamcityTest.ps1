@@ -55,6 +55,9 @@ function Convert-DataToTeamcityTest {
     .PARAMETER FailureThreshold
     Threshold for $ColumnTestFailure parameter, above which test will be marked as failed.
 
+    .EXAMPLE
+    Convert-DataToTeamcityTest -InputData $InputData -ColumnTestName 'Name' -ColumnsToReportAsTests 'Average'
+
     #>
     [CmdletBinding()]
     [OutputType([string[]])]
