@@ -23,27 +23,12 @@ SOFTWARE.
 #>
 
 $curDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$publicFunctions = @()
 Get-ChildItem -Recurse $curDir -Include *.ps1 | Where-Object { $_ -notmatch '\.Tests.ps1|_deploy'  } | Foreach-Object {
-    . $_.FullName      
+    . $_.FullName 
+    if ($_.FullName -match '(Utils|JMeter)\\') {
+        $publicFunctions += ($_.Name -replace '.ps1', '')
+    }     
 }
 
-Export-ModuleMember -Function `
-    ConvertTo-EnhancedHTML, `
-    ConvertTo-EnhancedHTMLFragment, `
-    ConvertTo-EnhancedHTMLFragmentImage, `
-    Get-TeamcityArrayParameter, `
-    Get-TeamcityHashtableParameter, `
-    Get-TeamcityConnectionParameters, `
-    New-JMeterAggregateReport, `
-    New-JMeterDetailedReport, `
-    New-JMeterTeamcityTests, `
-    New-TeamcityTrendReport, `
-    Invoke-ClearDirectoryMetaRunner, `
-    Invoke-CopyDownloadFilesMetaRunner, `
-    Invoke-CopyUploadFilesMetaRunner, `
-    Invoke-SqlMetaRunner, `
-    Invoke-DatabaseMetaRunner, `
-    Invoke-RemotePowershellMetaRunner, `
-    Start-JMeter, `
-    Test-RunCondition, `
-    Wait-JMeter
+Export-ModuleMember -Function $publicFunctions
