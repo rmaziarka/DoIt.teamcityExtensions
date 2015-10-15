@@ -34,9 +34,9 @@ $columnsToReportAsTests = Get-TeamcityArrayParameter -Param @'
     'DatabaseServer' = '%sqlTCTest.databaseServer%';
     'DatabaseName' = '%sqlTCTest.databaseName%';
     'Query' = $query;
-    'IntegratedSecurity' = %sqlRun.integratedSecurity%;
-    'Username' = '%sqlRun.username%';
-    'Password' = '%sqlRun.password%';
+    'IntegratedSecurity' = %sqlTCTest.integratedSecurity%;
+    'Username' = '%sqlTCTest.username%';
+    'Password' = '%sqlTCTest.password%';
     'ColumnTestName' = '%sqlTCTest.columnTestName%';
     'ColumnsToReportAsTests' = $columnsToReportAsTests;
   }
