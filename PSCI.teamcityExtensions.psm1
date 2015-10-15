@@ -26,7 +26,7 @@ $curDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $publicFunctions = @()
 Get-ChildItem -Recurse $curDir -Include *.ps1 | Where-Object { $_ -notmatch '\.Tests.ps1|_deploy'  } | Foreach-Object {
     . $_.FullName 
-    if ($_.FullName -match '(Utils|JMeter)\\') {
+    if ($_.FullName -match '(Utils|JMeter|TestTrend)\\') {
         $publicFunctions += ($_.Name -replace '.ps1', '')
     }     
 }
