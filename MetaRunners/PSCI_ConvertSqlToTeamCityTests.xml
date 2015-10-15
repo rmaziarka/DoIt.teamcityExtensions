@@ -27,7 +27,7 @@ $query = @'
 '@
 
 $columnsToReportAsTests = Get-TeamcityArrayParameter -Param @'
-%sqlTCTest.columnsToReportAsTest%
+%sqlTCTest.columnsToReportAsTests%
 '@
 
   $params = @{
