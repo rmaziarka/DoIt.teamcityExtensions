@@ -41,7 +41,8 @@ $columnsToReportAsTests = Get-TeamcityArrayParameter -Param @'
     'ColumnsToReportAsTests' = $columnsToReportAsTests;
   }
 
-  [void](Invoke-ConvertSqlToTeamCityTestsMetaRunner @params)
+  Invoke-ConvertSqlToTeamCityTestsMetaRunner @params
+
 } catch {
   Write-ErrorRecord
 }]]></param>
