@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="PSCI: Convert SQL result to TeamCity tests">
+  <description>Converts result of SQL query to TeamCity tests</description>
+  <settings>
+    <parameters>
+      <param name="sqlTCTest.databaseServer" value="" spec="text description='Name of database server' validationMode='not_empty' label='Database Server' display='normal'" />
+      <param name="sqlTCTest.databaseName" value="" spec="text description='Name of database' validationMode='any' label='Database Name' display='normal'" />
+      <param name="sqlTCTest.integratedSecurity" value="$false" spec="checkbox checkedValue='$true' description='Check for Windows Authentication, uncheck for SQL Server Authentication' uncheckedValue='$false' label='Integrated Security' display='normal'" />
+      <param name="sqlTCTest.username" value="" spec="text description='Username - leave empty for agent service credentials' validationMode='any' label='Username' display='normal'" />
+      <param name="sqlTCTest.password" value="" spec="password description='Password - leave empty for agent service credentials' label='Password' display='normal'" />
+      <param name="sqlTCTest.query" value="" spec="text description='SQL query to run' validationMode='any' label='SQL query' display='normal'" />
+      <param name="sqlTCTest.columnTestName" value="" spec="text description='Column containing test names' validationMode='not_empty' label='Test name column' display='normal'" />
+      <param name="sqlTCTest.columnsToReportAsTests" value="" spec="text description='Comma- or newline-delimited list of columns containing test durations' validationMode='any' label='Test duration columns' display='normal'" />
+    </parameters>
+    <build-runners>
+      <runner name="Run SQL" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x64" />
+          <param name="jetbrains_powershell_errorToError" value="false" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\PSCI\Boot\PSCI.boot.ps1
+
+try { 
+
+$query = @'
+%sqlTCTest.query%
+'@
+
+$columnsToReportAsTests = Get-TeamcityArrayParameter -Param @'
+%sqlTCTest.columnsToReportAsTest%
+'@
+
+  $params = @{
+    'DatabaseServer' = '%sqlTCTest.databaseServer%';
+    'DatabaseName' = '%sqlTCTest.databaseName%';
+    'Query' = $query;
+    'IntegratedSecurity' = %sqlRun.integratedSecurity%;
+    'Username' = '%sqlRun.username%';
+    'Password' = '%sqlRun.password%';
+    'ColumnTestName' = '%sqlTCTest.columnTestName%';
+    'ColumnsToReportAsTests' = $columnsToReportAsTests;
+  }
+
+  [void](Invoke-ConvertSqlToTeamCityTestsMetaRunner @params)
+} catch {
+  Write-ErrorRecord
+}]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+

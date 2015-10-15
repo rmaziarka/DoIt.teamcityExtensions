@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function ConvertTo-TeamcityTest {
+function Convert-CsvToTeamcityTest {
     <#
     .SYNOPSIS
     Outputs TeamCity test service messages basing on input CSV file.
@@ -61,7 +61,7 @@ function ConvertTo-TeamcityTest {
     Prefix that will be added to test name. Can be used to categorize tests (e.g. 'Average.').
 
     .EXAMPLE
-    ConvertTo-TeamcityTest -CsvInputFilePath "AggregateReport.csv" -TestSuiteName "JMeter" -FailureThreshold 0 `
+    Convert-CsvToTeamcityTest -CsvInputFilePath "AggregateReport.csv" -TestSuiteName "JMeter" -FailureThreshold 0 `
         -ColumnTestName "sampler_label" -ColumnTestTime "average" -ColumnTestFailure "aggregate_report_error%" -TestClassNamePrefix "Average." `
     #>
     [CmdletBinding()]
@@ -126,8 +126,7 @@ function ConvertTo-TeamcityTest {
             $testInfo = @{}
             $testInfo.TestName = "${TestSuiteName}: $testName"
             $testInfo.Succeeded = $true
-            # need to escape some characters - see https://confluence.jetbrains.com/display/TCD8/Build+Script+Interaction+with+TeamCity
-            $testNameEscaped = $testName -replace "\|","||" -replace "'","|'" -replace "`n","|n" -replace "`r","|r" -replace "\[","|[" -replace "\]","|]"
+            $testNameEscaped = Convert-StringToTeamCityEscapedString -String $testName
             Write-Output -InputObject ("##teamcity[testStarted name='{0}']" -f $testNameEscaped)
             if ($ColumnTestFailure) { 
                 $failureValue = [decimal]($_.$ColumnTestFailure -replace '%', '')
