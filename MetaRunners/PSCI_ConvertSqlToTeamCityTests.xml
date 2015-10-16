@@ -8,6 +8,7 @@
       <param name="sqlTCTest.integratedSecurity" value="$false" spec="checkbox checkedValue='$true' description='Check for Windows Authentication, uncheck for SQL Server Authentication' uncheckedValue='$false' label='Integrated Security' display='normal'" />
       <param name="sqlTCTest.username" value="" spec="text description='Username - leave empty for agent service credentials' validationMode='any' label='Username' display='normal'" />
       <param name="sqlTCTest.password" value="" spec="password description='Password - leave empty for agent service credentials' label='Password' display='normal'" />
+      <param name="sqlTCTest.predefinedQuery" value="" spec="select display='normal' description='If one of the predefined query is choosen, the Sql query parameter would be ignored. Otherwise only sql query will be taken into consideration.' label='Predefined sql query' data_1='sqlQueryParameter' label_1='--Choose one from the list or provide your own query in Sql query--' data_3='LoadTestVisualStudioQuery'" />
       <param name="sqlTCTest.query" value="" spec="text description='SQL query to run' validationMode='any' label='SQL query' display='normal'" />
       <param name="sqlTCTest.columnTestName" value="" spec="text description='Column containing test names' validationMode='not_empty' label='Test name column' display='normal'" />
       <param name="sqlTCTest.columnsToReportAsTests" value="" spec="text description='Comma- or newline-delimited list of columns containing test durations' validationMode='any' label='Test duration columns' display='normal'" />
@@ -33,6 +34,7 @@ $columnsToReportAsTests = Get-TeamcityArrayParameter -Param @'
   $params = @{
     'DatabaseServer' = '%sqlTCTest.databaseServer%';
     'DatabaseName' = '%sqlTCTest.databaseName%';
+    'PredefinedQuery' = '%sqlTCTest.predefinedQuery%';
     'Query' = $query;
     'IntegratedSecurity' = %sqlTCTest.integratedSecurity%;
     'Username' = '%sqlTCTest.username%';

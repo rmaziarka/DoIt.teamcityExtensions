@@ -33,8 +33,13 @@ function Invoke-ConvertSqlToTeamCityTestsMetaRunner {
     .PARAMETER DatabaseName
     Name of database.
 
+    .PARAMETER PredefinedQuery
+    If one of the predefined query is choosen, the Sql query parameter would be ignored.
+    Otherwise only sql query will be taken into consideration.
+
     .PARAMETER Query
     Sql query to execute.
+    Only used if predefinedQuery parameter is not specified.
 
     .PARAMETER IntegratedSecurity
     If true, Windows Authentication will be used. SQL Server Authentication otherwise.
@@ -67,6 +72,10 @@ function Invoke-ConvertSqlToTeamCityTestsMetaRunner {
         [Parameter(Mandatory=$false)]
         [string]
         $DatabaseName,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $PredefinedQuery,
 
         [Parameter(Mandatory=$false)]
         [string]
@@ -116,7 +125,11 @@ function Invoke-ConvertSqlToTeamCityTestsMetaRunner {
     if ($credential) {
        $params['Credential'] = $credential
     }
-    if ($Query) {
+
+    if ($PredefinedQuery -and $PredefinedQuery -ne 'sqlQueryParameter') {
+       $predefinedSqlQuery = Get-PredefinedSqlQuery -PredefinedQueryName $PredefinedQuery
+       $params['Query'] = $predefinedSqlQuery
+    } elseif ($Query) {
        $params['Query'] = $Query
     }
 

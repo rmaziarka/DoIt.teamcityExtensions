@@ -28,7 +28,16 @@ Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psd1" -Force
 Describe -Tag "PSCI.unit" "Invoke-ConvertSqlToTeamCityTestsMetaRunner.Tests.ps1" {
     InModuleScope PSCI.teamcityExtensions {
 
-            Context "when " {
+            Context "when call with predefined sql query name" {
+                It "should work" {
+                    $output = Invoke-ConvertSqlToTeamCityTestsMetaRunner -DatabaseServer 'localhost' -DatabaseName 'LoadTest2010' -IntegratedSecurity `
+                        -ColumnTestName 'Name' -ColumnsToReportAsTests 'Average', 'Minimum', 'Maximum' -PredefinedQuery 'LoadTestVisualStudioQuery'
+
+                    $output.Foreach({ Write-Host $_ })
+                }
+            }
+
+            Context "when call with provided sql query" {
 
                 $sql = @'
 select top 5 'Request' as Type, 
@@ -40,17 +49,19 @@ select top 5 'Request' as Type,
           Average*1000 as Average,
           Minimum*1000 as Minimum,
           Maximum*1000 as Maximum,
-          Percentile90*1000 as Percentile90
+          Percentile90*1000 as Percentile90,
+          Percentile95*1000 as Percentile95
 from  [dbo].[LoadTestPageResults]
 '@
 
                 It "should work" {
                     $output = Invoke-ConvertSqlToTeamCityTestsMetaRunner -DatabaseServer 'localhost' -DatabaseName 'LoadTest2010' -IntegratedSecurity `
-                        -ColumnTestName 'Name' -ColumnsToReportAsTests 'Average', 'Minimum', 'Maximum' -Query $sql
+                        -ColumnTestName 'Name' -ColumnsToReportAsTests 'Average', 'Minimum', 'Maximum' -PredefinedQuery 'LoadTestVisualStudioQuery' -Query $sql
 
                     $output.Foreach({ Write-Host $_ })
                 }
             }
+
     }
 }
 #>
