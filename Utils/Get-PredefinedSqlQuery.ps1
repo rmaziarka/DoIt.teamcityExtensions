@@ -45,6 +45,8 @@ function Get-PredefinedSqlQuery {
 
     if ($PredefinedQueryName -eq 'LoadTestVisualStudioQuery'){
         $resultQuery = @'
+        DECLARE @maxLoadTestRunId int = (SELECT MAX(LoadTestRunId) FROM [dbo].[LoadTestPageResults])
+
         select 'Request' as Type, 
                   LoadTestRunId,
                   ScenarioName,
@@ -57,6 +59,7 @@ function Get-PredefinedSqlQuery {
                   Percentile90*1000 as Percentile90,
                   Percentile95*1000 as Percentile95
         from  [dbo].[LoadTestPageResults]
+        WHERE LoadTestRunId = @maxLoadTestRunId
         union all
         select   'Transaction',
                 LoadTestRunId,  
@@ -70,6 +73,7 @@ function Get-PredefinedSqlQuery {
                 Percentile90*1000 as Percentile90,
                 Percentile95*1000 as Percentile95
         from  [dbo].[LoadTestTransactionResults2]
+        WHERE LoadTestRunId = @maxLoadTestRunId
         union all
         select  'Webtest', 
                 LoadTestRunId,  
@@ -83,6 +87,7 @@ function Get-PredefinedSqlQuery {
                 Percentile90*1000 as Percentile90,
                 Percentile95*1000 as Percentile95
         from [dbo].[LoadTestTestResults]
+        WHERE LoadTestRunId = @maxLoadTestRunId
         ORDER BY LoadTestRunId DESC, Type
 '@
     }

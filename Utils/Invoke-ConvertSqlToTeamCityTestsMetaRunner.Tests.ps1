@@ -56,7 +56,7 @@ from  [dbo].[LoadTestPageResults]
 
                 It "should work" {
                     $output = Invoke-ConvertSqlToTeamCityTestsMetaRunner -DatabaseServer 'localhost' -DatabaseName 'LoadTest2010' -IntegratedSecurity `
-                        -ColumnTestName 'Name' -ColumnsToReportAsTests 'Average', 'Minimum', 'Maximum' -PredefinedQuery 'LoadTestVisualStudioQuery' -Query $sql
+                        -ColumnTestName 'Name' -ColumnsToReportAsTests 'Average', 'Minimum', 'Maximum' -Query $sql
 
                     $output.Foreach({ Write-Host $_ })
                 }
