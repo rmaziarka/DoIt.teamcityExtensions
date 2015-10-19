@@ -13,7 +13,7 @@
       <param name="psci.deploy.psciPath" value="" spec="text description='Path to PSCI (leave empty for default defined in deploy.ps1, put AGENT_PSCI for PSCI available at Teamcity agent)' validationMode='any' label='Path to PSCI' display='normal'" />
       <param name="psci.deploy.packagesPath" value="" spec="text description='Path to packages directory (leave empty for default defined in deploy.ps1)' validationMode='any' label='Path to packages' display='normal'" />
       <param name="psci.deploy.deployConfigurationPath" value="" spec="text description='Path to configuration files (leave empty for default defined in deploy.ps1)' validationMode='any' label='Path to configuration files' display='normal'" />
-      <param name="psci.deploy.deployType" value="All" spec="select description='Deploy type' data_2='Provision' data_1='All' display='normal' label='Deploy type' data_4='Adhoc' data_3='Deploy'" />
+      <param name="psci.deploy.deployType" value="All" spec="text description='Deploy type - valid values: All (default), Provision (only -StepsProvision will run), Deploy (only -StepsDeploy will run), Adhoc (StepsFilter will run on ServerRolesFilter/NodesFilter)' validationMode='any' display='normal' label='Deploy type'" />
       <param name="psci.deploy.validateOnly" value="" spec="text description='Put true to create deployment plan but not run actual deployment' display='normal' label='Validate only'" />
       <param name="psci.deploy.postScript" value="" spec="text description='Additional powershell code to run after the deployment (in the same Powershell session - can use variables $params or $DeploymentPlan)' display='normal' label='Custom post-script'" />
     </parameters>
