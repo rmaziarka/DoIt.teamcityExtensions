@@ -126,7 +126,7 @@ function Invoke-ConvertSqlToTeamCityTestsMetaRunner {
        $params['Credential'] = $credential
     }
 
-    if ($PredefinedQuery -and $PredefinedQuery -ne 'sqlQueryParameter') {
+    if ($PredefinedQuery) {
        $predefinedSqlQuery = Get-PredefinedSqlQuery -PredefinedQueryName $PredefinedQuery
        $params['Query'] = $predefinedSqlQuery
     } elseif ($Query) {

@@ -24,9 +24,16 @@ SOFTWARE.
 
 Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psd1" -Force
 
-<#
+
 Describe -Tag "PSCI.unit" "Invoke-ConvertSqlToTeamCityTestsMetaRunner.Tests.ps1" {
     InModuleScope PSCI.teamcityExtensions {
+<#
+            Context "when call with predefined sql query name which is empty and parameter Query is not given" {
+                It "should throw missing parameter" {
+                    {Invoke-ConvertSqlToTeamCityTestsMetaRunner -DatabaseServer 'localhost' -DatabaseName 'LoadTest2010' -IntegratedSecurity `
+                        -ColumnTestName 'Name' -ColumnsToReportAsTests 'Average', 'Minimum', 'Maximum' -PredefinedQuery ''} | Should Throw
+                }
+            }
 
             Context "when call with predefined sql query name" {
                 It "should work" {
@@ -61,7 +68,6 @@ from  [dbo].[LoadTestPageResults]
                     $output.Foreach({ Write-Host $_ })
                 }
             }
-
+            #>
     }
 }
-#>
