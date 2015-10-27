@@ -23,10 +23,10 @@ SOFTWARE.
 #>
 
 function Start-Zap {
-	<#
+    <#
     .SYNOPSIS
     Starts ZAP process.
-	    
+        
     .PARAMETER ZAPDir
     Path to root ZAP directory.
     
@@ -48,17 +48,17 @@ function Start-Zap {
         $ZAPProperties
     )
 
-	if (!(Test-Path -LiteralPath $ZAPDir)) {
+    if (!(Test-Path -LiteralPath $ZAPDir)) {
         throw "Cannot find ZAP directory at '$ZAPDir'."
     }    
-	
-	$cmdArgs = "-daemon "
-	$cmdArgs += $ZAPProperties -Join ' '
+    
+    $cmdArgs = "-daemon "
+    $cmdArgs += $ZAPProperties -Join ' '
 
-	$ZAPPath = Join-Path -Path $ZAPDir -ChildPath "ZAP.bat"
+    $ZAPPath = Join-Path -Path $ZAPDir -ChildPath "ZAP.bat"
     if (!(Test-Path -LiteralPath $ZAPPath)) {
        throw "Cannot find '$ZAPPath'."
     }
 
-	[void](Start-ExternalProcess -Command $ZAPPath -ArgumentList $cmdArgs -WorkingDirectory $ZAPDir)
+    [void](Start-ExternalProcess -Command $ZAPPath -ArgumentList $cmdArgs -WorkingDirectory $ZAPDir)
 }

@@ -23,7 +23,7 @@ SOFTWARE.
 #>
 
 function Close-Zap {
-	<#
+    <#
     .SYNOPSIS
     Close ZAP process.
     
@@ -33,13 +33,13 @@ function Close-Zap {
     .EXAMPLE
     Close-Zap -ApiKey 12345
     #>
-	[CmdletBinding()]
+    [CmdletBinding()]
     [OutputType([void])]
     param(
-		[Parameter(Mandatory=$false)]
+        [Parameter(Mandatory=$false)]
         [int]
         $ApiKey = 12345
     )
-	$shutdownUrl = "http://zap/JSON/core/action/shutdown/?zapapiformat=JSON&apikey=" + $ApiKey
-	Invoke-WebRequestWrapper -Uri $shutdownUrl -Method "Get" -ContentType "JSON"
+    $shutdownUrl = "http://zap/JSON/core/action/shutdown/?zapapiformat=JSON&apikey=" + $ApiKey
+    Invoke-WebRequestWrapper -Uri $shutdownUrl -Method "Get" -ContentType "JSON"
 }

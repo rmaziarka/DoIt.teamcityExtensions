@@ -23,9 +23,9 @@ SOFTWARE.
 #>
 
 function Start-ZapAScan {
-	<#
+    <#
     .SYNOPSIS
-	Starts ZAP Active Scan for specified url.
+    Starts ZAP Active Scan for specified url.
     
     .PARAMETER Url
     Url for which Active Scan should be run.
@@ -42,30 +42,30 @@ function Start-ZapAScan {
     [CmdletBinding()]
     [OutputType([void])]
     param(
-		[Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$true)]
         [string]
         $Url,
 
-		[Parameter(Mandatory=$false)]
+        [Parameter(Mandatory=$false)]
         [int]
         $ApiKey = 12345,
 
-		[Parameter(Mandatory=$false)]
+        [Parameter(Mandatory=$false)]
         [int]
         $Interval = 1
     )
 
-	$scanUrl = "http://zap/JSON/ascan/action/scan/?zapapiformat=JSON&apikey=" + $ApiKey + "&url=" + $Url + "&recurse=&inScopeOnly=&scanPolicyName=&method=&postData="
-	$responseScan = Invoke-WebRequestWrapper -Uri $scanUrl -Method "Get" -ContentType "JSON"
-	$json = $responseScan.Content | ConvertFrom-Json
-	$scanId = $json.scan
+    $scanUrl = "http://zap/JSON/ascan/action/scan/?zapapiformat=JSON&apikey=" + $ApiKey + "&url=" + $Url + "&recurse=&inScopeOnly=&scanPolicyName=&method=&postData="
+    $responseScan = Invoke-WebRequestWrapper -Uri $scanUrl -Method "Get" -ContentType "JSON"
+    $json = $responseScan.Content | ConvertFrom-Json
+    $scanId = $json.scan
 
-	$status = 0
-	while($status -lt 100) {
-		$urlGetStatusUrl = "http://zap/JSON/ascan/view/status/?zapapiformat=JSON&scanId=" + $scanId
-		$responseStatus = Invoke-WebRequestWrapper -Uri $urlGetStatusUrl -Method "Get" -ContentType "JSON"
-		$json = $responseStatus.Content | ConvertFrom-Json
-		$status = $json.status
-		Start-Sleep -s $Interval
-	}
+    $status = 0
+    while($status -lt 100) {
+        $urlGetStatusUrl = "http://zap/JSON/ascan/view/status/?zapapiformat=JSON&scanId=" + $scanId
+        $responseStatus = Invoke-WebRequestWrapper -Uri $urlGetStatusUrl -Method "Get" -ContentType "JSON"
+        $json = $responseStatus.Content | ConvertFrom-Json
+        $status = $json.status
+        Start-Sleep -s $Interval
+    }
 }
