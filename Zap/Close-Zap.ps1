@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Shutdown-Zap {
+function Close-Zap {
 	<#
     .SYNOPSIS
     Close ZAP process.
@@ -31,7 +31,7 @@ function Shutdown-Zap {
     Api key which it was run with ZAP.
 
     .EXAMPLE
-    Shutdown-Zap -ApiKey 12345
+    Close-Zap -ApiKey 12345
     #>
 	[CmdletBinding()]
     [OutputType([void])]

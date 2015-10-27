@@ -26,9 +26,12 @@ function Start-Zap {
 	<#
     .SYNOPSIS
     Starts ZAP process.
+	    
+    .PARAMETER $ZAPDir
+    Path to root ZAP directory.
     
-    .PARAMETER ApiKey
-    Api key which it was run with ZAP.
+    .PARAMETER $ZAPProperties
+    List of properties which ZAP should be run.
 
     .EXAMPLE
     Start-ZAP -ZAPDir 'C:\ZAP\' -ZAPProperties @('-config api.key=12345', '-config connection.timeoutInSecs=60')
