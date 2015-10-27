@@ -27,47 +27,52 @@ Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psd1" -Force
 
 Describe -Tag "PSCI.unit" "Invoke-ConvertSqlToTeamCityTestsMetaRunner.Tests.ps1" {
     InModuleScope PSCI.teamcityExtensions {
-<#
-            Context "when call with predefined sql query name which is empty and parameter Query is not given" {
-                It "should throw missing parameter" {
-                    {Invoke-ConvertSqlToTeamCityTestsMetaRunner -DatabaseServer 'localhost' -DatabaseName 'LoadTest2010' -IntegratedSecurity `
-                        -ColumnTestName 'Name' -ColumnsToReportAsTests 'Average', 'Minimum', 'Maximum' -PredefinedQuery ''} | Should Throw
-                }
+    <#
+        Context "when call with predefined sql query name which is empty and parameter Query is not given" {
+            It "should throw missing parameter" {
+                {Invoke-ConvertSqlToTeamCityTestsMetaRunner -DatabaseServer 'localhost' -DatabaseName 'LoadTest2010' -IntegratedSecurity `
+                    -ColumnTestName 'Name' -ColumnsToReportAsTests 'Average', 'Minimum', 'Maximum' -PredefinedQuery ''} | Should Throw
             }
+        }
 
-            Context "when call with predefined sql query name" {
-                It "should work" {
-                    $output = Invoke-ConvertSqlToTeamCityTestsMetaRunner -DatabaseServer 'localhost' -DatabaseName 'LoadTest2010' -IntegratedSecurity `
-                        -ColumnTestName 'Name' -ColumnsToReportAsTests 'Average', 'Minimum', 'Maximum' -PredefinedQuery 'LoadTestVisualStudioQuery'
+        Context "when call with predefined sql query name" {        
+            $TrxFolderOrFilePath = 'C:\TestReport.trx'
+            Mock Test-Path { return $true } -ParameterFilter { $TrxFolderOrFilePath -eq 'C:\TestReport.trx' }
+            Mock Get-Content { return "<TestRun id='6d03ab07-c551-4847-a311-9fa9c36bf61c'></TestRun>" }
+            Mock Convert-DataToTeamCityTest { return  }
 
-                    $output.Foreach({ Write-Host $_ })
-                }
+            It "should work" {
+                $output = Invoke-ConvertSqlToTeamCityTestsMetaRunner -DatabaseServer 'localhost' -DatabaseName 'LoadTest2010' -IntegratedSecurity `
+                    -ColumnTestName 'Name' -ColumnsToReportAsTests 'Average', 'Minimum', 'Maximum' -PredefinedQuery 'LoadTestVisualStudioQuery' -TrxFolderOrFilePath 'C:\TestReport.trx'
+
+                $output.Foreach({ Write-Host $_ })
             }
+        }
 
-            Context "when call with provided sql query" {
+        Context "when call with provided sql query" {
 
-                $sql = @'
-select top 5 'Request' as Type, 
-               LoadTestRunId,
-          ScenarioName,
-               TestCaseName, 
-          RequestUri as Name,
-          PageCount as Count,
-          Average*1000 as Average,
-          Minimum*1000 as Minimum,
-          Maximum*1000 as Maximum,
-          Percentile90*1000 as Percentile90,
-          Percentile95*1000 as Percentile95
-from  [dbo].[LoadTestPageResults]
+        $sql = @'
+        select top 5 'Request' as Type, 
+                LoadTestRunId,
+            ScenarioName,
+                TestCaseName, 
+            RequestUri as Name,
+            PageCount as Count,
+            Average*1000 as Average,
+            Minimum*1000 as Minimum,
+            Maximum*1000 as Maximum,
+            Percentile90*1000 as Percentile90,
+            Percentile95*1000 as Percentile95
+        from  [dbo].[LoadTestPageResults]
 '@
 
-                It "should work" {
-                    $output = Invoke-ConvertSqlToTeamCityTestsMetaRunner -DatabaseServer 'localhost' -DatabaseName 'LoadTest2010' -IntegratedSecurity `
-                        -ColumnTestName 'Name' -ColumnsToReportAsTests 'Average', 'Minimum', 'Maximum' -Query $sql
+            It "should work" {
+                $output = Invoke-ConvertSqlToTeamCityTestsMetaRunner -DatabaseServer 'localhost' -DatabaseName 'LoadTest2010' -IntegratedSecurity `
+                    -ColumnTestName 'Name' -ColumnsToReportAsTests 'Average', 'Minimum', 'Maximum' -Query $sql
 
-                    $output.Foreach({ Write-Host $_ })
-                }
+                $output.Foreach({ Write-Host $_ })
             }
-            #>
+        }
+        #>
     }
 }

@@ -34,11 +34,26 @@ Describe -Tag "PSCI.unit" "Get-PredefinedSqlQuery.ps1" {
             }
             
                         
-            Context "when supplied predefined query name which exists" {
-                It "should return the predefined query" {
-                   $result = Get-PredefinedSqlQuery -PredefinedQueryName 'LoadTestVisualStudioQuery'
+            Context "when predefined query is LoadTestVisualStudioQuery but none TestRunGuid parameter supplied " {
+                It "should throw exception" {
+                   {Get-PredefinedSqlQuery -PredefinedQueryName 'LoadTestVisualStudioQuery'} | Should Throw
+                }
+            }
+            
+                        
+            Context "when predefined query is LoadTestVisualStudioQuery but testRunGuid parameter is empty" {
+                It "should throw exception." {
+                   {Get-PredefinedSqlQuery -PredefinedQueryName 'LoadTestVisualStudioQuery' -TestRunGuid ''} | Should Throw
+                }
+            }
+            
+                        
+            Context "when predefined query is LoadTestVisualStudioQuery and testRunGuid is supplied" {                
+                It "should return the predefined query containing given testRunGuid" {
+                   $result = Get-PredefinedSqlQuery -PredefinedQueryName 'LoadTestVisualStudioQuery' -TestRunGuid '0000-1111-AAAA-BBBB-9999'
 
                    $result | Should Not Be $null
+                   $result.Contains('0000-1111-AAAA-BBBB-9999') | Should Be $true
                 }
             }
     }
