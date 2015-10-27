@@ -27,10 +27,10 @@ function Start-Zap {
     .SYNOPSIS
     Starts ZAP process.
 	    
-    .PARAMETER $ZAPDir
+    .PARAMETER ZAPDir
     Path to root ZAP directory.
     
-    .PARAMETER $ZAPProperties
+    .PARAMETER ZAPProperties
     List of properties which ZAP should be run.
 
     .EXAMPLE
