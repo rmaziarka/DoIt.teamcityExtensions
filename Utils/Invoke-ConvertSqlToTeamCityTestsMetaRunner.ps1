@@ -37,6 +37,9 @@ function Invoke-ConvertSqlToTeamCityTestsMetaRunner {
     If one of the predefined query is choosen, the Sql query parameter would be ignored.
     Otherwise only sql query will be taken into consideration.
 
+    .PARAMETER TrxFolderOrFilePath
+    Path to the trx (xml) file, which contains RunGuid. When specified, then RunGuid from the file will be taken as a parameter to sql predefined query.
+
     .PARAMETER Query
     Sql query to execute.
     Only used if predefinedQuery parameter is not specified.
@@ -76,6 +79,10 @@ function Invoke-ConvertSqlToTeamCityTestsMetaRunner {
         [Parameter(Mandatory=$false)]
         [string]
         $PredefinedQuery,
+        
+        [parameter(Mandatory=$false)]
+        [string]
+        $TrxFolderOrFilePath,
 
         [Parameter(Mandatory=$false)]
         [string]
@@ -126,8 +133,13 @@ function Invoke-ConvertSqlToTeamCityTestsMetaRunner {
        $params['Credential'] = $credential
     }
 
-    if ($PredefinedQuery -and $PredefinedQuery -ne 'sqlQueryParameter') {
-       $predefinedSqlQuery = Get-PredefinedSqlQuery -PredefinedQueryName $PredefinedQuery
+    if($TrxFolderOrFilePath)
+    {
+        $testRunGuid = Get-TestRunGuidFromTrxFile -TrxFolderOrFilePath $TrxFolderOrFilePath
+    }
+
+    if ($PredefinedQuery) {
+       $predefinedSqlQuery = Get-PredefinedSqlQuery -PredefinedQueryName $PredefinedQuery -TestRunGuid $testRunGuid
        $params['Query'] = $predefinedSqlQuery
     } elseif ($Query) {
        $params['Query'] = $Query

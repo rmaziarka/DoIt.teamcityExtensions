@@ -42,7 +42,8 @@ function Convert-DataToTeamcityTest {
     Name of test suite that will be reported to TeamCity.
 
     .PARAMETER TestNames
-    When parameter is specified, then only column names from the parameter are taken into consideration.
+    When parameter is specified, then only test names specified in this list are taken into consideration.
+    Names contained in the ColumnTestName will be filtered into 
     Otherwise (when parameter is not specified) there is no filter.
 
     .PARAMETER IgnoreTestNames
