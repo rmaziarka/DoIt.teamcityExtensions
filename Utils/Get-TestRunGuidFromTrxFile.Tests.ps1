@@ -131,11 +131,19 @@ Describe -Tag "PSCI.unit" "Get-TestRunGuidFromTrxFile.Tests.ps1" {
             }
         }
             
-        Context "when not existing directory folder is given" {
+        Context "when not existing directory is given" {
 
             It "it should throw not existing directory path" {
                 { Get-TestRunGuidFromTrxFile -TrxFolderOrFilePath 'C:\NotExistingDirectory123654\NotExistingSubdirectory987654123' } | Should Throw
             }
-        }        
+        }   
+        
+        <#
+        Context "when existing directory with at least one trx file is given" {
+
+            It "should take the newest trx file and make other things" {
+                $result = Get-TestRunGuidFromTrxFile -TrxFolderOrFilePath 'C:\Users\kkociuga\Documents\Visual Studio 2015\Projects\WebAndLoadTestProject1\TestResults' | Should Throw
+            }
+        }#> 
     }
 }

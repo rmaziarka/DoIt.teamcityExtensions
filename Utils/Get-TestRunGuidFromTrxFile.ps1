@@ -45,7 +45,7 @@ function Get-TestRunGuidFromTrxFile {
 
         if ((Test-Path -PathType Container -Path $TrxFolderOrFilePath)) {
             $file = $null
-            $files = Get-ChildItem $TrxFolderOrFilePath -Filter *.trx | `
+            Get-ChildItem $TrxFolderOrFilePath -Filter *.trx | `
             Foreach-Object{
                 if (!$file -or $_.LastWriteTimeUtc -gt $file.LastWriteTimeUtc)
                 {
