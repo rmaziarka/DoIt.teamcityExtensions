@@ -37,35 +37,33 @@ function Get-TestRunGuidFromTrxFile {
     [CmdletBinding()]
     [OutputType([string])]
     param(
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory=$true)]
         [string]
         $TrxFolderOrFilePath
     )
+
     if (!(Test-Path -PathType Leaf -Path $TrxFolderOrFilePath)) {
 
-        if ((Test-Path -PathType Container -Path $TrxFolderOrFilePath)) {
-            $file = $null
-            Get-ChildItem $TrxFolderOrFilePath -Filter *.trx | `
-            Foreach-Object{
-                if (!$file -or $_.LastWriteTimeUtc -gt $file.LastWriteTimeUtc)
-                {
-                    $file = $_
-                }
-            }
-            $TrxFolderOrFilePath = $file.FullName
+        if (Test-Path -PathType Container -Path $TrxFolderOrFilePath) {
+
+            $TrxFolderOrFilePath = Get-ChildItem -Path $TrxFolderOrFilePath -Filter *.trx | Sort -Property LastWriteTimeUtc -Descending | Select-Object -ExpandProperty FullName -First 1
         }
         else {
-            throw "File/Path $TrxFolderOrFilePath does not exist."
+            $fileOrPathDoesNotExtists = $true
         }
+    }
+    
+    if ($fileOrPathDoesNotExtists) {
+        throw "File/Path $TrxFolderOrFilePath does not exist."
     }
 
     [xml]$trx = Get-Content -Path $TrxFolderOrFilePath -ReadCount 0
 
     $testRunGuid = $trx.TestRun.id
 
-    if([string]::IsNullOrEmpty($testRunGuid)){
+    if ([string]::IsNullOrEmpty($testRunGuid)) {
         throw "Xml file $TrxFolderOrFilePath does not have TestRun element or id attribute within it."
     }
 
-    return $testRunGuid;
+    return $testRunGuid
 }

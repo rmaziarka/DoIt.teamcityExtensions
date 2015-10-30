@@ -130,19 +130,18 @@ function Invoke-ConvertSqlToTeamCityTestsMetaRunner {
         'ConnectionString' = $builder.ConnectionString
     }
     if ($credential) {
-       $params['Credential'] = $credential
+        $params['Credential'] = $credential
     }
 
-    if($TrxFolderOrFilePath)
-    {
+    if ($TrxFolderOrFilePath) {
         $testRunGuid = Get-TestRunGuidFromTrxFile -TrxFolderOrFilePath $TrxFolderOrFilePath
     }
 
     if ($PredefinedQuery) {
-       $predefinedSqlQuery = Get-PredefinedSqlQuery -PredefinedQueryName $PredefinedQuery -TestRunGuid $testRunGuid
-       $params['Query'] = $predefinedSqlQuery
+        $predefinedSqlQuery = Get-PredefinedSqlQuery -PredefinedQueryName $PredefinedQuery -TestRunGuid $testRunGuid
+        $params['Query'] = $predefinedSqlQuery
     } elseif ($Query) {
-       $params['Query'] = $Query
+        $params['Query'] = $Query
     }
 
     $sqlResult = Invoke-Sql @params
