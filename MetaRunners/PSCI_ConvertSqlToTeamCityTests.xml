@@ -9,7 +9,8 @@
       <param name="sqlTCTest.username" value="" spec="text description='Username - leave empty for agent service credentials' validationMode='any' label='Username' display='normal'" />
       <param name="sqlTCTest.password" value="" spec="password description='Password - leave empty for agent service credentials' label='Password' display='normal'" />
       <param name="sqlTCTest.predefinedQuery" value="" spec="select display='normal' description='If one of the predefined query is choosen, the Sql query parameter would be ignored. Otherwise only sql query will be taken into consideration.' label='Predefined sql query' data_1='' label_1='--Choose one from the list or provide your own query in Sql query--' data_3='LoadTestVisualStudioQuery'" />
-      <param name="sqlTCTest.query" value="" spec="text description='SQL query to run' validationMode='any' label='SQL query' display='normal'" />
+      <param name="sqlTCTest.trxFolderOrFilePath" value="" spec="text description='Used only when one of predifinedQuery parameter was chosen, ignored otherwise. Provide either path to directory (then the newest *.trx file from the directory will be taken) or to the *.trx file' label='Trx directory or file' validationMode='any' display='normal'" />
+      <param name="sqlTCTest.query" value="" spec="text description='Used instead of predefinedQuery (only when none of predifinedQuery parameter was chosen), ignored otherwise. Direct SQL query to run.' label='SQL query' validationMode='any' display='normal'" />
       <param name="sqlTCTest.columnTestName" value="" spec="text description='Column containing test names' validationMode='not_empty' label='Test name column' display='normal'" />
       <param name="sqlTCTest.columnsToReportAsTests" value="" spec="text description='Comma- or newline-delimited list of columns containing test durations' validationMode='any' label='Test duration columns' display='normal'" />
     </parameters>
@@ -35,6 +36,7 @@ $columnsToReportAsTests = Get-TeamcityArrayParameter -Param @'
     'DatabaseServer' = '%sqlTCTest.databaseServer%';
     'DatabaseName' = '%sqlTCTest.databaseName%';
     'PredefinedQuery' = '%sqlTCTest.predefinedQuery%';
+    'TrxFolderOrFilePath' = '%sqlTCTest.trxFolderOrFilePath%';
     'Query' = $query;
     'IntegratedSecurity' = %sqlTCTest.integratedSecurity%;
     'Username' = '%sqlTCTest.username%';

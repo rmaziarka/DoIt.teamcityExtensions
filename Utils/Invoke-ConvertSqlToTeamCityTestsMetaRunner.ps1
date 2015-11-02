@@ -133,11 +133,10 @@ function Invoke-ConvertSqlToTeamCityTestsMetaRunner {
         $params['Credential'] = $credential
     }
 
-    if ($TrxFolderOrFilePath) {
-        $testRunGuid = Get-TestRunGuidFromTrxFile -TrxFolderOrFilePath $TrxFolderOrFilePath
-    }
-
     if ($PredefinedQuery) {
+        if ($TrxFolderOrFilePath) {
+            $testRunGuid = Get-TestRunGuidFromTrxFile -TrxFolderOrFilePath $TrxFolderOrFilePath
+        }
         $predefinedSqlQuery = Get-PredefinedSqlQuery -PredefinedQueryName $PredefinedQuery -TestRunGuid $testRunGuid
         $params['Query'] = $predefinedSqlQuery
     } elseif ($Query) {
