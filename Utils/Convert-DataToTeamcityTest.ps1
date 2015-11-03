@@ -132,7 +132,14 @@ function Convert-DataToTeamcityTest {
                     Write-Output -InputObject ("##teamcity[testFailed name='{0}' message='{1}']" -f $testNameEscaped, "Failure threshold exceeded (${failureValue} > ${FailureThreshold})")
                 }
             }
-            $testTime = [decimal]::round($row.$column)
+
+            #create miliseconds from seconds and round to whole miliseconds (without decimal digits)
+            if ($row.$column -ne [System.DBNull]::Value) {
+                $testTime = [decimal]::round($row.$column * 1000)
+            }
+            else {
+                $testTime = "-"
+            }
             Write-Output -InputObject ("##teamcity[testFinished name='{0}' duration='{1}']" -f $testNameEscaped, $testTime)
         }
     }

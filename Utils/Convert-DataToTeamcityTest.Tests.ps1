@@ -157,5 +157,52 @@ Describe -Tag "PSCI.unit" "Convert-DataToTeamCityTest.Tests.ps1" {
                     $outputContainsExludedName | Should be $false
                 }
             }
+
+            Context "when dbnull value is provided as some column to report" {
+                $InputData = @(
+                    [PSCustomObject]@{
+                        Name = 'TestName777'
+                        ErrorPercentage = [System.DBNull]::Value
+                    }
+                )
+
+                $output = Convert-DataToTeamcityTest -InputData $InputData -ColumnTestName 'Name' -ColumnsToReportAsTests @('ErrorPercentage')
+
+                It "should return '-' as duration value" {
+                    $output[1] | Should Be "##teamcity[testFinished name='ErrorPercentage.TestName777' duration='-']"
+                }
+            }
+
+            Context "when provided column contains value with few digits after coma" {
+                $InputData = @(
+                    [PSCustomObject]@{
+                        Name = 'TestName123321'
+                        Average = 0.174444
+                    }
+                )
+
+                $output = Convert-DataToTeamcityTest -InputData $InputData -ColumnTestName 'Name' -ColumnsToReportAsTests 'Average'
+
+                It "should return valid TeamCity service messages contains proper rounding (round down)" {
+                    $output.Count | Should Be 2
+                    $output[1] | Should Be "##teamcity[testFinished name='Average.TestName123321' duration='174']"
+                }
+            }
+
+            Context "when provided column contains value with few digits after coma" {
+                $InputData = @(
+                    [PSCustomObject]@{
+                        Name = 'TestName123321'
+                        Average = 0.1745555555555
+                    }
+                )
+
+                $output = Convert-DataToTeamcityTest -InputData $InputData -ColumnTestName 'Name' -ColumnsToReportAsTests 'Average'
+
+                It "should return valid TeamCity service messages contains proper rounding (round up)" {
+                    $output.Count | Should Be 2
+                    $output[1] | Should Be "##teamcity[testFinished name='Average.TestName123321' duration='175']"
+                }
+            }
     }
 }
