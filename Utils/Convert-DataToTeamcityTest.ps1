@@ -138,7 +138,7 @@ function Convert-DataToTeamcityTest {
                 $testTime = [decimal]::round($row.$column * 1000)
             }
             else {
-                $testTime = "-"
+                $testTime = ""
             }
             Write-Output -InputObject ("##teamcity[testFinished name='{0}' duration='{1}']" -f $testNameEscaped, $testTime)
         }
