@@ -168,8 +168,8 @@ Describe -Tag "PSCI.unit" "Convert-DataToTeamCityTest.Tests.ps1" {
 
                 $output = Convert-DataToTeamcityTest -InputData $InputData -ColumnTestName 'Name' -ColumnsToReportAsTests @('ErrorPercentage')
 
-                It "should return '-' as duration value" {
-                    $output[1] | Should Be "##teamcity[testFinished name='ErrorPercentage.TestName777' duration='']"
+                It "should not return any TeamCity service messages" {
+                    $output | Should Be $null
                 }
             }
 

@@ -123,24 +123,22 @@ function Convert-DataToTeamcityTest {
         $baseTestName = $row.$ColumnTestName
         
         foreach ($column in $ColumnsToReportAsTests) {
-            $testName = "$($column).$baseTestName"
-            $testNameEscaped = Convert-StringToTeamCityEscapedString -String $testName
-            Write-Output -InputObject ("##teamcity[testStarted name='{0}']" -f $testNameEscaped)
-            if ($ColumnTestFailure) {
-                $failureValue = [decimal]($row.$ColumnTestFailure)
-                if ($failureValue -gt $FailureThreshold) {
-                    Write-Output -InputObject ("##teamcity[testFailed name='{0}' message='{1}']" -f $testNameEscaped, "Failure threshold exceeded (${failureValue} > ${FailureThreshold})")
-                }
-            }
-
-            #create miliseconds from seconds and round to whole miliseconds (without decimal digits)
             if ($row.$column -ne [System.DBNull]::Value) {
+                $testName = "$($column).$baseTestName"
+                $testNameEscaped = Convert-StringToTeamCityEscapedString -String $testName
+                Write-Output -InputObject ("##teamcity[testStarted name='{0}']" -f $testNameEscaped)
+                if ($ColumnTestFailure) {
+                    $failureValue = [decimal]($row.$ColumnTestFailure)
+                    if ($failureValue -gt $FailureThreshold) {
+                        Write-Output -InputObject ("##teamcity[testFailed name='{0}' message='{1}']" -f $testNameEscaped, "Failure threshold exceeded (${failureValue} > ${FailureThreshold})")
+                    }
+                }
+
+                #create miliseconds from seconds and round to whole miliseconds (without decimal digits)
                 $testTime = [decimal]::round($row.$column * 1000)
+
+                Write-Output -InputObject ("##teamcity[testFinished name='{0}' duration='{1}']" -f $testNameEscaped, $testTime)
             }
-            else {
-                $testTime = ""
-            }
-            Write-Output -InputObject ("##teamcity[testFinished name='{0}' duration='{1}']" -f $testNameEscaped, $testTime)
         }
     }
 
