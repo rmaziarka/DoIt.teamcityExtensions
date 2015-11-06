@@ -33,6 +33,15 @@ function Start-Zap {
     .PARAMETER ZAPProperties
     List of properties which ZAP should be run.
 
+    .PARAMETER StdOutFilePath
+    If specified, stdout will be sent to this filename.
+
+    .PARAMETER StdErrFilePath
+    If specified, stderr will be sent to this filename.
+
+    .PARAMETER PidFilePath
+    If specified, PID of the process will be sent to this filename (it can be later killed with Stop-ProcessForcefully).
+
     .EXAMPLE
     Start-ZAP -ZAPDir 'C:\ZAP\' -ZAPProperties @('-config api.key=12345', '-config connection.timeoutInSecs=60')
     #>
@@ -45,7 +54,19 @@ function Start-Zap {
 
         [Parameter(Mandatory=$false)]
         [string[]]
-        $ZAPProperties
+        $ZAPProperties,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $StdOutFilePath,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $StdErrFilePath,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $PidFilePath
     )
 
     if (!(Test-Path -LiteralPath $ZAPDir)) {
@@ -60,5 +81,15 @@ function Start-Zap {
        throw "Cannot find '$ZAPPath'."
     }
 
-    [void](Start-ExternalProcess -Command $ZAPPath -ArgumentList $cmdArgs -WorkingDirectory $ZAPDir)
+    $params = @{
+        'FilePath' = $ZAPPath
+        'WorkingDirectory' = $ZAPDir
+        'ArgumentList' = $cmdArgs
+        'StdOutFilePath' = $StdOutFilePath
+        'StdErrFilePath' = $StdErrFilePath
+        'PidFilePath' = $PidFilePath
+    }
+
+    Start-ExternalProcessAsynchronously @params
+
 }

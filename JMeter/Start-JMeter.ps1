@@ -164,32 +164,16 @@ function Start-JMeter {
         [void](Start-ExternalProcess -Command $jmeterPath -ArgumentList $cmdArgs)
         Write-ProgressExternal -Message ''
     } else {
-        
         $params = @{
             'FilePath' = $jmeterPath
             'ArgumentList' = $cmdArgs
-            'NoNewWindow' = $true
-            'PassThru' = $true
+            'StdOutFilePath' = $RunInBackgroundStdOutFile
+            'StdErrFilePath' = $RunInBackgroundStdErrFile
+            'PidFilePath' = $JMeterPidFile
         }
 
-        if ($RunInBackgroundStdOutFile) {
-            $params += @{ 'RedirectStandardOutput' = $RunInBackgroundStdOutFile }
-        }
+        Start-ExternalProcessAsynchronously @params
 
-        if ($RunInBackgroundStdErrFile) {
-            $params += @{ 'RedirectStandardError' = $RunInBackgroundStdErrFile }
-        }
-
-        Write-Log -Info "Running JMeter in background with following command line: $jmeterPath $cmdArgs."
-        if ($RunInBackgroundStdOutFile -or $RunInBackgroundStdErrFile) {
-            Write-Log -Info "JMeter output will be captured in following files: '$RunInBackgroundStdOutFile', '$RunInBackgroundStdErrFile'"
-        }
-        $process = Start-Process @params
-        if ($JMeterPidFile) {
-            Set-Content -Path $JMeterPidFile -Value $process.Id
-        }
-        Write-Log -Info "Process started, id = $($process.Id), name = $($process.Name), pidFile = '$JMeterPidFile'"
-        return $process.Id
     }
 
 }
