@@ -172,7 +172,7 @@ function Start-JMeter {
             'PidFilePath' = $JMeterPidFile
         }
 
-        Start-ExternalProcessAsynchronously @params
+        [void](Start-ExternalProcessAsynchronously @params)
 
     }
 

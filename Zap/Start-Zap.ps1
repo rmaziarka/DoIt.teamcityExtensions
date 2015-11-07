@@ -90,6 +90,6 @@ function Start-Zap {
         'PidFilePath' = $PidFilePath
     }
 
-    Start-ExternalProcessAsynchronously @params
+    [void](Start-ExternalProcessAsynchronously @params)
 
 }
