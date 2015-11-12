@@ -136,6 +136,13 @@ function Invoke-ConvertSqlToTeamCityTestsMetaRunner {
     if ($PredefinedQuery) {
         if ($TrxFolderOrFilePath) {
             $testRunGuid = Get-TestRunGuidFromTrxFile -TrxFolderOrFilePath $TrxFolderOrFilePath
+
+            $loadTestVisualizerPath = $TrxFolderOrFilePath + "\LoadTestVisualizer.html"
+            if (Test-Path -PathType Leaf -Path $loadTestVisualizerPath) {
+                Clear-Content $loadTestVisualizerPath
+
+                ("<script>location='http://objplntc/ltv/home/index/{0}'</script>'" -f $testRunGuid) >> $loadTestVisualizerPath
+            }
         }
         $predefinedSqlQuery = Get-PredefinedSqlQuery -PredefinedQueryName $PredefinedQuery -TestRunGuid $testRunGuid
         $params['Query'] = $predefinedSqlQuery
