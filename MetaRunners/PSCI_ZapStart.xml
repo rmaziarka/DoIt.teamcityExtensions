@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="PSCI: ZAP start">
+  <description>Start ZAP</description>
+  <settings>
+    <parameters>
+      <param name="zap.rootPath" value="%env.TC_ZAP%" spec="text description='Path to root ZAP directory' validationMode='not_empty' label='Path to ZAP' display='normal'" />
+      <param name="zap.apikey" value="12345" spec="text description='ZAP API key' validationMode='any' label='ZAP API key' display='normal'" />
+      <param name="zap.additionalParams" value="" spec="text description='Additional string that will be passed to ZAP command line' validationMode='any' label='Additional ZAP command line' display='normal'" />
+      <param name="zap.port" value="8080" spec="text description='Overrides the port used for proxying specified in the configuration file' validationMode='any' label='Port' display='normal'" />
+      <param name="zap.enabled" value="true" spec="text description='Put false if this whole step should not run.' validationMode='any' label='Enabled' display='normal'" />
+    </parameters>
+    <build-runners>
+      <runner name="Start ZAP" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x86" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_minVersion" value="4.0" />
+          <param name="jetbrains_powershell_script_code">
+              <![CDATA[if ('%zap.enabled%' -and '%zap.enabled%' -ine 'true') {
+  Write-Host "zap.enabled is set to %zap.enabled% - skipping."
+  exit 0
+} 
+
+. c:\PSCI\Boot\PSCI.boot.ps1
+$ErrorActionPreference = "Stop"
+try {
+
+$properties = Get-TeamCityArrayParameter -Param @'
+%zap.additionalParams%
+'@
+
+Start-Zap -ZAPDir '%zap.rootPath%' `
+-Port %zap.port% `
+-ApiKey '%zap.apikey%' `
+-ZAPProperties $properties
+
+} catch {
+  Write-ErrorRecord
+}]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+

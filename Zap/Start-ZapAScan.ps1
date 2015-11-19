@@ -33,11 +33,8 @@ function Start-ZapAScan {
     .PARAMETER ApiKey
     Api key which it was run with ZAP.
 
-    .PARAMETER Interval
-    Time in seconds for which Active Scan status should be checked.
-
     .EXAMPLE
-    Start-ZapAScan -Url 'http://localhost:8080' -ApiKey 12345 -Interval 1
+    Start-ZapAScan -Url 'http://localhost' -ApiKey '12345'
     #>
     [CmdletBinding()]
     [OutputType([void])]
@@ -47,13 +44,11 @@ function Start-ZapAScan {
         $Url,
 
         [Parameter(Mandatory=$false)]
-        [int]
-        $ApiKey = 12345,
-
-        [Parameter(Mandatory=$false)]
-        [int]
-        $Interval = 1
+        [string]
+        $ApiKey = '12345'
     )
+
+	Write-Log -Info "ZAP Active Scan starting."
 
     $scanUrl = "http://zap/JSON/ascan/action/scan/?zapapiformat=JSON&apikey=" + $ApiKey + "&url=" + $Url + "&recurse=&inScopeOnly=&scanPolicyName=&method=&postData="
     $responseScan = Invoke-WebRequestWrapper -Uri $scanUrl -Method "Get" -ContentType "JSON"
@@ -61,11 +56,11 @@ function Start-ZapAScan {
     $scanId = $json.scan
 
     $status = 0
-    while($status -lt 100) {
+    while ($status -lt 100) {
         $urlGetStatusUrl = "http://zap/JSON/ascan/view/status/?zapapiformat=JSON&scanId=" + $scanId
         $responseStatus = Invoke-WebRequestWrapper -Uri $urlGetStatusUrl -Method "Get" -ContentType "JSON"
         $json = $responseStatus.Content | ConvertFrom-Json
         $status = $json.status
-        Start-Sleep -s $Interval
+        Start-Sleep -Seconds 1
     }
 }

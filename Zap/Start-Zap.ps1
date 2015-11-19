@@ -42,8 +42,17 @@ function Start-Zap {
     .PARAMETER PidFilePath
     If specified, PID of the process will be sent to this filename (it can be later killed with Stop-ProcessForcefully).
 
+    .PARAMETER ApiKey
+    Api key which it was run with ZAP.
+
+    .PARAMETER StartTimeout
+    How many second to wait for Zap to start up.
+
+    .PARAMETER ConnectionTimeout
+    Zap connection timeout
+
     .EXAMPLE
-    Start-ZAP -ZAPDir 'C:\ZAP\' -ZAPProperties @('-config api.key=12345', '-config connection.timeoutInSecs=60')
+    Start-ZAP -ZAPDir 'C:\ZAP\' -ApiKey '12345' -ConnectionTimeout 60
     #>
     [CmdletBinding()]
     [OutputType([void])]
@@ -58,22 +67,41 @@ function Start-Zap {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $StdOutFilePath,
+        $StdOutFilePath = "zapstdout.txt",
 
         [Parameter(Mandatory=$false)]
         [string]
-        $StdErrFilePath,
+        $StdErrFilePath = "zapstderr.txt",
 
         [Parameter(Mandatory=$false)]
         [string]
-        $PidFilePath
+        $PidFilePath = "zappid.txt",
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $ApiKey = 12345,
+
+        [Parameter(Mandatory=$false)]
+        [int]
+        $StartTimeout = 60,
+       
+        [Parameter(Mandatory=$false)]
+        [int]
+        $ConnectionTimeout = 60,
+
+        [Parameter(Mandatory=$false)]
+        [int]
+        $Port = 8080
     )
 
     if (!(Test-Path -LiteralPath $ZAPDir)) {
         throw "Cannot find ZAP directory at '$ZAPDir'."
     }    
-    
+
     $cmdArgs = "-daemon "
+    $cmdArgs += "-config api.key=$ApiKey "
+    $cmdArgs += "-config connection.timeoutInSecs=$ConnectionTimeout "
+    $cmdArgs += "-port $Port "
     $cmdArgs += $ZAPProperties -Join ' '
 
     $ZAPPath = Join-Path -Path $ZAPDir -ChildPath "ZAP.bat"
@@ -92,4 +120,22 @@ function Start-Zap {
 
     [void](Start-ExternalProcessAsynchronously @params)
 
+    $status = ''
+    $timeout = New-TimeSpan -Seconds $StartTimeout
+    $sw = [Diagnostics.StopWatch]::StartNew()
+ 
+    # TODO: change when zap release a fix to output better message https://github.com/zaproxy/zaproxy/issues/2063
+    $loadedMessage = '*Initializing Tips and Tricks';
+    while ($status -notlike $loadedMessage) {
+       if ($sw.elapsed -ge $timeout) {
+          throw "Zap timed out after '$timeout'."
+        }
+        $status = Get-Content -Path $StdOutFilePath -Tail 1
+        Start-Sleep -Milliseconds 200
+    }
+
+    # TODO: remove when zap release better message and we are sure zap is loaded
+    Start-Sleep -s 5
+
+    Write-Log -Info "ZAP ready."
 }

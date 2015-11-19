@@ -33,11 +33,8 @@ function Start-ZapSpider {
     .PARAMETER ApiKey
     Api key which it was run with ZAP.
 
-    .PARAMETER Interval
-    Time in seconds for which Spider status should be checked.
-
     .EXAMPLE
-    Start-ZapSpider -Url 'http://localhost:8080' -ApiKey 12345 -Interval 1
+    Start-ZapSpider -Url 'http://localhost' -ApiKey '12345'
     #>
     [CmdletBinding()]
     [OutputType([void])]
@@ -47,14 +44,12 @@ function Start-ZapSpider {
         $Url,
 
         [Parameter(Mandatory=$false)]
-        [int]
-        $ApiKey = 12345,
-
-        [Parameter(Mandatory=$false)]
-        [int]
-        $Interval = 1
+        [string]
+        $ApiKey = '12345'
     )
 
+	Write-Log -Info "ZAP Spider starting."
+	
     $scanUrl = "http://zap/JSON/spider/action/scan/?zapapiformat=JSON&apikey=" + $ApiKey + "&url=" + $Url +"&maxChildren=&recurse="
     $responseScan = Invoke-WebRequestWrapper -Uri $scanUrl -Method "Get" -ContentType "JSON"
     $json = $responseScan.Content | ConvertFrom-Json
@@ -66,6 +61,6 @@ function Start-ZapSpider {
         $responseStatus = Invoke-WebRequestWrapper -Uri $urlGetStatusUrl -Method "Get" -ContentType "JSON"
         $json = $responseStatus.Content | ConvertFrom-Json
         $status = $json.status
-        Start-Sleep -s $Interval
+        Start-Sleep -s 1
     }
 }

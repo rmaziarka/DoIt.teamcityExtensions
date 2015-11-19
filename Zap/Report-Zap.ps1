@@ -22,44 +22,40 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Close-Zap {
+function Report-Zap {
     <#
     .SYNOPSIS
-    Close ZAP process.
+    Generates ZAP report.
     
     .PARAMETER ApiKey
     Api key which it was run with ZAP.
 
-	.PARAMETER ZapPid
-    ZAP process id.
+	.PARAMETER ReportFilePath
+    Path to report file
 
     .EXAMPLE
-    Close-Zap -ApiKey '12345' -PidFilePath 'zappid.txt'
+    Report-Zap -ReportFilePath "ZAP/zap.html" -ApiKey 12345
     #>
     [CmdletBinding()]
     [OutputType([void])]
     param(
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory=$true)]
         [string]
-        $ApiKey = '12345',
-
+        $ReportFilePath,
+		
 		[Parameter(Mandatory=$false)]
         [string]
-        $PidFilePath = "zappid.txt"
-    )
+        $ApiKey = '12345'	
+	)
 
-	$ZapPid = Get-Content -Path $PidFilePath -ReadCount 1
+	Write-Log -Info "ZAP creating report."
 
-	Write-Log -Info "ZAP closing."
+	$dir = Split-Path -Path $ReportFilePath -Parent
+	if ($dir -and !(Test-Path -Path $dir)) {
+		New-Item -Path $dir -ItemType Directory
+	}
 		
-    $shutdownUrl = "http://zap/JSON/core/action/shutdown/?zapapiformat=JSON&apikey=$ApiKey"
-    Invoke-WebRequestWrapper -Uri $shutdownUrl -Method "Get" -ContentType "JSON"
-	
-	$process = Get-Process -Id $ZapPid -ErrorAction SilentlyContinue
-	$killTimeoutInSeconds = 60
-	if (!$process.WaitForExit($killTimeoutInSeconds * 1000)) {                
-		Write-Log -Info "Zap process is still running after $killTimeoutInSeconds s - killing."
-        Stop-ProcessForcefully -Process $process -KillTimeoutInSeconds $killTimeoutInSeconds
-    }
+    $reportUrl = "http://zap/OTHER/core/other/htmlreport/?apikey=" + $ApiKey
 
+    Invoke-WebRequestWrapper $reportUrl -OutFile $ReportFilePath
 }
