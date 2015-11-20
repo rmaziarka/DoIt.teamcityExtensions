@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Report-Zap {
+function New-ZapReport {
     <#
     .SYNOPSIS
     Generates ZAP report.
@@ -34,7 +34,7 @@ function Report-Zap {
     Path to report file
 
     .EXAMPLE
-    Report-Zap -ReportFilePath "ZAP/zap.html" -ApiKey 12345
+    New-ZapReport -ReportFilePath "ZAP/zap.html" -ApiKey 12345
     #>
     [CmdletBinding()]
     [OutputType([void])]

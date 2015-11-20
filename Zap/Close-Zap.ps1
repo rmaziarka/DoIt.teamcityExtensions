@@ -30,8 +30,8 @@ function Close-Zap {
     .PARAMETER ApiKey
     Api key which it was run with ZAP.
 
-	.PARAMETER ZapPid
-    ZAP process id.
+	.PARAMETER PidFilePath
+    Path to file with ZAP process id
 
     .EXAMPLE
     Close-Zap -ApiKey '12345' -PidFilePath 'zappid.txt'

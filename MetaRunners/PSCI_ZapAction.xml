@@ -34,7 +34,7 @@ try {
         Start-ZapSpider -Url '%zap.rootPath%' -ApiKey '%zap.apikey%'
     }
 
-    Report-Zap -ApiKey '%zap.apikey%' -ReportFilePath 'ZAP\zap.html'
+    New-ZapReport -ApiKey '%zap.apikey%' -ReportFilePath 'ZAP\zap.html'
 
 } catch {
     Write-ErrorRecord

@@ -49,7 +49,10 @@ function Start-Zap {
     How many second to wait for Zap to start up.
 
     .PARAMETER ConnectionTimeout
-    Zap connection timeout
+    Zap connection timeout.
+
+	.PARAMETER Port
+    Zap port. Overrides the port used for proxying specified in the configuration file.
 
     .EXAMPLE
     Start-ZAP -ZAPDir 'C:\ZAP\' -ApiKey '12345' -ConnectionTimeout 60
@@ -130,7 +133,7 @@ function Start-Zap {
        if ($sw.elapsed -ge $timeout) {
           throw "Zap timed out after '$timeout'."
         }
-        $status = Get-Content -Path $StdOutFilePath -Tail 1
+        $status = Get-Content -Path $StdOutFilePath -ReadCount 1 -Tail 1
         Start-Sleep -Milliseconds 200
     }
 
