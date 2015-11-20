@@ -30,7 +30,7 @@ function Close-Zap {
     .PARAMETER ApiKey
     Api key which it was run with ZAP.
 
-	.PARAMETER PidFilePath
+    .PARAMETER PidFilePath
     Path to file with ZAP process id
 
     .EXAMPLE
@@ -43,22 +43,22 @@ function Close-Zap {
         [string]
         $ApiKey = '12345',
 
-		[Parameter(Mandatory=$false)]
+        [Parameter(Mandatory=$false)]
         [string]
         $PidFilePath = "zappid.txt"
     )
 
-	$ZapPid = Get-Content -Path $PidFilePath -ReadCount 1
+    $ZapPid = Get-Content -Path $PidFilePath -ReadCount 1
 
-	Write-Log -Info "ZAP closing."
-		
+    Write-Log -Info "ZAP closing."
+        
     $shutdownUrl = "http://zap/JSON/core/action/shutdown/?zapapiformat=JSON&apikey=$ApiKey"
     Invoke-WebRequestWrapper -Uri $shutdownUrl -Method "Get" -ContentType "JSON"
-	
-	$process = Get-Process -Id $ZapPid -ErrorAction SilentlyContinue
-	$killTimeoutInSeconds = 60
-	if (!$process.WaitForExit($killTimeoutInSeconds * 1000)) {                
-		Write-Log -Info "Zap process is still running after $killTimeoutInSeconds s - killing."
+    
+    $process = Get-Process -Id $ZapPid -ErrorAction SilentlyContinue
+    $killTimeoutInSeconds = 60
+    if (!$process.WaitForExit($killTimeoutInSeconds * 1000)) {                
+        Write-Log -Info "Zap process is still running after $killTimeoutInSeconds s - killing."
         Stop-ProcessForcefully -Process $process -KillTimeoutInSeconds $killTimeoutInSeconds
     }
 

@@ -48,7 +48,7 @@ function Start-ZapAScan {
         $ApiKey = '12345'
     )
 
-	Write-Log -Info "ZAP Active Scan starting."
+    Write-Log -Info "ZAP Active Scan starting."
 
     $scanUrl = "http://zap/JSON/ascan/action/scan/?zapapiformat=JSON&apikey=" + $ApiKey + "&url=" + $Url + "&recurse=&inScopeOnly=&scanPolicyName=&method=&postData="
     $responseScan = Invoke-WebRequestWrapper -Uri $scanUrl -Method "Get" -ContentType "JSON"

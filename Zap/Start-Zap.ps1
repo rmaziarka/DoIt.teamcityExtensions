@@ -51,7 +51,7 @@ function Start-Zap {
     .PARAMETER ConnectionTimeout
     Zap connection timeout.
 
-	.PARAMETER Port
+    .PARAMETER Port
     Zap port. Overrides the port used for proxying specified in the configuration file.
 
     .EXAMPLE

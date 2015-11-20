@@ -30,7 +30,7 @@ function New-ZapReport {
     .PARAMETER ApiKey
     Api key which it was run with ZAP.
 
-	.PARAMETER ReportFilePath
+    .PARAMETER ReportFilePath
     Path to report file
 
     .EXAMPLE
@@ -42,19 +42,19 @@ function New-ZapReport {
         [Parameter(Mandatory=$true)]
         [string]
         $ReportFilePath,
-		
-		[Parameter(Mandatory=$false)]
+        
+        [Parameter(Mandatory=$false)]
         [string]
-        $ApiKey = '12345'	
-	)
+        $ApiKey = '12345'
+    )
 
-	Write-Log -Info "ZAP creating report."
+    Write-Log -Info "ZAP creating report."
 
-	$dir = Split-Path -Path $ReportFilePath -Parent
-	if ($dir -and !(Test-Path -Path $dir)) {
-		New-Item -Path $dir -ItemType Directory
-	}
-		
+    $dir = Split-Path -Path $ReportFilePath -Parent
+    if ($dir -and !(Test-Path -Path $dir)) {
+        New-Item -Path $dir -ItemType Directory
+    }
+        
     $reportUrl = "http://zap/OTHER/core/other/htmlreport/?apikey=" + $ApiKey
 
     Invoke-WebRequestWrapper $reportUrl -OutFile $ReportFilePath

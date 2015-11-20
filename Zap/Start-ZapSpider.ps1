@@ -48,8 +48,8 @@ function Start-ZapSpider {
         $ApiKey = '12345'
     )
 
-	Write-Log -Info "ZAP Spider starting."
-	
+    Write-Log -Info "ZAP Spider starting."
+    
     $scanUrl = "http://zap/JSON/spider/action/scan/?zapapiformat=JSON&apikey=" + $ApiKey + "&url=" + $Url +"&maxChildren=&recurse="
     $responseScan = Invoke-WebRequestWrapper -Uri $scanUrl -Method "Get" -ContentType "JSON"
     $json = $responseScan.Content | ConvertFrom-Json
