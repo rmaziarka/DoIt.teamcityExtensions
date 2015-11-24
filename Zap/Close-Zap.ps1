@@ -33,8 +33,11 @@ function Close-Zap {
     .PARAMETER PidFilePath
     Path to file with ZAP process id
 
+    .PARAMETER Port
+    Zap port. Overrides the port used for proxying specified in the configuration file.
+
     .EXAMPLE
-    Close-Zap -ApiKey '12345' -PidFilePath 'zappid.txt'
+    Close-Zap -ApiKey '12345' -PidFilePath 'zappid.txt' -Port 8080
     #>
     [CmdletBinding()]
     [OutputType([void])]
@@ -45,7 +48,11 @@ function Close-Zap {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $PidFilePath = "zappid.txt"
+        $PidFilePath = "zappid.txt",
+
+        [Parameter(Mandatory=$false)]
+        [int]
+        $Port = 8080
     )
 
     $ZapPid = Get-Content -Path $PidFilePath -ReadCount 1
@@ -53,7 +60,7 @@ function Close-Zap {
     Write-Log -Info "ZAP closing."
         
     $shutdownUrl = "http://zap/JSON/core/action/shutdown/?zapapiformat=JSON&apikey=$ApiKey"
-    Invoke-WebRequestWrapper -Uri $shutdownUrl -Method "Get" -ContentType "JSON"
+    Invoke-WebRequestWrapper -Uri $shutdownUrl -Method "Get" -ContentType "JSON" -Proxy "http://localhost:$Port"
     
     $process = Get-Process -Id $ZapPid -ErrorAction SilentlyContinue
     $killTimeoutInSeconds = 60

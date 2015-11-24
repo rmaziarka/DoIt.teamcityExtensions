@@ -33,8 +33,11 @@ function Start-ZapSpider {
     .PARAMETER ApiKey
     Api key which it was run with ZAP.
 
+    .PARAMETER Port
+    Zap port. Overrides the port used for proxying specified in the configuration file.
+
     .EXAMPLE
-    Start-ZapSpider -Url 'http://localhost' -ApiKey '12345'
+    Start-ZapSpider -Url 'http://localhost' -ApiKey '12345' -Port 8080
     #>
     [CmdletBinding()]
     [OutputType([void])]
@@ -45,20 +48,24 @@ function Start-ZapSpider {
 
         [Parameter(Mandatory=$false)]
         [string]
-        $ApiKey = '12345'
+        $ApiKey = '12345',
+
+        [Parameter(Mandatory=$false)]
+        [int]
+        $Port = 8080
     )
 
     Write-Log -Info "ZAP Spider starting."
     
     $scanUrl = "http://zap/JSON/spider/action/scan/?zapapiformat=JSON&apikey=" + $ApiKey + "&url=" + $Url +"&maxChildren=&recurse="
-    $responseScan = Invoke-WebRequestWrapper -Uri $scanUrl -Method "Get" -ContentType "JSON"
+    $responseScan = Invoke-WebRequestWrapper -Uri $scanUrl -Method "Get" -ContentType "JSON" -Proxy "http://localhost:$Port"
     $json = $responseScan.Content | ConvertFrom-Json
     $scanId = $json.scan
 
     $status = 0
     while($status -lt 100) {
         $urlGetStatusUrl = "http://zap/JSON/spider/view/status/?zapapiformat=JSON&scanId=" + $scanId
-        $responseStatus = Invoke-WebRequestWrapper -Uri $urlGetStatusUrl -Method "Get" -ContentType "JSON"
+        $responseStatus = Invoke-WebRequestWrapper -Uri $urlGetStatusUrl -Method "Get" -ContentType "JSON" -Proxy "http://localhost:$Port"
         $json = $responseStatus.Content | ConvertFrom-Json
         $status = $json.status
         Start-Sleep -s 1

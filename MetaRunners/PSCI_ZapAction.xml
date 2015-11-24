@@ -8,6 +8,7 @@
         <param name="zap.spiderenabled" value="$false" spec="checkbox checkedValue='$true' description='If checked, ZAP will perform an spider' uncheckedValue='$false' label='Start a spider' display='normal'" />
         <param name="zap.scanenabled" value="$false" spec="checkbox checkedValue='$true' description='If checked, ZAP will perform an active scan' uncheckedValue='$false' label='Start an active scan' display='normal'" />
         <param name="zap.url" value="" spec="text description='Url for which Active Scan should be run.' validationMode='not_empty' label='Url to application' display='normal'" />
+        <param name="zap.port" value="8080" spec="text description='Overrides the port used for proxying specified in the configuration file' validationMode='any' label='Port' display='normal'" />
         <param name="zap.enabled" value="true" spec="text description='Put false if this whole step should not run.' validationMode='any' label='Enabled' display='normal'" />
     </parameters>
     <build-runners>
@@ -27,19 +28,19 @@ $ErrorActionPreference = "Stop"
 try {  
 
     if (%zap.spiderenabled%) {
-        Start-ZapSpider -Url '%zap.rootPath%' -ApiKey '%zap.apikey%'
+        Start-ZapSpider -Url '%zap.rootPath%' -ApiKey '%zap.apikey%' -Port %zap.port%
     }
     
     if (%zap.scanenabled%) {
-        Start-ZapAScan -Url '%zap.rootPath%' -ApiKey '%zap.apikey%'
+        Start-ZapAScan -Url '%zap.rootPath%' -ApiKey '%zap.apikey%' -Port %zap.port%
     }
 
-    New-ZapReport -ApiKey '%zap.apikey%' -ReportFilePath 'ZAP\zap.html'
+    New-ZapReport -ApiKey '%zap.apikey%' -ReportFilePath 'ZAP\zap.html' -Port %zap.port%
 
 } catch {
     Write-ErrorRecord
 } finally {
-    Close-Zap -ApiKey '%zap.apikey%' -PidFilePath 'zappid.txt'
+    Close-Zap -ApiKey '%zap.apikey%' -PidFilePath 'zappid.txt' -Port %zap.port%
 }
 ]]></param>
           <param name="jetbrains_powershell_script_mode" value="CODE" />

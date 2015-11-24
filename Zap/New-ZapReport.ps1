@@ -33,8 +33,11 @@ function New-ZapReport {
     .PARAMETER ReportFilePath
     Path to report file
 
+    .PARAMETER Port
+    Zap port. Overrides the port used for proxying specified in the configuration file.
+
     .EXAMPLE
-    New-ZapReport -ReportFilePath "ZAP/zap.html" -ApiKey 12345
+    New-ZapReport -ReportFilePath "ZAP/zap.html" -ApiKey 12345 -Port 8080
     #>
     [CmdletBinding()]
     [OutputType([void])]
@@ -45,7 +48,11 @@ function New-ZapReport {
         
         [Parameter(Mandatory=$false)]
         [string]
-        $ApiKey = '12345'
+        $ApiKey = '12345',
+
+        [Parameter(Mandatory=$false)]
+        [int]
+        $Port = 8080
     )
 
     Write-Log -Info "ZAP creating report."
@@ -57,5 +64,5 @@ function New-ZapReport {
         
     $reportUrl = "http://zap/OTHER/core/other/htmlreport/?apikey=" + $ApiKey
 
-    Invoke-WebRequestWrapper $reportUrl -OutFile $ReportFilePath
+    Invoke-WebRequestWrapper $reportUrl -OutFile $ReportFilePath -Proxy "http://localhost:$Port"
 }
