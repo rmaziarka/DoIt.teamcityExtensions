@@ -65,7 +65,7 @@ function Start-ZapAScan {
     Write-Log -Info "Scan Id = $scanId."
 
     $status = 0
-    while ($status -lt 100) {
+    while ([int]$status -lt 100) {
         $urlGetStatusUrl = "http://zap/JSON/ascan/view/status/?zapapiformat=JSON&scanId=" + $scanId
         $responseStatus = Invoke-WebRequestWrapper -Uri $urlGetStatusUrl -Method "Get" -ContentType "JSON" -Proxy "http://localhost:$Port"
         $json = $responseStatus.Content | ConvertFrom-Json
