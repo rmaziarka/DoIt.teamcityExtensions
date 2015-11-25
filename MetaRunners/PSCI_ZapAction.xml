@@ -28,15 +28,15 @@ $ErrorActionPreference = "Stop"
 try {  
 
     if (%zap.spiderenabled%) {
-        Start-ZapSpider -Url '%zap.rootPath%' -ApiKey '%zap.apikey%' -Port %zap.port%
+        Start-ZapSpider -Url '%zap.url%' -ApiKey '%zap.apikey%' -Port %zap.port%
     }
     
     if (%zap.scanenabled%) {
-        Start-ZapAScan -Url '%zap.rootPath%' -ApiKey '%zap.apikey%' -Port %zap.port%
+        Start-ZapAScan -Url '%zap.url%' -ApiKey '%zap.apikey%' -Port %zap.port%
     }
 
     New-ZapReport -ApiKey '%zap.apikey%' -ReportFilePath 'ZAP\zap.html' -Port %zap.port%
-
+    Write-Host "##teamcity[publishArtifacts 'ZAP\zap.html => ZAP']" 
 } catch {
     Write-ErrorRecord
 } finally {
