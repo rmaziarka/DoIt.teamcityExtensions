@@ -60,13 +60,28 @@ function Close-Zap {
     Write-Log -Info "ZAP closing."
         
     $shutdownUrl = "http://zap/JSON/core/action/shutdown/?zapapiformat=JSON&apikey=$ApiKey"
-    Invoke-WebRequestWrapper -Uri $shutdownUrl -Method "Get" -ContentType "JSON" -Proxy "http://localhost:$Port"
+    
+    try
+    {
+        $responseStatus = Invoke-WebRequestWrapper -Uri $shutdownUrl -Method "Get" -ContentType "JSON" -Proxy "http://localhost:$Port"
+        $json = $responseStatus.Content | ConvertFrom-Json
+        $status = $json
+        Write-Log -Info "Zap API shutdown method responed with $status."
+    }
+    catch
+    {
+         Write-Log -Info "Zap API does not respond."
+    }
     
     $process = Get-Process -Id $ZapPid -ErrorAction SilentlyContinue
+    
     $killTimeoutInSeconds = 60
-    if (!$process.WaitForExit($killTimeoutInSeconds * 1000)) {                
-        Write-Log -Info "Zap process is still running after $killTimeoutInSeconds s - killing."
-        Stop-ProcessForcefully -Process $process -KillTimeoutInSeconds $killTimeoutInSeconds
+    if($process){
+        Write-Log -Info "Trying to kill Zap process - $ZapPid."
+        if (!$process.WaitForExit($killTimeoutInSeconds * 1000)) {                
+            Write-Log -Info "Zap process is still running after $killTimeoutInSeconds s - killing."
+            Stop-ProcessForcefully -Process $process -KillTimeoutInSeconds $killTimeoutInSeconds
+        }
     }
-
+    Write-Log -Info "Process $ZapPid not running. Exit."
 }

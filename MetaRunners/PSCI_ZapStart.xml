@@ -35,8 +35,10 @@ Start-Zap -ZAPDir '%zap.rootPath%' `
 -ZAPProperties $properties
 
 } catch {
-  Write-ErrorRecord
-}]]></param>
+  Write-ErrorRecord -StopExecution:$false
+  Close-Zap -ApiKey '%zap.apikey%' -PidFilePath 'zappid.txt' -Port %zap.port%
+}
+]]></param>
           <param name="jetbrains_powershell_script_mode" value="CODE" />
           <param name="teamcity.step.mode" value="default" />
         </parameters>

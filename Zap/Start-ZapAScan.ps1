@@ -62,12 +62,16 @@ function Start-ZapAScan {
     $json = $responseScan.Content | ConvertFrom-Json
     $scanId = $json.scan
 
+    Write-Log -Info "Scan Id = $scanId."
+
     $status = 0
     while ($status -lt 100) {
         $urlGetStatusUrl = "http://zap/JSON/ascan/view/status/?zapapiformat=JSON&scanId=" + $scanId
         $responseStatus = Invoke-WebRequestWrapper -Uri $urlGetStatusUrl -Method "Get" -ContentType "JSON" -Proxy "http://localhost:$Port"
         $json = $responseStatus.Content | ConvertFrom-Json
         $status = $json.status
+        Write-Log -Info "Status = $status/100"
         Start-Sleep -Seconds 1
     }
+    Write-Log -Info "ZAP Active Scan finished."
 }

@@ -123,21 +123,23 @@ function Start-Zap {
 
     [void](Start-ExternalProcessAsynchronously @params)
 
-    $status = ''
+    $status = @()
     $timeout = New-TimeSpan -Seconds $StartTimeout
     $sw = [Diagnostics.StopWatch]::StartNew()
  
-    # TODO: change when zap release a fix to output better message https://github.com/zaproxy/zaproxy/issues/2063
-    $loadedMessage = '*Initializing Tips and Tricks';
-    while ($status -notlike $loadedMessage) {
+    
+    
+    $loadedMessage = '*Initializing Tips and Tricks*';
+    #$loadedMessage = '*ZAP is now listening on*'; TODO: uncomment when zap release contains a fix to output this message https://github.com/zaproxy/zaproxy/issues/2063
+    while (($status -like $loadedMessage).length -eq 0 ) {
        if ($sw.elapsed -ge $timeout) {
           throw "Zap timed out after '$timeout'."
         }
-        $status = Get-Content -Path $StdOutFilePath -ReadCount 1 -Tail 1
+        $status = Get-Content -Path $StdOutFilePath -ReadCount 1 -Tail 5
         Start-Sleep -Milliseconds 200
     }
 
-    # TODO: remove when zap release better message and we are sure zap is loaded
+    # TODO: remove when zap release contains a fix to output this message https://github.com/zaproxy/zaproxy/issues/2063
     Start-Sleep -s 5
 
     Write-Log -Info "ZAP ready."
