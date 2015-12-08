@@ -36,6 +36,12 @@ function Start-ZapSpider {
     .PARAMETER Port
     Zap port. Overrides the port used for proxying specified in the configuration file.
 
+    .PARAMETER MaxChildren
+    API 'maxChildren' parameter can be set to limit the number of children scanned.
+
+    .PARAMETER Recurse
+    API 'recurse' parameter can be used to prevent the spider from seeding recursively.
+
     .EXAMPLE
     Start-ZapSpider -Url 'http://localhost' -ApiKey '12345' -Port 8080
     #>
@@ -52,12 +58,20 @@ function Start-ZapSpider {
 
         [Parameter(Mandatory=$false)]
         [int]
-        $Port = 8080
+        $Port = 8080,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $MaxChildren,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $Recurse
     )
 
     Write-Log -Info "ZAP Spider starting."
     
-    $scanUrl = "http://zap/JSON/spider/action/scan/?zapapiformat=JSON&apikey=" + $ApiKey + "&url=" + $Url +"&maxChildren=&recurse="
+    $scanUrl = "http://zap/JSON/spider/action/scan/?zapapiformat=JSON&apikey=$ApiKey&url=$Url&maxChildren=$MaxChildren&recurse=$Recurse"
     $responseScan = Invoke-WebRequestWrapper -Uri $scanUrl -Method "Get" -ContentType "JSON" -Proxy "http://localhost:$Port"
     $json = $responseScan.Content | ConvertFrom-Json
     $scanId = $json.scan
@@ -71,7 +85,7 @@ function Start-ZapSpider {
         $json = $responseStatus.Content | ConvertFrom-Json
         $status = $json.status
         Write-Log -Info "Status = $status/100"
-        Start-Sleep -Seconds 1
+        Start-Sleep -Seconds 10
     }
     Write-Log -Info "ZAP Spider finished."
 }

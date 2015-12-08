@@ -22,13 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Start-ZapAScan {
+function Start-ZapAjaxSpider {
     <#
     .SYNOPSIS
-    Starts ZAP Active Scan for specified url.
+    Starts ZAP AJAX Spider for specified url.
     
     .PARAMETER Url
-    Url for which Active Scan should be run.
+    Url for which AJAX Spider should be run.
     
     .PARAMETER ApiKey
     Api key which it was run with ZAP.
@@ -36,23 +36,11 @@ function Start-ZapAScan {
     .PARAMETER Port
     Zap port. Overrides the port used for proxying specified in the configuration file.
 
-    .PARAMETER Recurse
-    API 'recurse' parameter can be used to 
-
-    .PARAMETER InScopeOnly
-    API 'inScopeOnly' parameter can be used to
-
-    .PARAMETER ScanPolicyName
-    API 'scanPolicyName' parameter can be used to 
-
-    .PARAMETER Method
-    API 'method' parameter can be used to
-
-    .PARAMETER PostData
-    API 'postData' parameter can be used to 
+    .PARAMETER InScope
+    API 'inScope' parameter can be used to 
 
     .EXAMPLE
-    Start-ZapAScan -Url 'http://localhost' -ApiKey '12345' -Port 8080
+    Start-ZapAjaxSpider -Url 'http://localhost' -ApiKey '12345' -Port 8080
     #>
     [CmdletBinding()]
     [OutputType([void])]
@@ -68,45 +56,28 @@ function Start-ZapAScan {
         [Parameter(Mandatory=$false)]
         [int]
         $Port = 8080,
-
+                       
         [Parameter(Mandatory=$false)]
         [string]
-        $Recurse,
-        
-        [Parameter(Mandatory=$false)]
-        [string]
-        $InScopeOnly,
-
-        [Parameter(Mandatory=$false)]
-        [string]
-        $ScanPolicyName,
-
-        [Parameter(Mandatory=$false)]
-        [string]
-        $Method,
-
-        [Parameter(Mandatory=$false)]
-        [string]
-        $PostData
+        $InScope
     )
 
-    Write-Log -Info "ZAP Active Scan starting."
+    Write-Log -Info "ZAP AJAX Spider starting."
 
-    $scanUrl = "http://zap/JSON/ascan/action/scan/?zapapiformat=JSON&apikey=$ApiKey&url=$Url&recurse=$Recurse&inScopeOnly=$InScopeOnly&scanPolicyName=$ScanPolicyName&method=$Method&postData=$PostData"
+    $scanUrl = "http://zap/JSON/ajaxSpider/action/scan/?zapapiformat=JSON&apikey=$ApiKey&url=$Url&inScope=$InScope"
     $responseScan = Invoke-WebRequestWrapper -Uri $scanUrl -Method "Get" -ContentType "JSON" -Proxy "http://localhost:$Port"
     $json = $responseScan.Content | ConvertFrom-Json
-    $scanId = $json.scan
+    $result = $json.Result
 
-    Write-Log -Info "Scan Id = $scanId."
+    Write-Log -Info "Status = $result"
 
-    $status = 0
-    while ([int]$status -lt 100) {
-        $urlGetStatusUrl = "http://zap/JSON/ascan/view/status/?zapapiformat=JSON&scanId=" + $scanId
+    while ($status -ne "Stopped") {
+        $urlGetStatusUrl = "http://zap/JSON/ajaxSpider/view/status/?zapapiformat=JSON"
         $responseStatus = Invoke-WebRequestWrapper -Uri $urlGetStatusUrl -Method "Get" -ContentType "JSON" -Proxy "http://localhost:$Port"
         $json = $responseStatus.Content | ConvertFrom-Json
         $status = $json.status
-        Write-Log -Info "Status = $status/100"
+        Write-Log -Info "Status = $status"
         Start-Sleep -Seconds 10
     }
-    Write-Log -Info "ZAP Active Scan finished."
+    Write-Log -Info "ZAP AJAX Spider finished."
 }

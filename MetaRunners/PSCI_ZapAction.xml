@@ -5,10 +5,23 @@
     <parameters>
         <param name="zap.rootPath" value="%env.TC_ZAP%" spec="text description='Path to root ZAP directory' validationMode='not_empty' label='Path to ZAP' display='normal'" />
         <param name="zap.apikey" value="12345" spec="text description='ZAP API key' validationMode='any' label='API key' display='normal'" />
-        <param name="zap.spiderenabled" value="$false" spec="checkbox checkedValue='$true' description='If checked, ZAP will perform an spider' uncheckedValue='$false' label='Start a spider' display='normal'" />
-        <param name="zap.scanenabled" value="$false" spec="checkbox checkedValue='$true' description='If checked, ZAP will perform an active scan' uncheckedValue='$false' label='Start an active scan' display='normal'" />
         <param name="zap.url" value="" spec="text description='Url for which Active Scan should be run.' validationMode='not_empty' label='Url to application' display='normal'" />
         <param name="zap.port" value="8080" spec="text description='Overrides the port used for proxying specified in the configuration file' validationMode='any' label='Port' display='normal'" />
+        
+        <param name="zap.spiderEnabled" value="%zap.spiderEnabled%" spec="text description='Put true in order to perform a spider scan.' label='Start a spider' display='normal'" />
+        <param name="zap.spiderMaxChildren" value="" spec="text description='This parameter can be set to limit the number of children scanned.' validationMode='any' label='Spider max children' display='normal'" />
+        <param name="zap.spiderRecurse" value="" spec="text description='This parameter can be used to prevent the spider from seeding recursively.' validationMode='any' label='Spider recurse' display='normal'" />
+
+        <param name="zap.ajaxSpiderEnabled" value="%zap.ajaxSpiderEnabled%" spec="text description='Put true in order to  perform an ajax spider scan' label='Start an ajax spider scan' display='normal'" />
+        <param name="zap.ajaxSpiderInScope" value="" spec="text description='In scope option for an ajax spider scan.' validationMode='any' label='Ajax spider in scope option' display='normal'" />
+
+        <param name="zap.scanEnabled" value="%zap.scanEnabled%" spec="text description='Put true in order to perform an active scan' label='Start an active scan' display='normal'" />
+        <param name="zap.scanRecurse" value="" spec="text description='Recurse option for an active scan.' validationMode='any' label='Active scan recurse option' display='normal'" />
+        <param name="zap.scanInScopeOnly" value="" spec="text description='In scope only option for an active scan.' validationMode='any' label='Active scan in scope only option' display='normal'" />
+        <param name="zap.scanPolicyName" value="" spec="text description='Scan policy name option for an active scan.' validationMode='any' label='Active scan policy name option' display='normal'" />
+        <param name="zap.scanMethod" value="" spec="text description='Method option for an active scan.' validationMode='any' label='Active scan method option' display='normal'" />
+        <param name="zap.scanPostData" value="" spec="text description='Post data option for an active scan.' validationMode='any' label='Active scan post data option' display='normal'" />
+        
         <param name="zap.enabled" value="true" spec="text description='Put false if this whole step should not run.' validationMode='any' label='Enabled' display='normal'" />
     </parameters>
     <build-runners>
@@ -27,13 +40,18 @@
 $ErrorActionPreference = "Stop"
 try {  
 
-    if (%zap.spiderenabled%) {
-        Start-ZapSpider -Url '%zap.url%' -ApiKey '%zap.apikey%' -Port %zap.port%
+    if ('%zap.spiderEnabled%' -eq 'true') {
+        Start-ZapSpider -Url '%zap.url%' -ApiKey '%zap.apikey%' -Port %zap.port% -MaxChildren '%zap.spiderMaxChildren%' -Recurse '%zap.spiderRecurse%'
     }
     
-    if (%zap.scanenabled%) {
-        Start-ZapAScan -Url '%zap.url%' -ApiKey '%zap.apikey%' -Port %zap.port%
+    if ('%zap.ajaxSpiderEnabled%' -eq 'true') {
+        Start-ZapAjaxSpider -Url '%zap.url%' -ApiKey '%zap.apikey%' -Port %zap.port% -InScope '%zap.ajaxSpiderInScope%'
     }
+    
+    if ('%zap.scanEnabled%' -eq 'true') {
+        Start-ZapAScan -Url '%zap.url%' -ApiKey '%zap.apikey%' -Port %zap.port% -Recurse '%zap.scanRecurse%' -InScopeOnly '%zap.scanInScopeOnly%' `
+                       -ScanPolicyName '%zap.scanPolicyName%' -Method '%zap.scanMethod%' -PostData '%zap.scanPostData%' 
+    }    
 
     New-ZapReport -ApiKey '%zap.apikey%' -ReportFilePath 'ZAP\zap.html' -Port %zap.port%
     Write-Host "##teamcity[publishArtifacts 'ZAP\zap.html => ZAP']" 
