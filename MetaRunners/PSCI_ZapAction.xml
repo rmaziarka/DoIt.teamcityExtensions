@@ -7,7 +7,8 @@
         <param name="zap.apikey" value="12345" spec="text description='ZAP API key' validationMode='any' label='API key' display='normal'" />
         <param name="zap.url" value="" spec="text description='Url for which Active Scan should be run.' validationMode='not_empty' label='Url to application' display='normal'" />
         <param name="zap.port" value="8080" spec="text description='Overrides the port used for proxying specified in the configuration file' validationMode='any' label='Port' display='normal'" />
-        
+        <param name="zap.minimalFailureThreshold" value="high" spec="text description='Can be High, Medium or Low. The test will fail when there is at least one alert of given risk (or higher).' label='Minimal failure threshold' display='normal'" />
+
         <param name="zap.spiderEnabled" value="%zap.spiderEnabled%" spec="text description='Put true in order to perform a spider scan.' label='Start a spider' display='normal'" />
         <param name="zap.spiderMaxChildren" value="" spec="text description='This parameter can be set to limit the number of children scanned.' validationMode='any' label='Spider max children' display='normal'" />
         <param name="zap.spiderRecurse" value="" spec="text description='This parameter can be used to prevent the spider from seeding recursively.' validationMode='any' label='Spider recurse' display='normal'" />
@@ -53,7 +54,7 @@ try {
                        -ScanPolicyName '%zap.scanPolicyName%' -Method '%zap.scanMethod%' -PostData '%zap.scanPostData%' 
     }    
 
-    New-ZapReport -ApiKey '%zap.apikey%' -ReportFilePath 'ZAP\zap.html' -Port %zap.port%
+    New-ZapReport -ApiKey '%zap.apikey%' -ReportFilePath 'ZAP\zap.html' -Port %zap.port% -MinimalFailureThreshold '%zap.minimalFailureThreshold%'
     Write-Host "##teamcity[publishArtifacts 'ZAP\zap.html => ZAP']" 
 } catch {
     Write-ErrorRecord

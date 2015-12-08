@@ -31,10 +31,13 @@ function New-ZapReport {
     Api key which it was run with ZAP.
 
     .PARAMETER ReportFilePath
-    Path to report file
+    Path to report file.
 
     .PARAMETER Port
     Zap port. Overrides the port used for proxying specified in the configuration file.
+
+    .PARAMETER MinimalFailureThreshold
+    Can be 'High', 'Medium', 'Low'. The test will fail when there is at least one alert of given risk level (or higher).
 
     .EXAMPLE
     New-ZapReport -ReportFilePath "ZAP/zap.html" -ApiKey 12345 -Port 8080
@@ -52,7 +55,11 @@ function New-ZapReport {
 
         [Parameter(Mandatory=$false)]
         [int]
-        $Port = 8080
+        $Port = 8080,
+
+        [Parameter(Mandatory=$false)]
+        [string]
+        $MinimalFailureThreshold
     )
 
     Write-Log -Info "ZAP creating report."
@@ -62,7 +69,26 @@ function New-ZapReport {
         New-Item -Path $dir -ItemType Directory
     }
         
-    $reportUrl = "http://zap/OTHER/core/other/htmlreport/?apikey=" + $ApiKey
+    $reportUrl = "http://zap/OTHER/core/other/htmlreport/?apikey=$ApiKey"
 
     Invoke-WebRequestWrapper $reportUrl -OutFile $ReportFilePath -Proxy "http://localhost:$Port"
+        
+    $dict = @{}
+    $dict.Add('High',3)
+    $dict.Add('Medium',2)
+    $dict.Add('Low',1)
+    
+    if($MinimalFailureThreshold) {
+
+        $MinimalFailureCode = $dict[$MinimalFailureThreshold]
+
+        $xmlReportUrl = "http://zap/OTHER/core/other/xmlreport/?apikey=$ApiKey"
+        $xmlResponse = Invoke-WebRequestWrapper $xmlReportUrl -Proxy "http://localhost:$Port"
+        $alertsCount = ([xml]$xmlResponse.Content).SelectNodes("//alertitem[riskcode>=$MinimalFailureCode]").Count
+        if($alertsCount -gt 0) {
+            Write-Output ("##teamcity[testFailed because alerts of risk '{0}' (or higher) were found.]" -f $MinimalFailureThreshold)            
+        }
+    }
+
+
 }
