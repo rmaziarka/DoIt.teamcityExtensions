@@ -86,9 +86,7 @@ function New-ZapReport {
         $xmlResponse = Invoke-WebRequestWrapper $xmlReportUrl -Proxy "http://localhost:$Port"
         $alertsCount = ([xml]$xmlResponse.Content).SelectNodes("//alertitem[riskcode>=$MinimalFailureCode]").Count
         if($alertsCount -gt 0) {
-            Write-Output ("##teamcity[testFailed name='ZAP' message='One or more alerts of risk {0} (or higher) were found.']" -f $MinimalFailureThreshold)
+            Write-Output ("##teamcity[buildProblem description='One or more alerts of risk {0} (or higher) were found.']" -f $MinimalFailureThreshold)
         }
     }
-
-
 }
