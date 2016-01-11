@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psd1" -Force
+Import-Module -Name "$PSScriptRoot\..\..\..\DoIt.psd1" -Force
 
-<#Describe -Tag "PSCI.integration" "New-JMeterAggregateReport.Tests.ps1" {
-    InModuleScope PSCI.teamcityExtensions {
+<#Describe -Tag "DoIt.integration" "New-JMeterAggregateReport.Tests.ps1" {
+    InModuleScope DoIt.teamcityExtensions {
 
         Context "when invoking with existing JTL" {
             

@@ -1,2 +1,2 @@
 Contents of this directory needs to be copied to <TeamCityDataDir>\config\projects\_Root\pluginData\metaRunners.
-Note metarunners PSCI_GenerateTestTrendReport and PSCI_TagBuild.xml need to be modified to include valid user and password in parameters.
+Note metarunners DoIt_GenerateTestTrendReport and DoIt_TagBuild.xml need to be modified to include valid user and password in parameters.

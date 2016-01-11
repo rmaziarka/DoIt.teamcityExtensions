@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psd1"
+Import-Module -Name "$PSScriptRoot\..\..\..\DoIt.psd1"
 
-Describe -Tag "PSCI.unit" "Get-TeamcityArrayParameter" {
-    InModuleScope PSCI.teamcityExtensions {
+Describe -Tag "DoIt.unit" "Get-TeamcityArrayParameter" {
+    InModuleScope DoIt.teamcityExtensions {
         Context "when supplied a string with escaped commas" {
             It "should return one-element array with commas" {
                $result = Get-TeamcityArrayParameter -Param 'key=value1\,va\\lue2'

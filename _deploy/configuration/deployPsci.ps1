@@ -22,14 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-function Deploy-Psci {
+function Deploy-DoIt {
 
     <#
     .SYNOPSIS
-    Copies PSCI library to remote host using blue-green deployment.
+    Copies DoIt library to remote host using blue-green deployment.
 
     .DESCRIPTION
-    This function is invoked by PSCI deployment.
+    This function is invoked by DoIt deployment.
     
     .PARAMETER NodeName
     Destination node.
@@ -44,7 +44,7 @@ function Deploy-Psci {
     ConnectionParameters object describing how to connect to the remote noed (see [[New-ConnectionParameters]]).
 
     .EXAMPLE
-        Deploy-Psci
+        Deploy-DoIt
 
 #>
 
@@ -68,26 +68,26 @@ function Deploy-Psci {
         $ConnectionParams
     )
 
-    if ($Tokens.Psci.PsciPackage) {
-        $sourcePath = $Tokens.Psci.PsciPackage
+    if ($Tokens.DoIt.DoItPackage) {
+        $sourcePath = $Tokens.DoIt.DoItPackage
     } else {
-        $sourcePath = (Get-ConfigurationPaths).PsciLibraryPath
+        $sourcePath = (Get-ConfigurationPaths).DoItLibraryPath
     }
 
     $params = @{
         Path = $sourcePath
         ConnectionParams = $ConnectionParams
-        BlueGreenEnvVariableName = $Tokens.Psci.BlueGreenEnvVariableName
-        Destination = @($Tokens.Psci.DestPathBlue, $Tokens.Psci.DestPathGreen)
+        BlueGreenEnvVariableName = $Tokens.DoIt.BlueGreenEnvVariableName
+        Destination = @($Tokens.DoIt.DestPathBlue, $Tokens.DoIt.DestPathGreen)
         ClearDestination = $true
     }
 
     Copy-FilesToRemoteServer @params
 
     $params = @{
-        Path = Join-Path -Path ((Get-ConfigurationPaths).ProjectRootPath) -ChildPath 'PSCI.boot.ps1'
+        Path = Join-Path -Path ((Get-ConfigurationPaths).ProjectRootPath) -ChildPath 'DoIt.boot.ps1'
         ConnectionParams = $ConnectionParams
-        Destination = $Tokens.Psci.DestPathBoot
+        Destination = $Tokens.DoIt.DestPathBoot
         ClearDestination = $false
     }
 

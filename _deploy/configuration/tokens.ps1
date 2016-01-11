@@ -23,12 +23,12 @@ SOFTWARE.
 #>
 
 Environment Default {
-    Tokens Psci @{
-        BlueGreenEnvVariableName = 'PSCI_PATH'
-        DestPathBlue = 'c:\PSCI\Blue'
-        DestPathGreen = 'c:\PSCI\Green'
-        DestPathBoot = 'c:\PSCI\Boot'
-        PsciPackage = ''
+    Tokens DoIt @{
+        BlueGreenEnvVariableName = 'DoIt_PATH'
+        DestPathBlue = 'c:\DoIt\Blue'
+        DestPathGreen = 'c:\DoIt\Green'
+        DestPathBoot = 'c:\DoIt\Boot'
+        DoItPackage = ''
     }
     
     Tokens Credentials @{

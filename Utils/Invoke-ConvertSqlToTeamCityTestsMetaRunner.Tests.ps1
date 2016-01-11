@@ -22,11 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psd1" -Force
+Import-Module -Name "$PSScriptRoot\..\..\..\DoIt.psd1" -Force
 
 
-Describe -Tag "PSCI.unit" "Invoke-ConvertSqlToTeamCityTestsMetaRunner.Tests.ps1" {
-    InModuleScope PSCI.teamcityExtensions {
+Describe -Tag "DoIt.unit" "Invoke-ConvertSqlToTeamCityTestsMetaRunner.Tests.ps1" {
+    InModuleScope DoIt.teamcityExtensions {
     <#
         Context "when call with predefined sql query name which is empty and parameter Query is not given" {
             It "should throw missing parameter" {

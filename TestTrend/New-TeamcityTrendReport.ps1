@@ -262,7 +262,7 @@ function Get-TeamCityTrendReportSql {
     param()
 
     return @"
-    -- Test Trend Report (PSCI / New-TeamcityTrendReport)
+    -- Test Trend Report (DoIt / New-TeamcityTrendReport)
     SET QUOTED_IDENTIFIER ON
     SET NOCOUNT ON
 

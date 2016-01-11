@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="PSCI: Clear directory">
+<meta-runner name="DoIt: Clear directory">
   <description>Clear directory recursively using regex</description>
   <settings>
     <parameters>
@@ -14,7 +14,7 @@
         <parameters>
           <param name="jetbrains_powershell_bitness" value="x64" />
           <param name="jetbrains_powershell_execution" value="PS1" />
-          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\PSCI\Boot\PSCI.boot.ps1
+          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\DoIt\Boot\DoIt.boot.ps1
 try { 
 $includeRegex = @'
 %clearDirectory.regex%

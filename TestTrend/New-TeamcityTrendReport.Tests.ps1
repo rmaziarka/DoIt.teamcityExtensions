@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 #>
 
-Import-Module -Name "$PSScriptRoot\..\..\..\PSCI.psd1" -Force
+Import-Module -Name "$PSScriptRoot\..\..\..\DoIt.psd1" -Force
 
-<#Describe -Tag "PSCI.integration" "New-TeamcityTrendReport" {
-    InModuleScope PSCI.teamcityExtensions {
+<#Describe -Tag "DoIt.integration" "New-TeamcityTrendReport" {
+    InModuleScope DoIt.teamcityExtensions {
 
         $teamcityDbConnectionString = 'Data Source=<anonymized>;Integrated Security=SSPI;Initial Catalog=<anonymized>'
         $teamcityBuildId = 1

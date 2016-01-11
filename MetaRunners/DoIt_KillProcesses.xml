@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="PSCI: Kill processes">
+<meta-runner name="DoIt: Kill processes">
   <description>Kills hanging processes at TeamCity agent. Uses parameter teamcity.agent.process.names.to.kill.</description>
   <settings>
     <parameters />

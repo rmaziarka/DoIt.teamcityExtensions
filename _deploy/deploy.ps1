@@ -32,8 +32,8 @@ It will deploy packages available in $PackagesPath to the $Environment, using co
 .PARAMETER ProjectRootPath
 Base directory of the project, relative to the directory where this script resides. It is used as a base directory for other directories.
   
-.PARAMETER PSCILibraryPath
-Base directory where PSCI library resides, relative to $ProjectRootPath.
+.PARAMETER DoItLibraryPath
+Base directory where DoIt library resides, relative to $ProjectRootPath.
 
 .PARAMETER PackagesPath
 Path to the directory where packages reside, relative to $ProjectRootPath.
@@ -74,7 +74,7 @@ param(
 
     [Parameter(Mandatory=$false)]
     [string]
-    $PSCILibraryPath = '..\..\..', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
+    $DoItLibraryPath = '..\..\..', # Modify this path according to your project structure. This is absolute or relative to $ProjectRootPath.
 
     [Parameter(Mandatory=$false)]
     [string]
@@ -94,7 +94,7 @@ param(
     
     [Parameter(Mandatory=$false)]
     [string[]]
-    $ServerRolesFilter = 'Psci',
+    $ServerRolesFilter = 'DoIt',
     
     [Parameter(Mandatory=$false)]
     [string[]]
@@ -116,17 +116,17 @@ try {
     ############# Initialization
     Push-Location -Path $PSScriptRoot
 
-    if (![System.IO.Path]::IsPathRooted($PSCILibraryPath)) {
-        $PSCILibraryPath = Join-Path -Path $ProjectRootPath -ChildPath $PSCILibraryPath
+    if (![System.IO.Path]::IsPathRooted($DoItLibraryPath)) {
+        $DoItLibraryPath = Join-Path -Path $ProjectRootPath -ChildPath $DoItLibraryPath
     }
-    if (!(Test-Path "$PSCILibraryPath\PSCI.psd1")) {
-        Write-Output -InputObject "Cannot find PSCI library at '$PSCILibraryPath'. Please ensure your ProjectRootPath and PSCILibraryPath parameters are correct."
+    if (!(Test-Path "$DoItLibraryPath\DoIt.psd1")) {
+        Write-Output -InputObject "Cannot find DoIt library at '$DoItLibraryPath'. Please ensure your ProjectRootPath and DoItLibraryPath parameters are correct."
         exit 1
     }
-    Import-Module "$PSCILibraryPath\PSCI.psd1" -Force
+    Import-Module "$DoItLibraryPath\DoIt.psd1" -Force
 
-    $PSCIGlobalConfiguration.LogFile = "$PSScriptRoot\deploy.log.txt"
-    Remove-Item -LiteralPath $PSCIGlobalConfiguration.LogFile -ErrorAction SilentlyContinue
+    $DoItGlobalConfiguration.LogFile = "$PSScriptRoot\deploy.log.txt"
+    Remove-Item -LiteralPath $DoItGlobalConfiguration.LogFile -ErrorAction SilentlyContinue
 
     Initialize-ConfigurationPaths -ProjectRootPath $ProjectRootPath -PackagesPath $PackagesPath -DeployConfigurationPath $DeployConfigurationPath -ValidatePackagesPath
     

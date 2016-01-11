@@ -26,5 +26,5 @@ SOFTWARE.
 Environment Default {
     # Uncomment for simple localhost deployment
     # ServerConnection AgentsNodes -Nodes 'localhost' -RemotingCredential { $Tokens.Credentials.PSCredential }
-    ServerRole Psci -Steps 'Deploy-Psci' -ServerConnections AgentsNodes
+    ServerRole DoIt -Steps 'Deploy-DoIt' -ServerConnections AgentsNodes
 }

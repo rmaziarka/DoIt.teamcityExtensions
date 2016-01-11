@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="PSCI: Get build tags">
+<meta-runner name="DoIt: Get build tags">
   <description>Gets build tags and saves them in a parameter</description>
   <settings>
     <parameters>

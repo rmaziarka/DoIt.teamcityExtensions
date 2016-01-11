@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="PSCI: Test Trend Report">
+<meta-runner name="DoIt: Test Trend Report">
   <description>Generates a trend report basing on test results.</description>
   <settings>
     <parameters>
@@ -20,7 +20,7 @@
         <parameters>
           <param name="jetbrains_powershell_bitness" value="x86" />
           <param name="jetbrains_powershell_execution" value="PS1" />
-          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\PSCI\Boot\PSCI.boot.ps1
+          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\DoIt\Boot\DoIt.boot.ps1
 try { 
 
 $user = '%trendReport.tcServerDbConnection.userId%'

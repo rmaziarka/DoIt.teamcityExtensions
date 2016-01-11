@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="PSCI: ZAP start">
+<meta-runner name="DoIt: ZAP start">
   <description>Start ZAP</description>
   <settings>
     <parameters>
@@ -21,7 +21,7 @@
   exit 0
 } 
 
-. c:\PSCI\Boot\PSCI.boot.ps1
+. c:\DoIt\Boot\DoIt.boot.ps1
 $ErrorActionPreference = "Stop"
 try {
 

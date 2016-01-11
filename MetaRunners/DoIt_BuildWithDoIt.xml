@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="DoIt: Build with DoIt">
+  <description>Builds a package using DoIt</description>
+  <settings>
+    <parameters>
+      <param name="DoIt.build.tasks" value="" spec="text description='Comma-delimited list of tasks to run. Leave empty for default task.' validationMode='any' label='Tasks' display='normal'" />
+      <param name="DoIt.build.buildps1" value="" spec="text description='Path to build.ps1' validationMode='not_empty' label='Path to build.ps1' display='normal'" />
+      <param name="DoIt.build.version" value="%build.number%" spec="text description='Version number' validationMode='any' label='Version' display='normal'" />
+      <param name="DoIt.build.projectRootPath" value="" spec="text description='Base project directory (leave empty for default defined in build.ps1)' validationMode='any' label='Path to project root' display='normal'" />
+      <param name="DoIt.build.DoItPath" value="" spec="text description='Path to DoIt (leave empty for default defined in build.ps1, put AGENT_DoIt for DoIt available at Teamcity agent)' validationMode='any' label='Path to DoIt' display='normal'" />
+      <param name="DoIt.build.packagesPath" value="" spec="text description='Path to packages directory (leave empty for default defined in build.ps1)' validationMode='any' label='Path to packages' display='normal'" />
+    </parameters>
+    <build-runners>
+      <runner name="Run DoIt build" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x64" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_script_code"><![CDATA[$params = @{}
+$global:ErrorActionPreference = "Stop"
+try { 
+if ('%DoIt.build.version%') {
+  $params.Version = '%DoIt.build.version%'
+}
+if ('%DoIt.build.projectRootPath%') {
+  $params.ProjectRootPath = '%DoIt.build.projectRootPath%'
+}
+if ('%DoIt.build.DoItPath%') {
+  if ('%DoIt.build.DoItPath%' -ieq 'AGENT_DoIt') {
+    $DoItPath = [Environment]::GetEnvironmentVariable('DoIt_PATH', 'Machine')
+  } else {
+    $DoItPath = '%DoIt.build.DoItPath%'
+  } 
+
+  $content = Get-Content -Path '%DoIt.build.buildps1%' -ReadCount 0 | Out-String
+  # this is required for backward compatibility, to be removed in future
+  if ($content -imatch '\$DoItLibraryPath') {
+    $params.DoItLibraryPath = $DoItPath
+  } else {
+    $params.ObjDoItLibraryPath = $DoItPath 
+  }
+}
+if ('%DoIt.build.packagesPath%') {
+  $params.PackagesPath = '%DoIt.build.packagesPath%'
+}
+if ('%DoIt.build.tasks%') {
+  $params.Tasks = '%DoIt.build.tasks%' -split ','
+}
+if (!(Test-Path -Path '%DoIt.build.buildps1%')) {
+  throw "Cannot find path '%DoIt.build.buildps1%'"
+}
+} catch {
+  Write-Host $_ -ErrorAction SilentlyContinue
+  exit 1
+}
+
+Write-Host "Running %DoIt.build.buildps1%"
+& "%DoIt.build.buildps1%" @params
+exit $lastexitcode]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+

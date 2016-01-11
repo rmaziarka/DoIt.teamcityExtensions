@@ -24,15 +24,15 @@ SOFTWARE.
 
 $global:ErrorActionPreference = "Stop"
 
-$psciPath = [Environment]::GetEnvironmentVariable('PSCI_PATH', 'Machine')
-if (!$psciPath) {
-  Write-Error "No PSCI_PATH environment variable. Please ensure PSCI is installed on $([system.environment]::MachineName)."
+$DoItPath = [Environment]::GetEnvironmentVariable('DoIt_PATH', 'Machine')
+if (!$DoItPath) {
+  Write-Error "No DoIt_PATH environment variable. Please ensure DoIt is installed on $([system.environment]::MachineName)."
   exit 1
 }
-$psciPath = Join-Path -Path $psciPath -ChildPath 'PSCI.psd1'
-if (!(Test-Path -LiteralPath $psciPath )) {
-  Write-Error "Cannot find '$psciPath '. Please ensure PSCI is installed on $([system.environment]::MachineName)."
+$DoItPath = Join-Path -Path $DoItPath -ChildPath 'DoIt.psd1'
+if (!(Test-Path -LiteralPath $DoItPath )) {
+  Write-Error "Cannot find '$DoItPath '. Please ensure DoIt is installed on $([system.environment]::MachineName)."
   exit 1
 }
 
-Import-Module -Name $psciPath 
+Import-Module -Name $DoItPath 

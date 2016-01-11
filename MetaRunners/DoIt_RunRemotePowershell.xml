@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="PSCI: Run remote Powershell">
+<meta-runner name="DoIt: Run remote Powershell">
   <description>Runs Powershell command on remote hosts</description>
   <settings>
     <parameters>
@@ -20,7 +20,7 @@
           <param name="jetbrains_powershell_bitness" value="x64" />
           <param name="jetbrains_powershell_errorToError" value="true" />
           <param name="jetbrains_powershell_execution" value="PS1" />
-          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\PSCI\Boot\PSCI.boot.ps1
+          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\DoIt\Boot\DoIt.boot.ps1
 try { 
 
 $connectionNodes = Get-TeamcityArrayParameter -Param @'

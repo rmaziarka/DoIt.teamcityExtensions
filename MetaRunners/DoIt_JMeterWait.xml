@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="PSCI: JMeter wait">
+<meta-runner name="DoIt: JMeter wait">
   <description>Waits until JMeter process finishes and ensures it succeeded.</description>
   <settings>
     <parameters>
@@ -20,7 +20,7 @@
   Write-Host "jmeter.enabled is set to %jmeter.enabled% - skipping."
   exit 0
 } 
-. c:\PSCI\Boot\PSCI.boot.ps1
+. c:\DoIt\Boot\DoIt.boot.ps1
 $ErrorActionPreference = "Stop"
 try { 
 [void](Wait-JMeter -JMeterPidFile 'jmeter-pid.txt' `

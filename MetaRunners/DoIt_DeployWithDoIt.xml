@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="DoIt: Deploy with DoIt">
+  <description>Deploys a package that has been created using DoIt</description>
+  <settings>
+    <parameters>
+      <param name="DoIt.deploy.environment" value="" spec="text description='Comma- or newline-delimited list of environments where the package will be deployed (as defined in topology)'  validationMode='not_empty' label='Environment' display='normal'" />
+      <param name="DoIt.deploy.serverRolesToDeploy" value="" spec="text description='List of server roles to deploy (leave empty for all, as defined for the selected environment in topology)'  validationMode='any' label='ServerRoles to deploy' display='normal'" />
+      <param name="DoIt.deploy.nodesFilter" value="" spec="text description='List of destination nodes (servers) - leave empty to use nodes defined in configuration files'  validationMode='any' label='Nodes override' display='normal'" />
+      <param name="DoIt.deploy.configurationsFilter" value="" spec="text description='List of steps which will be run on destination nodes - leave empty to use steps defined in configuration files'  validationMode='any' label='Steps override' display='normal'" />
+      <param name="DoIt.deploy.tokensOverride" value="" spec="text description='Comma- or newline-delimited tokens to override during deployment - e.g. User=Me,Password=secret. You need to escape , with \, and \ with \\.'  validationMode='any' label='Tokens override' display='normal'" />
+      <param name="DoIt.deploy.deployps1" value="DeployScripts\deploy.ps1" spec="text description='Path to deploy.ps1' validationMode='not_empty' label='Path to deploy.ps1' display='normal'" />
+      <param name="DoIt.deploy.projectRootPath" value="" spec="text description='Base project directory (leave empty for default defined in deploy.ps1)' validationMode='any' label='Path to project root' display='normal'" />
+      <param name="DoIt.deploy.DoItPath" value="" spec="text description='Path to DoIt (leave empty for default defined in deploy.ps1, put AGENT_DoIt for DoIt available at Teamcity agent)' validationMode='any' label='Path to DoIt' display='normal'" />
+      <param name="DoIt.deploy.packagesPath" value="" spec="text description='Path to packages directory (leave empty for default defined in deploy.ps1)' validationMode='any' label='Path to packages' display='normal'" />
+      <param name="DoIt.deploy.deployConfigurationPath" value="" spec="text description='Path to configuration files (leave empty for default defined in deploy.ps1)' validationMode='any' label='Path to configuration files' display='normal'" />
+      <param name="DoIt.deploy.deployType" value="All" spec="text description='Deploy type - valid values: All (default), Provision (only -StepsProvision will run), Deploy (only -StepsDeploy will run), Adhoc (StepsFilter will run on ServerRolesFilter/NodesFilter)' validationMode='any' display='normal' label='Deploy type'" />
+      <param name="DoIt.deploy.validateOnly" value="" spec="text description='Put true to create deployment plan but not run actual deployment' display='normal' label='Validate only'" />
+      <param name="DoIt.deploy.postScript" value="" spec="text description='Additional powershell code to run after the deployment (in the same Powershell session - can use variables $params or $DeploymentPlan)' display='normal' label='Custom post-script'" />
+    </parameters>
+    <build-runners>
+      <runner name="Run DoIt deployment" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x64" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_script_code"><![CDATA[$global:ErrorActionPreference = "Stop"
+$DoItAgentPath = [Environment]::GetEnvironmentVariable('DoIt_PATH', 'Machine')
+if (!$DoItAgentPath ) {
+  Write-Host "No DoIt_PATH environment variable. Please ensure DoIt is installed on agent."
+  exit 1
+}
+if (!(Test-Path -Path '%DoIt.deploy.deployps1%')) {
+  Write-Host "Cannot find file '%DoIt.deploy.deployps1%' in directory '$((Get-Location).Path)'"
+  exit 1
+}
+try { 
+. "$DoItAgentPath\DoIt.classes.ps1"
+. "$DoItAgentPath\core\utils\Write-Log.ps1"
+. "$DoItAgentPath\modules\teamcityExtensions\Utils\Get-TeamcityArrayParameter.ps1"
+. "$DoItAgentPath\modules\teamcityExtensions\Utils\Get-TeamcityHashtableParameter.ps1"
+
+$env = Get-TeamcityArrayParameter -Param @'
+%DoIt.deploy.environment%
+'@
+
+if ($env.Count -eq 1) {
+  # Make environment backward-compatible (in old version string, instead of string[])
+  $env = $env[0]
+}
+
+$tokensOverride = Get-TeamcityHashtableParameter -Param @'
+%DoIt.deploy.tokensOverride%
+'@
+
+$params = @{
+  Environment = $env
+  DeployType = '%DoIt.deploy.deployType%'
+}
+
+if ('%DoIt.deploy.serverRolesToDeploy%') {
+  $serverRolesFilter = Get-TeamcityArrayParameter -Param @'
+%DoIt.deploy.serverRolesToDeploy%
+'@
+  $content = Get-Content -Path "%DoIt.deploy.deployps1%" -ReadCount 0 | Out-String
+  if ($content -imatch '\$ServerRolesFilter') {
+    $params.ServerRolesFilter = $serverRolesFilter
+  } else {
+    $params.ServerRolesToDeploy = $serverRolesFilter
+  }
+}
+if ('%DoIt.deploy.nodesFilter%') {
+  $params.NodesFilter = Get-TeamcityArrayParameter -Param @'
+%DoIt.deploy.nodesFilter%
+'@
+}
+if ('%DoIt.deploy.configurationsFilter%') {
+  $stepsFilter = Get-TeamcityArrayParameter -Param @'
+%DoIt.deploy.configurationsFilter%
+'@
+
+  $content = Get-Content -Path "%DoIt.deploy.deployps1%" -ReadCount 0 | Out-String
+  if ($content -imatch '\$ConfigurationsFilter') {
+    $params.ConfigurationsFilter = $stepsFilter
+  } else {
+    $params.StepsFilter = $stepsFilter
+  }
+}
+if ('%DoIt.deploy.tokensOverride%') {
+  $params.TokensOverride = $tokensOverride
+}
+if ('%DoIt.deploy.projectRootPath%') {
+  $params.ProjectRootPath = '%DoIt.deploy.projectRootPath%'
+}
+if ('%DoIt.deploy.DoItPath%') {
+  if ('%DoIt.deploy.DoItPath%' -ieq 'AGENT_DoIt') {
+    $DoItPath = [Environment]::GetEnvironmentVariable('DoIt_PATH', 'Machine')
+  } else {
+    $DoItPath = '%DoIt.deploy.DoItPath%'
+  } 
+
+  $content = Get-Content -Path "%DoIt.deploy.deployps1%" -ReadCount 0 | Out-String
+  if ($content -imatch '\$DoItLibraryPath') {
+    $params.DoItLibraryPath = $DoItPath
+  } else {
+    $params.ObjDoItLibraryPath = $DoItPath
+  }
+}
+if ('%DoIt.deploy.packagesPath%') {
+  $params.PackagesPath = '%DoIt.deploy.packagesPath%'
+}
+if ('%DoIt.deploy.deployConfigurationPath%') {
+  $params.DeployConfigurationPath = '%DoIt.deploy.deployConfigurationPath%'
+}
+if ('%DoIt.deploy.validateOnly%' -ieq 'true') {
+  $params.ValidateOnly = $true
+}
+
+$paramsLog = ($params.GetEnumerator() | Foreach-Object { "-$($_.Key) $($_.Value)" }) -join ' '
+} catch {
+  Write-Host $_ -ErrorAction SilentlyContinue
+  exit 1
+}
+
+Write-Host "Running %DoIt.deploy.deployps1% $paramsLog"
+& "%DoIt.deploy.deployps1%" @params
+
+$postScript = @'
+%DoIt.deploy.postScript%
+'@
+if ($postScript) {
+  Write-Host "Running custom post-script"
+  Invoke-Expression $postScript
+}]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
+

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="PSCI: Convert SQL result to TeamCity tests">
+<meta-runner name="DoIt: Convert SQL result to TeamCity tests">
   <description>Converts result of SQL query to TeamCity tests</description>
   <settings>
     <parameters>
@@ -20,7 +20,7 @@
           <param name="jetbrains_powershell_bitness" value="x64" />
           <param name="jetbrains_powershell_errorToError" value="false" />
           <param name="jetbrains_powershell_execution" value="PS1" />
-          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\PSCI\Boot\PSCI.boot.ps1
+          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\DoIt\Boot\DoIt.boot.ps1
 
 try { 
 

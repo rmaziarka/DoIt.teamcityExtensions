@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="PSCI: Copy / download files">
+<meta-runner name="DoIt: Copy / download files">
   <description>Copies files locally or downloads files from remote server using WinRM</description>
   <settings>
     <parameters>
@@ -18,7 +18,7 @@
         <parameters>
           <param name="jetbrains_powershell_bitness" value="x64" />
           <param name="jetbrains_powershell_execution" value="PS1" />
-          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\PSCI\Boot\PSCI.boot.ps1
+          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\DoIt\Boot\DoIt.boot.ps1
 try { 
 
 $sourcePaths = Get-TeamcityArrayParameter -Param @'

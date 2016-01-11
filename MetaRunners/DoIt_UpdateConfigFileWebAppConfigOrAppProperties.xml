@@ -1,35 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="PSCI: Update XML file (using XDT/XSLT)">
-  <description>Applies XDT transform or XSLT stylesheet to XML files</description>
+<meta-runner name="DoIt: Update config file (web/app.config or app.properties)">
+  <description>Updates entries in config files (xml add key='' value='' / xml connectionStrings / ini-like key=value)</description>
   <settings>
     <parameters>
       <param name="config.files" value="" spec="text description='Newline- or comma delimited paths to the files that will be modified' validationMode='not_empty' label='Path to files to update' display='normal'" />
-      <param name="config.transformFilename" value="" spec="text description='Path to xdt or xslt file (if empty, |'Transform body|' parameter will be used)' validationMode='any' label='Path to transform file' display='normal'" />
-      <param name="config.transformBody" spec="text description='Body of xdt or xslt transform to use (if empty, |'Path to transform file|' parameter will be used)' orderNumber='3.0' validationMode='any' label='Transform body' display='normal'" />
-      <param name="config.type" value="XDT" spec="select description='Transform type' data_2='XSLT' data_1='XDT' display='normal' label='Transform type'" />
-      <param name="connection.nodes" value="" spec="text description='Newline- or comma-delimited list of remote servers where the files will be updated.' validationMode='any' label='Remote servers' display='normal'" />
+      <param name="config.type" value="" spec="select label_1='Web.config properties (xml - add key=|'|' value=|'|')' description='Config file type' data_1='XmlAppKey' display='normal' label='File type' data_2='XmlConnectionString' label_2='Web.config connectionString' data_3='KeyValue' label_3='Properties file (.ini-like - key=value)'" />
+      <param name="config.values" value="" spec="text description='Newline- or comma-delimited properties to set (in |'key=value|' format)' validationMode='not_empty' label='Properties values' display='normal'" />
+      <param name="connection.nodes" value="" spec="text description='Newline- or comma-delimited list of remote servers where the files will be updated.'  validationMode='any' label='Remote servers' display='normal'" />
       <param name="connection.useHttps" value="" spec="checkbox checkedValue='$true' description='Check to use https (WinRM 5986) instead of http (WinRM 5985).' uncheckedValue='$false' label='Use HTTPS' display='normal'" />
       <param name="connection.userName" value="" spec="text description='User name to use to connect to the remote servers. Can be empty only if HTTPS is not used.' validationMode='any' label='User name' display='normal'" />
       <param name="connection.password" value="" spec="password description='Password to use to connect to the remote servers. Can be empty only if HTTPS is not used.' label='Password' display='normal'" />
+      <param name="run.condition" value="" spec="text description='Powershell expression that will be evaluated to decide whether to run this build step. For example, if you want to run the step only if parameter x is not empty, put |'%x% -ne &quot;&quot;|'' validationMode='any' label='Run condition' display='normal'" />
     </parameters>
     <build-runners>
-      <runner name="Update XML file" type="jetbrains_powershell">
+      <runner name="Update configuration file" type="jetbrains_powershell">
         <parameters>
           <param name="jetbrains_powershell_bitness" value="x64" />
           <param name="jetbrains_powershell_errorToError" value="true" />
           <param name="jetbrains_powershell_execution" value="PS1" />
-          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\PSCI\Boot\PSCI.boot.ps1
-try { 
+          <param name="jetbrains_powershell_script_code"><![CDATA[. c:\DoIt\Boot\DoIt.boot.ps1
+try {
+$runCondition = @'
+%run.condition%
+'@
+if (!(Test-RunCondition -RunCondition $runCondition)) {
+  return
+}
+
 $configFiles = Get-TeamcityArrayParameter -Param @'
 %config.files%
 '@
 
-$connectionNodes = Get-TeamcityArrayParameter -Param @'
-%connection.nodes%
+$configValues = Get-TeamcityArrayParameter -Param @'
+%config.values%
 '@
 
-$transformBody = @'
-%config.transformBody%
+$connectionNodes = Get-TeamcityArrayParameter -Param @'
+%connection.nodes%
 '@
 
 $configType = '%config.type%'
@@ -42,8 +49,7 @@ $connectionParams = Get-TeamcityConnectionParameters `
 Update-ConfigFile `
   -ConfigFiles $configFiles `
   -ConfigType $configType `
-  -TransformFilename '%config.transformFilename%' `
-  -TransformBody $transformBody `
+  -ConfigValues $configValues `
   -ConnectionParameters $connectionParams
 } catch {
   Write-ErrorRecord

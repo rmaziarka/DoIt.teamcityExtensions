@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<meta-runner name="PSCI: JMeter Aggregate Report">
+<meta-runner name="DoIt: JMeter Aggregate Report">
   <description>Generates aggregate report basing on JMeter JTL file</description>
   <settings>
     <parameters>
@@ -34,7 +34,7 @@
   exit 0
 } 
 
-. c:\PSCI\Boot\PSCI.boot.ps1
+. c:\DoIt\Boot\DoIt.boot.ps1
 try { 
 if ('%jmeter.aggregate.options%' -match 'DetailedReport') {
   New-JMeterDetailedReport -JMeterDir '%jmeter.aggregate.path%' -InputJtlFilePath '%jmeter.aggregate.jtl.path%' -DetailReport -OutputDir 'JMeter'
